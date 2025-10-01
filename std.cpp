@@ -3,6 +3,7 @@
 #include <deque>
 #include <forward_list>
 #include <list>
+#include <queue>
 #include <stack>
 #include <vector>
 
@@ -268,4 +269,32 @@ void methodsStack() {
   s.pop();
   bool em = s.empty();
   int size = s.size();
+}
+
+/*
+Queue
+Is implemented as well with a deque, but can be implemented using
+a list. and inforces FIFO (First-in, First-out)
+
+Methods:
+    push(typename): insert at the end of the queue typename
+    emplace(typename | args): insert in place arguments | typename
+    pop(): remove element from the front of the list
+    @typename front(): accesses the first element of queue
+    @typename back(): accesses the last element of queue
+    @bool empty(): check whether the queue is empty
+    @int size(): returns the amount of elements in queue
+
+*/
+
+std::queue<Point> q = {};
+
+void methodsQueue() {
+  q.push(Point(2, 3));
+  q.emplace(5, 7);
+  q.pop();
+  Point f = q.front();
+  Point b = q.back();
+  bool em = q.empty();
+  int s = q.size();
 }
