@@ -5,6 +5,7 @@
 #include <queue>
 #include <set>
 #include <stack>
+#include <unordered_set>
 #include <vector>
 
 /*
@@ -406,4 +407,53 @@ void methodsMultiset() {
   ms.erase(r.first, r.second);
   int s = ms.size();
   bool em = ms.empty();
+}
+
+/*
+
+ TODO: Link hash tables explanation
+
+Unordered_set
+Store unique elements like a normal set but are unordered, and implemented
+with a hash tables, meaning elements go into buckets depending on their hash
+values, normally buckes look like a std::list or std::forward_list
+    elements are stored using a hash function.
+
+Operations:
+    Average: O(1)
+    Worst: O(n)
+
+Methods:
+    insert(typename): inserts element to set ignoring duplicates
+    implace(typename | args): inserts element to set but in place
+    @iterator | end() find(typename): returns the iterator to the el or end()
+    @int count(): returns 1 if element exists, or 0-otherwise
+    @int erase(): removes element if found
+    @int size(): returns amount of elements inside set
+    clear(): removes all elements
+    @bool empty(): checks whether the set is empty
+
+    Specific to hash containers:
+        @int bucket_count(): returns number of buckets
+        @int bucket(typename): returns the bucket index where typename is
+        @int load_factor(): average number of elements per bucket
+        rehash(n): reserves the n buckets and regenarate the hash table
+        reserve(n): reserves space for n elements and regenarate the hash table
+
+Iterators traversal for Unordered_sets are random, meaning is
+unpredictable.
+
+*/
+
+std::unordered_set<int> us;
+void methodsUnorderedSet() {
+  us.insert(4);
+  us.emplace(5);
+  auto it = us.find(4);
+  int c = us.count(4);
+  us.erase(4);
+
+  int i = us.bucket(4);
+  int cbs = us.bucket_count();
+  int ld = us.load_factor();
 }
