@@ -8,6 +8,8 @@
 #include <unordered_set>
 #include <vector>
 
+// TODO: Add examples to everything
+
 /*
 STL Containers
 Iterators:
@@ -19,6 +21,8 @@ Iterators:
     rend():
     crbegin():
     crend():
+
+ TODO: explain differences of the containers
 
 Containers:
 Sequence continers:
@@ -411,7 +415,7 @@ void methodsMultiset() {
 
 /*
 
- TODO: Link hash tables explanation
+ TODO: Link hash tables explanation, and hash containers
 
 Unordered_set
 Store unique elements like a normal set but are unordered, and implemented
@@ -456,4 +460,29 @@ void methodsUnorderedSet() {
   int i = us.bucket(4);
   int cbs = us.bucket_count();
   int ld = us.load_factor();
+}
+
+/*
+
+ TODO: add link to hash tables, and unordered_set
+
+Unordered_multiset
+Is implemented in the same way as an unordered_set using a hash table
+but it allows duplicates
+
+Methods:
+    insert(typename): inserts element to set accepting duplicates
+    @int count(typename): amount of times typename is present
+    @{ fiterator, eiterator } equal_range(typename): returns the iterator to the
+    begin and end portion when typename is present
+    @iterator | end() find(): returns the first instance of a value or end()
+
+*/
+
+std::unordered_multiset<int> ums;
+void methodsUnorderedMultiset() {
+  ums.insert(2);
+  ums.count(2);
+  ums.equal_range(10);
+  ums.find(2);
 }
