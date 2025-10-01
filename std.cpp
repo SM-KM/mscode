@@ -611,3 +611,28 @@ void find() {
   auto f = std::find(v.begin(), v.end(), 3);
   auto fif = std::find_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
 }
+
+/*
+Count
+uses a linear scan and counts values that are the same as the one passed
+
+Params:
+    @iterator first
+    @iterator last
+    Value | element to find
+
+Count_if
+same as count but includes a predicate to validate which elements counts
+
+Params:
+    @iterator first
+    @iterator last
+    Lambda predicate
+
+
+*/
+
+void count() {
+  std::vector<int> v;
+  int amount = std::count(v.begin(), v.end(), 5);
+}
