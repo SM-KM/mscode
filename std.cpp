@@ -1,5 +1,6 @@
 #include <array>
 #include <deque>
+#include <forward_list>
 #include <list>
 #include <vector>
 
@@ -137,6 +138,12 @@ void methosDeque() {
 List
 Doubled linked list
 
+struct Node {
+    T data;
+    Node* next;
+    Node* before;
+}
+
 Methods:
     push_back(typename): adds element to the end
     push_front(typename): adds element to the front
@@ -170,4 +177,44 @@ void methodsList() {
   bool em = l.empty();
   l.swap(lswap);
   l.assign(4, 5);
+}
+
+/*
+Forward_list
+Implements a Linked List
+
+struct Node {
+    T data;
+    Node* next;
+}
+
+Methods:
+    push_front(typename): adds elemnts at the beginning
+    pop_front(): removes element at the start of the list
+    insert_after(iterator, typename): adds typename after the position of the
+    iterator emplace_back(iterator, typename): construct element in place after
+the pos of iterator
+
+    erase_after(iterator): delete element after the pos of iterator
+    remove(typename): removes all elements of type typename
+    remove_if(predicate): removes elements with a condition
+    clear(): clears the list
+    @bool empty(): check whether the list is empty
+    @iterator before_begin(): special iterator before the first element
+
+    For iterators it only includes forward iterators
+*/
+
+std::forward_list<int> fl = {3, 4, 5};
+
+void methodsForwardList() {
+  fl.push_front(20);
+  fl.pop_front();
+  fl.insert_after(fl.begin(), 2);
+  fl.erase_after(fl.begin());
+  fl.remove(3);
+  fl.remove_if([](int x) { return x % 2 == 0; });
+  fl.clear();
+  bool em = fl.empty();
+  fl.insert_after(fl.before_begin(), 2);
 }
