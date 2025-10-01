@@ -1,5 +1,4 @@
 #include <array>
-#include <cstddef>
 #include <deque>
 #include <forward_list>
 #include <list>
@@ -297,4 +296,33 @@ void methodsQueue() {
   Point b = q.back();
   bool em = q.empty();
   int s = q.size();
+}
+
+/*
+Priority_queue
+is implemented by default with a vector, but using heap instead
+of container, tree structure. by default max-heap meaning max element as root
+using:
+    std::make_heap, std::push_heap, std::pop_heap
+    std::less<t>
+
+Methods:
+    push(typename): inserts new element it gets placed in the correct heap
+    position auto
+    emplace(typename | args): construct element in place
+    pop(): remove largest element by default
+    @typename top(): access the top element
+    @bool empty(): checks whether the
+    @int size(): returns number of elements in pq
+
+*/
+
+std::priority_queue<Point> pq;
+
+void methodsPriorityQueue() {
+  pq.push(Point(4, 5));
+  pq.emplace(4, 5);
+  Point t = pq.top();
+  bool em = pq.empty();
+  int s = pq.size();
 }
