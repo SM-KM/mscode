@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <bitset>
 #include <deque>
@@ -580,4 +581,33 @@ void methodBitset() {
   b.to_string();
   b.to_ulong();
   b.to_ullong();
+}
+
+/*
+Find
+Simple linear search algorith, implemented with iterators
+returns first iterator pointing to the first element found or return
+last iterator if nothing found. uses the operator== of the type
+
+Params:
+    @iterator first
+    @iterator last
+    Value | element to find
+
+
+Find_if
+Same as find but passes a predicate to compare elements with instead
+of the value to find
+
+Params:
+    @iterator first
+    @iterator last
+    Lambda predicate
+
+*/
+
+void find() {
+  std::vector<int> v;
+  auto f = std::find(v.begin(), v.end(), 3);
+  auto fif = std::find_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
 }
