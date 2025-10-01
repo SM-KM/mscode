@@ -1,4 +1,5 @@
 #include <array>
+#include <bitset>
 #include <deque>
 #include <forward_list>
 #include <list>
@@ -544,3 +545,39 @@ Methods:
 
 std::multimap<int, std::string> mm;
 void methodsMultimap() { ms.equal_range(3); }
+
+/*
+Bitset
+fixed-size array of unsigned long ints, representing a sequence of bits
+
+Methods:
+    set(int i | void): sets all bits to 1, or bit in 1 to 1
+    reset(int i | void): resets all bits to 0, or bit in 1 to 0
+    flip(int i | void): flips all bits, or bit in i (1 = 0 | 0 = 1)
+    @bool test(int i): return i = 1 ? return 1 : return 0
+    @bool all(): return true if all bits are 1
+    @bool any(): return true if any bit are 1
+    @bool none(): return true if all bits are 9
+    @int count(): count how many bits are 1
+    @int size(): return number of bits
+    to_string(): returns bits in a string "00101"
+    ulong(): returns bits as a unsigned long
+    ullong(): retuns bits as a unsigned long long
+
+*/
+
+std::bitset<8> b;
+void methodBitset() {
+  b.set();
+  b.reset();
+  b.flip(2);
+  b.test(4);
+  b.all();
+  b.any();
+  b.none();
+  int c = b.count();
+  int s = b.size();
+  b.to_string();
+  b.to_ulong();
+  b.to_ullong();
+}
