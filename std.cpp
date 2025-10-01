@@ -638,3 +638,20 @@ void count() {
   int amountif =
       std::count_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
 }
+
+/*
+For_each
+its a iterator-based loop that allows you to implement a method
+on each element
+
+Params:
+    @iterator first
+    @iterator last
+    Function predicate
+
+*/
+
+void for_each() {
+  std::vector<int> v;
+  std::for_each(v.begin(), v.end(), [](int v) { return v * 2; });
+}
