@@ -635,4 +635,6 @@ Params:
 void count() {
   std::vector<int> v;
   int amount = std::count(v.begin(), v.end(), 5);
+  int amountif =
+      std::count_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
 }
