@@ -16,10 +16,24 @@ Iterators:
     crbegin():
     crend():
 
+Containers:
+Sequence continers:
+    Vector, Array, Deque, List, Forward_list
+
+Associative containers:
+    Set, Map, Multiset, Multimap
+
+Unordered associative containers:
+    Unordered_set, Unordered_map, Unordered_multiset, Unordered_multimap
+
+Container adapters:
+    Stack, Queue, Priority_queue
+
 */
 
 /*
 Vector
+
 Methods:
     push_back(typename): adds an element to the end of the vector
     pop_back(): removes the last element
