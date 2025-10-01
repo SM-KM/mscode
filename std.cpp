@@ -1,0 +1,173 @@
+#include <array>
+#include <deque>
+#include <list>
+#include <vector>
+
+/*
+STL Containers
+Iterators:
+    begin():
+    end():
+    cbegin():
+    cend():
+    rbegin():
+    rend():
+    crbegin():
+    crend():
+
+*/
+
+/*
+Vector
+Methods:
+    push_back(typename): adds an element to the end of the vector
+    pop_back(): removes the last element
+    @int size(): size of the vector
+    @bool empty(): is empty the vector
+    @typename at(typename): return the value at that position
+    @typename front(): returns first element
+    @typename back(): returns last element
+    insert(iterator, value): inserts the value in the pos passed
+    erase(iterator): removes the value in the pos passed
+    clear(): removes all the elements
+    resize(n): change the size of the vector to n
+    assign(amount, value): assigns the amount of times the values
+    swap(vector): swaps the values of the 2 vectors, if the sizes
+    are different they swap sizes as well.
+
+    emplace_back(typename): like push_back but inplace.
+    @int capacity(): returns how many elements the vector can allocate
+    shrink_to_fit(): reduces capacity to the match the size
+*/
+
+std::vector<int> v = {1, 2, 3};
+std::vector<int> vswap = {4, 5, 6};
+
+void methodsVector() {
+  v.push_back(2);
+  v.pop_back();
+  int n = v.size();
+  bool empty = v.empty();
+  int el = v.at(1);
+  int f = v.front();
+  int b = v.back();
+  v.insert(v.begin() + 1, 2);
+  v.erase(v.begin() + 2);
+  v.clear();
+  v.resize(10);
+  v.assign(5, 5);
+  v.swap(vswap);
+  v.emplace_back(4);
+  int c = v.capacity();
+  v.shrink_to_fit();
+}
+
+/*
+Array
+Arr like C in cpp
+    operator[]: acces elements inside arr
+
+Methods:
+    at(i): returns element in position i, with bounds checking
+    @typename front(): returns first element
+    @typename back(): returns last element
+    @*typename data(): returns pointer to the c array under it, first el
+    @int size(): returns the size of arr
+    @bool empty(): returns whether the arr is empty
+    fill(typename): fills arr with typename
+    swap: swap contents of 2 arrs, of same typename and size n
+
+*/
+
+std::array<int, 2> arr = {1, 2};
+std::array<int, 2> arrswap = {4, 2};
+
+void methodsArray() {
+  arr.at(2);
+  int f = arr.front();
+  int b = arr.back();
+  int *p = arr.data();
+  int s = arr.size();
+  bool em = arr.empty();
+  arr.swap(arrswap);
+}
+
+/*
+Deque
+Double ended queue
+
+similar to vector is dynamic, but stores elements in chunks
+not in one block as vector.
+    - supports fast insertion and removal at the front
+
+Methods:
+    push_back(typename): inserts typename at the end of dq
+    push_front(typename): inserts typename at the front of dq
+    pop_back(): removes element in the back of the dq
+    pop_front(): removes element in the front of the dq
+    @typename at(i): returns element in i
+    swap(dqswap): swaps dq with dqswap
+    insert(iterator, value): insert value in the position passed
+    erase(iterator): removes element in position passed
+    clear(): removes all elements inside dq
+    assign(amount, value): it adds count times value to dq
+    resize(size): resize dq, with the size passed, if empty new positions
+    added it fills them with zeros
+
+*/
+
+std::deque<int> dq = {2, 3, 4};
+std::deque<int> dqswap = {2, 3};
+
+void methosDeque() {
+  dq.push_back(4);
+  dq.push_front(5);
+  int el = dq.at(2);
+  int f = dq.front();
+  int b = dq.back();
+  dq.swap(dqswap);
+  dq.insert(dq.begin() + 1, 2);
+  dq.erase(dq.begin() + 1);
+  dq.clear();
+  dq.assign(4, 5);
+  dq.resize(10);
+}
+
+/*
+List
+Doubled linked list
+
+Methods:
+    push_back(typename): adds element to the end
+    push_front(typename): adds element to the front
+    pop_back(): removes element in the end of list
+    pop_front(): removes element in the front of the list
+    @typename back(): returns last element in the list
+    @typename front(): returns first element in the list
+    insert(iterator, value): inserts value at iterator pos
+    erase(iterator): remove element in the iterator pos
+    @int size(): returns amount of Nodes
+    clear(): removes all nodes;
+    @bool empty(): returns whether the list is empty
+    assign(amount, value): assigns the value amount times to the list
+
+*/
+
+std::list<int> l = {1, 2, 3};
+std::list<int> lswap = {5, 6, 7, 8, 9};
+
+void methodsList() {
+  l.push_back(5);
+  l.push_front(8);
+  l.pop_back();
+  l.pop_front();
+  int f = l.front();
+  int b = l.back();
+  l.insert(l.begin()++, 2);
+  l.erase(l.begin()++);
+  int n = l.size();
+  l.clear();
+  bool em = l.empty();
+  l.swap(lswap);
+  l.assign(4, 5);
+}
