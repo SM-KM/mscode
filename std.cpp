@@ -1,7 +1,6 @@
 #include <array>
 #include <deque>
 #include <forward_list>
-#include <ios>
 #include <list>
 #include <map>
 #include <queue>
@@ -12,6 +11,7 @@
 #include <vector>
 
 // TODO: Add examples to everything as well as complexity,
+// explain difference on inserting vs implacing
 
 /*
 STL Containers
@@ -528,3 +528,19 @@ void methodsMap() {
   m.erase(2);
   m.clear();
 }
+
+/*
+ TODO: reference map explanaition
+
+Multimap
+is implemented the same way as map, but allows duplicated and
+are placed next to each other
+
+Methods:
+    @{ fiterator, eiterator } equal_range(typename key): returns 2 iterators for
+    the range of values with typename key
+
+*/
+
+std::multimap<int, std::string> mm;
+void methodsMultimap() { ms.equal_range(3); }
