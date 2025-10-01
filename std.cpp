@@ -369,3 +369,41 @@ void methodsSet() {
   auto lb = set.lower_bound(Point(4, 5));
   auto ub = set.upper_bound(Point(3, 8));
 }
+
+/*
+
+ TODO: Add references to balanced BST [red-black tree]
+
+Miltiset
+It works like a set but allows duplicated is also order them
+ascending and sorted. is implemented as a balanced BST(red-black tree)
+And as set operations are also O(log n)
+
+Methods:
+    insert(typename): inserts element and in the correct place, but does not
+    ignore duplicates like set
+    implace(typename | args): inserts element in the correct place but in place
+    @iterator | end() find(): returns the first instance of a value or end()
+    @int count(): returns the number of times element is present
+    @{ fiterator, eiterator } equal_range(typename): returns the iterator to the
+    begin and end portion when typename is present
+
+    erase(typename | range [iterators] | iterator): removes element or elements
+    in range
+    @int size(): amount of elements
+    @bool empty(): checks whether the multiset is empty
+    @typename lower_bound(typename): returns element >= typename
+    @typename upper_bound(typename): return element > typename
+
+*/
+
+std::multiset<int> ms;
+void methodsMultiset() {
+  ms.insert(4);
+  auto v = ms.find(4);
+  int c = ms.count(2);
+  auto r = ms.equal_range(2);
+  ms.erase(r.first, r.second);
+  int s = ms.size();
+  bool em = ms.empty();
+}
