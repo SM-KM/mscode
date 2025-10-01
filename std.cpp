@@ -1,7 +1,9 @@
 #include <array>
+#include <cstddef>
 #include <deque>
 #include <forward_list>
 #include <list>
+#include <stack>
 #include <vector>
 
 /*
@@ -231,4 +233,39 @@ void methodsForwardList() {
   fl.clear();
   bool em = fl.empty();
   fl.insert_after(fl.before_begin(), 2);
+}
+
+/*
+Stack
+is a deque underneath but can be implemented with a vector or a list
+is LIFO (Last-in, First-out) inforced
+
+Methods:
+    push(typename): adds typename to the top of the stack
+    emplace(typename): adds to the top but without creating a copy first, in
+    place
+
+    pop(): removes the first element in the stack
+    @typename top(): access the top element on the stack
+    @bool empty(): check whether the stack is empty
+    @int size(): returns amount of elements in the stack
+
+*/
+
+struct Point {
+public:
+  int x;
+  int y;
+
+  Point(int x, int y) : x(x), y(y) {};
+};
+
+std::stack<Point> s = {};
+
+void methodsStack() {
+  s.push(Point(2, 3));
+  s.emplace(2, 3);
+  s.pop();
+  bool em = s.empty();
+  int size = s.size();
 }
