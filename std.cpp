@@ -3,6 +3,7 @@
 #include <forward_list>
 #include <list>
 #include <queue>
+#include <set>
 #include <stack>
 #include <vector>
 
@@ -325,4 +326,46 @@ void methodsPriorityQueue() {
   Point t = pq.top();
   bool em = pq.empty();
   int s = pq.size();
+}
+
+/*
+ TODO: Add links to binary search tree to explain
+
+Set
+Stores unique elements in sorted order by default (ascending)
+usually as a balanced binary search tree
+For operations provides O(log n), insertion, search and deletion
+And does not allow duplicates, in the case that a duplicated is inserted nothing
+changes
+    Supports forward traversal
+
+Is ascending by default using std::less, but can be changes for
+example descending using std::greater.
+
+Methods:
+    insert(typename): adds new element if not present
+    emplace(typename | args): adds in place the element in the set
+    @iterator | end() <- if not found find(): searches an element
+    @int count(typename): counts instances of an element
+    erase(typename | iterator): delete element found
+    clear(): deletes all elements
+    @bool empty(): check whether the set is empty
+    @int size(): returns number of elements
+    lower_bound(typename): finds first element >= typename
+    upper_bound(typename): finds first element > typename
+
+*/
+
+std::set<Point> set;
+void methodsSet() {
+  set.insert(Point(4, 5));
+  set.emplace(6, 8);
+  auto f = set.find(Point(4, 5));
+  int c = set.count(Point(4, 5));
+  set.erase(Point(4, 5));
+  set.clear();
+  bool em = set.empty();
+  int s = set.size();
+  auto lb = set.lower_bound(Point(4, 5));
+  auto ub = set.upper_bound(Point(3, 8));
 }
