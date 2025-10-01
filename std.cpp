@@ -1,14 +1,17 @@
 #include <array>
 #include <deque>
 #include <forward_list>
+#include <ios>
 #include <list>
+#include <map>
 #include <queue>
 #include <set>
 #include <stack>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
-// TODO: Add examples to everything
+// TODO: Add examples to everything as well as complexity,
 
 /*
 STL Containers
@@ -485,4 +488,43 @@ void methodsUnorderedMultiset() {
   ums.count(2);
   ums.equal_range(10);
   ums.find(2);
+}
+
+/*
+ TODO: add reference to red-black trees
+
+Map
+container that stores values as key-value pairs ordered by default
+with std::less (ascending) and is internally implemented as a
+self-balanced red-black tree, with no duplicates
+
+Complexity:
+    Operations: O(log n)
+    Iteration: O(1)
+
+Methods:
+    operator[]: returns element at typename or inserts it if missing
+    insert(hint?, { typename, typename }): inserts element into the map
+    if is already there it does nothing.
+    @typename at(typename): returns element in typename, if found, otherwise
+    throws exception
+
+    @typename value | end() find(typename key): if element with key found return
+    it otherwise returns end()
+
+    @int count(typename): since keys are unique is either 1 or 0
+    erase(typename key | range [fiterator, eiterator] | iterator): removes
+    element found
+
+    clear(): traverses the map and delete each pair
+*/
+
+std::map<int, std::string> m;
+void methodsMap() {
+  m.insert({2, "asdd"});
+  std::string s = m.at(2);
+  auto it = m.find(2);
+  int c = m.count(1);
+  m.erase(2);
+  m.clear();
 }
