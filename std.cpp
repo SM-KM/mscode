@@ -655,3 +655,31 @@ void for_each() {
   std::vector<int> v;
   std::for_each(v.begin(), v.end(), [](int v) { return v * 2; });
 }
+
+/*
+Sort
+is a utility for containers using iterators and optional
+sorting function, implements introsort:
+    Quicksort: for average cases
+    Heapsort: if the recursion gets too deep in quicksort
+    InsertionSort: for small subarrays
+
+Params:
+    @iterator first
+    @iterator last
+    Function? predicate
+
+*/
+
+void sort() {
+  struct Point {
+    int x;
+    int y;
+  };
+
+  std::vector<int> v = {3, 5, 6};
+  std::vector<Point> points = {{3, 4}, {6, 7}};
+  std::sort(v.begin(), v.end());
+  std::sort(points.begin(), points.end(),
+            [](const Point &p, const Point &b) { return p.x > b.x; });
+}
