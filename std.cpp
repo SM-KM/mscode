@@ -731,3 +731,22 @@ void partial_sort() {
   std::nth_element(v.begin(), v.begin() + 5, v.end());
   std::partial_sort(v.begin(), v.begin() + 5, v.end());
 }
+
+/*
+Binary search
+is a search algoritm implemented of binary search using lower_bound
+it returns if the value is present no the value itself
+
+Params:
+    @iterator first
+    @iterator last
+    typename value
+
+    returns @bool of found condition
+
+*/
+
+void binary_search() {
+  std::vector<int> v = {9, 5, 6, 8, 3, 2, 4, 1};
+  bool f = std::binary_search(v.begin(), v.end(), 6);
+}
