@@ -706,3 +706,28 @@ void stable_sort() {
   std::vector<P> ps = {{1, "asda"}, {5, "asdwrte"}, {10, "231"}};
   std::stable_sort(ps.begin(), ps.end(), [](P a, P b) { return a.a < b.a; });
 }
+
+/*
+
+ TODO: add reference to nth_element
+
+Partial Sort
+it only sorts part of a range, is useful when you need the
+top-k smallest/largest elements, or just finding the top-k elements
+
+Params:
+   @iterator first
+   @iterator middle
+   @iterator end
+
+*/
+
+void partial_sort() {
+  std::vector<int> v = {9, 5, 6, 8, 3, 2, 4, 1};
+
+  // Sorted 5 smallest elements
+  std::partial_sort(v.begin(), v.begin() + 5, v.end());
+
+  std::nth_element(v.begin(), v.begin() + 5, v.end());
+  std::partial_sort(v.begin(), v.begin() + 5, v.end());
+}
