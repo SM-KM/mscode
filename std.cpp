@@ -664,10 +664,10 @@ sorting function, implements introsort:
     Heapsort: if the recursion gets too deep in quicksort
     InsertionSort: for small subarrays
 
-Params:
+params:
     @iterator first
     @iterator last
-    Function? predicate
+    function? predicate
 
 */
 
@@ -682,4 +682,27 @@ void sort() {
   std::sort(v.begin(), v.end());
   std::sort(points.begin(), points.end(),
             [](const Point &p, const Point &b) { return p.x > b.x; });
+}
+
+/*
+Stable sort
+is implemented as a merge sort variant, the stable part is that
+if two elements in the comparison are equal (a < b) && (a > b)
+their places are not changed.
+
+params:
+    @iterator first
+    @iterator last
+    function? predicate
+
+*/
+
+void stable_sort() {
+  struct P {
+    int a;
+    std::string n;
+  };
+
+  std::vector<P> ps = {{1, "asda"}, {5, "asdwrte"}, {10, "231"}};
+  std::stable_sort(ps.begin(), ps.end(), [](P a, P b) { return a.a < b.a; });
 }
