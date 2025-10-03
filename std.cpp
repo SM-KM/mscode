@@ -773,3 +773,35 @@ void copy() {
 
   std::copy(v.begin(), v.end(), dst.begin());
 }
+
+/*
+Transform
+applies a function to each method of a continaer, unary or binary
+by pairs, by passing the same iterator first of original container
+it can be performed in place.
+
+Params:
+    @iterator first
+    @iterator last
+    @iterator? begin of other container
+    @iterator begin of new container
+    @function Predicate
+
+*/
+
+void transform() {
+  std::vector<int> v = {1, 2, 3, 4, 5};
+
+  // Unary transform
+  std::vector<int> dst(v.size());
+  std::transform(v.begin(), v.end(), dst.begin(), [](int a) { return a * a; });
+
+  // Binary transform
+  std::vector<int> b = {1, 5};
+  std::vector<int> dstb(v.size());
+  std::transform(v.begin(), v.end(), b.begin(), dst.begin(),
+                 [](int x, int y) { return x * y; });
+
+  // In-place transform
+  std::transform(v.begin(), v.end(), v.begin(), [](int a) { return a * a; });
+}
