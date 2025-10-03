@@ -834,3 +834,34 @@ void replace() {
   // Replace with preficate
   std::replace_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; }, -1);
 }
+
+/*
+Partition
+creates a partition of the elements in the container that match
+the predicate function, meaning place them at the beggining
+and after that part is the rest that does not match the condition
+
+for presernving order but uses extra memory use stable_partition
+
+Params:
+    @iterator first
+    @iterator end
+    @function predicate
+
+    @returns iterator to first element of unmatching elements
+
+*/
+
+void partition() {
+  std::vector<int> v = {2, 3, 4, 6, 7, 3, 5, 2};
+
+  // Partition without preserving order
+  std::partition(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+
+  // Stable partition
+  std::stable_partition(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+
+  // Example use remove all negative numbers from v
+  v.erase(std::partition(v.begin(), v.end(), [](int x) { return x > 0; }),
+          v.end());
+}
