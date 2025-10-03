@@ -3,6 +3,7 @@
 #include <bitset>
 #include <deque>
 #include <forward_list>
+#include <iterator>
 #include <list>
 #include <map>
 #include <queue>
@@ -804,4 +805,32 @@ void transform() {
 
   // In-place transform
   std::transform(v.begin(), v.end(), v.begin(), [](int a) { return a * a; });
+}
+
+/*
+Replace
+it replaces in-place like a find and replace, if you want to keep
+the original you can replace_copy, and can be done the replacement
+with a predicate.
+
+Params:
+    @iterator first
+    @iterator end
+    @iterator? copy_result iterator container
+    @typename | @function old_value
+    @typename new_value
+*/
+
+void replace() {
+  std::vector<int> v = {1, 2, 4, 7, 5, 2, 9, 0};
+  std::vector<int> res;
+
+  // Simple replace in-place
+  std::replace(v.begin(), v.end(), 2, 20);
+
+  // Replace with copy into res
+  std::replace_copy(v.begin(), v.end(), std::back_inserter(res), 2, 10);
+
+  // Replace with preficate
+  std::replace_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; }, -1);
 }
