@@ -715,6 +715,8 @@ Partial Sort
 it only sorts part of a range, is useful when you need the
 top-k smallest/largest elements, or just finding the top-k elements
 
+sorts smallest elements in a group
+
 Params:
    @iterator first
    @iterator middle
@@ -749,4 +751,25 @@ Params:
 void binary_search() {
   std::vector<int> v = {9, 5, 6, 8, 3, 2, 4, 1};
   bool f = std::binary_search(v.begin(), v.end(), 6);
+}
+
+/*
+Copy
+copy elements in the range from first and end iterators passed
+into the source that is the begin iterator of some other place
+but i must contain enough space to copy
+    otherwise theres a buffer overflow
+
+Params:
+    @iterator first
+    @iterator last
+    @iterator begin other container even classes with copy const
+
+*/
+
+void copy() {
+  std::vector<int> v = {1, 2, 3, 4, 5};
+  std::vector<int> dst(5);
+
+  std::copy(v.begin(), v.end(), dst.begin());
 }
