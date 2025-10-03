@@ -7,6 +7,7 @@
 #include <iterator>
 #include <list>
 #include <map>
+#include <numeric>
 #include <queue>
 #include <set>
 #include <stack>
@@ -976,4 +977,25 @@ void make_heap() {
 
   v.push_back(9);
   std::push_heap(v.begin(), v.end());
+}
+
+/*
+Accumulate
+give default value, and default op is addition but can be specified,
+or even passed a function.
+
+Params:
+    @iterator
+    @iterator
+    @typename default_val
+    @function? accumulate
+
+*/
+
+void accumulate() {
+  std::vector<int> v = {2, 3, 6, 1};
+
+  // Example sum of squares
+  std::accumulate(v.begin(), v.end(), 0,
+                  [](int a, int b) { return a * b + b; });
 }
