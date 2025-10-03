@@ -999,3 +999,25 @@ void accumulate() {
   std::accumulate(v.begin(), v.end(), 0,
                   [](int a, int b) { return a * b + b; });
 }
+
+/*
+Inner Product
+Starting with an initial value of p,
+multiplies successive elements from the two ranges
+and adds each product into the accumulated value using operator+().
+The values in the ranges are processed in order.
+
+Params:
+    @iterator firsta
+    @iterator enda
+    @iterator firstb
+    @typename accumulate_val
+
+*/
+
+void inner_product() {
+  std::vector<int> v = {2, 3, 6, 1};
+  std::vector<int> b = {2, 3, 6, 1};
+
+  std::inner_product(v.begin(), v.end(), b.begin(), 0);
+}
