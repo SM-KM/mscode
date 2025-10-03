@@ -921,3 +921,33 @@ void set_intersection() {
   std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), res.begin(),
                         std::greater<int>());
 }
+
+/*
+Set difference
+it returns new range of elements that are in the first range but not
+in the second one. they both MUST be sorted
+
+
+Params:
+    @iterator firsta
+    @iterator lasta
+    @iterator firstb
+    @iterator lastb
+    @iterator firstres
+    @compare comparator
+
+
+*/
+
+void set_difference() {
+  std::vector<int> a = {2, 5, 7, 3, 1, 2};
+  std::vector<int> b = {8, 3, 2, 1};
+  std::vector<int> res;
+
+  // They must be sorted or the behavior is undefined
+  std::sort(a.begin(), a.end(), std::greater<int>());
+  std::sort(b.begin(), b.end(), std::greater<int>());
+
+  std::set_difference(a.begin(), a.end(), b.begin(), b.end(), res.begin(),
+                      std::greater<int>());
+}
