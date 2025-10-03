@@ -1021,3 +1021,19 @@ void inner_product() {
 
   std::inner_product(v.begin(), v.end(), b.begin(), 0);
 }
+
+/*
+Iota
+fill elements in range in sequence first = value + 1;
+
+Params:
+    @iterator first
+    @iterator end
+    @typename starting_val
+
+*/
+
+void iota() {
+  std::vector<int> v(10);
+  std::iota(v.begin(), v.end(), 0);
+}
