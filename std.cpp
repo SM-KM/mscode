@@ -877,6 +877,8 @@ Params:
     @iterator firstb
     @iterator lastb
     @iterator firstres
+    @compare comparator
+
 */
 
 void set_union() {
@@ -890,4 +892,32 @@ void set_union() {
 
   std::set_union(a.begin(), a.end(), b.begin(), b.end(), res.begin(),
                  std::greater<int>());
+}
+
+/*
+Set intersection
+conbines same elements in both
+two sorted ranges into 1 sorted range without duplicates
+
+Params:
+    @iterator firsta
+    @iterator lasta
+    @iterator firstb
+    @iterator lastb
+    @iterator firstres
+    @compare comparator
+
+*/
+
+void set_intersection() {
+  std::vector<int> a = {2, 5, 7, 3, 1, 2};
+  std::vector<int> b = {8, 3, 2, 1};
+  std::vector<int> res;
+
+  // They must be sorted or the behavior is undefined
+  std::sort(a.begin(), a.end(), std::greater<int>());
+  std::sort(b.begin(), b.end(), std::greater<int>());
+
+  std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), res.begin(),
+                        std::greater<int>());
 }
