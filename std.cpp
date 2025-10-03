@@ -951,3 +951,29 @@ void set_difference() {
   std::set_difference(a.begin(), a.end(), b.begin(), b.end(), res.begin(),
                       std::greater<int>());
 }
+
+/*
+Make Heap
+it turns a random acces range into a heap
+
+Params:
+    @iterator first
+    @iterator end
+
+Methods:
+    pop_heap(iterator, iterator): move the top element to the end
+    push_heap(iterator, iterator): checks and restore the heap property
+
+*/
+
+void make_heap() {
+  std::vector<int> v = {2, 4, 7, 4, 1, 8, 3};
+  std::make_heap(v.begin(), v.end());
+
+  // Methods
+  std::pop_heap(v.begin(), v.end());
+  v.pop_back();
+
+  v.push_back(9);
+  std::push_heap(v.begin(), v.end());
+}
