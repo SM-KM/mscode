@@ -4,15 +4,19 @@
 #include <deque>
 #include <forward_list>
 #include <functional>
+#include <iostream>
 #include <iterator>
 #include <list>
 #include <map>
 #include <numeric>
+#include <optional>
 #include <queue>
 #include <set>
 #include <stack>
 #include <string>
+#include <tuple>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 // TODO: Add examples to everything as well as complexity,
@@ -1037,3 +1041,58 @@ void iota() {
   std::vector<int> v(10);
   std::iota(v.begin(), v.end(), 0);
 }
+
+/*
+Pair
+specific case of a tuple that creates a pair of two elements
+can use also make_pair()
+
+Params:
+    @typename T1
+    @typename T2
+
+*/
+
+void pair() {
+  std::pair<uint, uint> pair = std::pair<uint, uint>(3, 4);
+  std::cout << pair.first << pair.second;
+
+  std::pair<ulong, ulong> p = std::make_pair(32, 56);
+}
+
+/*
+Tuple
+is a fixed size collection of heterogeneous values
+
+Params:
+    @typename...elements
+
+*/
+
+std::tuple<std::string, char, uint> getT(uint id) { return {"Name", 'A', id}; }
+void tuple() {
+  std::string name;
+  char l;
+  uint ag;
+
+  std::tie(name, l, ag) = getT(5);
+
+  // Structure bindings C++17
+  auto [n, le, a] = getT(4);
+}
+
+/*
+Optional
+contins a value that may or may not be there
+
+Params:
+
+*/
+
+std::optional<std::string> create(bool b) {
+  if (b)
+    return "God";
+  return {};
+};
+
+void optional() { std::cout << create(false).value_or("emp"); }
