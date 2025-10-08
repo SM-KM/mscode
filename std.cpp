@@ -17,6 +17,7 @@
 #include <tuple>
 #include <unordered_set>
 #include <utility>
+#include <variant>
 #include <vector>
 
 // TODO: Add examples to everything as well as complexity,
@@ -1083,9 +1084,8 @@ void tuple() {
 
 /*
 Optional
-contins a value that may or may not be there
-
-Params:
+contins a value that may or may not be there, to handle exceptions
+better and values that are modified constantly
 
 */
 
@@ -1096,3 +1096,14 @@ std::optional<std::string> create(bool b) {
 };
 
 void optional() { std::cout << create(false).value_or("emp"); }
+
+/*
+Variant
+holds multiple posible values for the same v
+
+*/
+
+void variant() {
+  std::variant<uint, void const *> variant;
+  std::holds_alternative<void const *>(variant);
+}
