@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <deque>
 #include <forward_list>
+#include <fstream>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
@@ -16,6 +17,7 @@
 #include <optional>
 #include <queue>
 #include <set>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <tuple>
@@ -1215,7 +1217,7 @@ template <class... Ts> struct overloaded : Ts... {
 // C++17 later
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-// Gets its time at compile time, dont evaluate
+// Gets its type at compile time, dont evaluate
 decltype(av) decav = av;
 
 void visit() {
@@ -1310,5 +1312,80 @@ void weak_ptr() {
   auto n2 = std::make_shared<Node>();
 
   n1->next = n2;
-  n2->prev = n1;
+  n2->prev = n1; // does not add an extra ref count of owner
+                 // avoiding cycling refs
+}
+
+/*
+Streams
+[ source ] -> [ stream ] -> [ destination ]
+is like a pipeline to move data
+
+Base Structure
+ios_base
+    -> basic_ios<CharT, Traits>
+        -> basic_istream<CharT, Traits> -> input [std::istream]
+        -> basic_ostream<CharT, Traits> -> output [std::ostream]
+        -> basic_iostream<CharT, Traits> -> input / output [std::iostream]
+
+std::istream = Pipe bringing data in [input]
+std::ostream = Pipe sending data out [output]
+std::fstream = Pipe connected to a file [input / output]
+std::stringstream = Pipe `
+
+all use <<, >>, get, put
+
+*/
+
+/*
+stringstream
+works with strings in memory, with a string buffer
+
+std::ostringstream == basic_ostream [Write to string]
+std::istringstream == basic_istream [Read from string]
+std::iostringstream == basic_iostream [Read and write to same string]
+
+*/
+
+void stringstream() {
+  std::ostringstream out;
+  out << "Hello " << 123;
+  std::string s = out.str();
+
+  std::istringstream in;
+  std::string word;
+  int num;
+
+  in >> word >> num;
+  std::cout << word << " + " << num;
+};
+
+/*
+File streams
+std::ifstream [input - read from file]
+std::ofstream [output - write to file]
+std::fstream [read and write file]
+
+Flags
+std::ios::in = open for reading
+std::ios:out = open for writting
+std::ios::app = append to file, append to the end
+std::ios::trunc = truncate file, clears the file
+std::ios::binary = binary mode, ignores \n..\r\n etc, for like images
+std::ios::ate
+
+*/
+
+void filestream() {
+  std::ofstream out("ex.txt");
+  out << "File here\n";
+  out.close();
+
+  std::ifstream in("ex.txt");
+  std::string line;
+  std::getline(in, line);
+  std::cout << line << "\n";
+
+  std::fstream file("x.txt", std::ios::in | std::ios::out | std::ios::binary |
+                                 std::ios::app | std::ios::trunc);
 }
