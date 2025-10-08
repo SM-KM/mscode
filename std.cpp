@@ -1205,6 +1205,21 @@ to work with the values
 std::variant<uint, bool> av = (uint)5;
 std::variant<std::string, long> bv = (uint)5;
 
+// TODO: add in deep example
+template <class... Ts> struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+
+// C++17 later
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+// Gets its time at compile time, dont evaluate
+decltype(av) decav = av;
+
 void visit() {
-  std::visit([](auto &&x, auto &&y) { std::cout << x << " " << y; }, av, bv);
+  std::visit(
+      overloaded{
+          [](auto &&x, auto &&y) { std::cout << x << " " << y; },
+      },
+      av, bv);
 };
