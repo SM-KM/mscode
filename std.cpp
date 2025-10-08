@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <any>
 #include <array>
 #include <bitset>
 #include <deque>
@@ -1107,3 +1108,11 @@ void variant() {
   std::variant<uint, void const *> variant;
   std::holds_alternative<void const *>(variant);
 }
+
+/*
+Any
+Holds any type of data
+
+*/
+
+void any() { std::any p = 3; }
