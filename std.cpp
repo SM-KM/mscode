@@ -1240,3 +1240,22 @@ void move() {
   std::string s2 = s1;            // Calls the copy constructor
   std::string s3 = std::move(s1); // Calls the move constructor
 }
+
+/*
+Forward - used in perfect forwarding
+rvalue reference &&
+
+is used to preserve the value category, meaning lvalue or rvalue
+
+*/
+
+void print(int &i) {};  // lvalue
+void print(int &&i) {}; // rvalue
+
+template <typename V> void wrapper(V &&v) { print(std::forward<V>(v)); }
+
+void forward() {
+  int n = 9;
+  wrapper(n);  // lvalue
+  wrapper(10); // rvalue
+}
