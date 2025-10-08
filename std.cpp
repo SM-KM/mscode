@@ -5,6 +5,7 @@
 #include <deque>
 #include <forward_list>
 #include <functional>
+#include <initializer_list>
 #include <iostream>
 #include <iterator>
 #include <list>
@@ -1171,3 +1172,39 @@ void function() {
 
   std::cout << f(4, 5) << flam(5, 8);
 }
+
+/*
+Initializer_list
+is a utility to make posible initalization of containers with {args..}
+so instead of doing:
+
+std::vector<int> v;
+v.push_back(4);
+
+You can do:
+
+std::vector<int> = { 1, 3, 4, 5 };
+
+*/
+
+void p(std::initializer_list<std::variant<int, std::string>> v) {
+  for (auto &e : v) {
+    std::visit([](auto &&a) { std::cout << a; }, e);
+  };
+};
+
+void initializer_list() { p({2, 4, "asads"}); }
+
+/*
+Visit
+is a util for working with variants, like a type-safe switch
+to work with the values
+
+ */
+
+std::variant<uint, bool> av = (uint)5;
+std::variant<std::string, long> bv = (uint)5;
+
+void visit() {
+  std::visit([](auto &&x, auto &&y) { std::cout << x << " " << y; }, av, bv);
+};
