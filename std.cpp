@@ -1116,3 +1116,58 @@ Holds any type of data
 */
 
 void any() { std::any p = 3; }
+
+/*
+Bind
+it lets you create a new bindable
+
+Params:
+    @callable
+    @args...
+
+*/
+
+void bind() {
+  using namespace std::placeholders;
+  struct subs {
+    int mult(int a, int b) const { return a * b; };
+    int operator()(int a, int b) const { return a - b; };
+  };
+
+  subs sub;
+  std::bind(&subs::mult, &sub, _1, _2);
+}
+
+/*
+Function<typename (typename...)>
+it basically stores with type-safe something that can be
+called like a function
+    - free function
+    - lambda
+    - functor (function object)
+    - member function pointer (std::bind | lambda)
+
+*/
+
+int add(int a, int b) { return a + b; };
+void function() {
+  // free function
+  std::function<int(int, int)> f = add;
+
+  // lambda
+  std::function<int(int, int)> flam = [](int a, int b) { return a + b; };
+
+  // functor
+  struct subs {
+    int mult(int a, int b) const { return a * b; };
+    int operator()(int a, int b) const { return a - b; };
+  };
+  std::function<int(int a, int b)> functor = subs();
+
+  // member function pointer
+  subs sub;
+  std::function<int(int a, int b)> fmemb = std::bind(
+      &subs::mult, &sub, std::placeholders::_1, std::placeholders::_2);
+
+  std::cout << f(4, 5) << flam(5, 8);
+}
