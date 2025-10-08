@@ -2,6 +2,7 @@
 #include <any>
 #include <array>
 #include <bitset>
+#include <cstdio>
 #include <deque>
 #include <forward_list>
 #include <functional>
@@ -10,6 +11,7 @@
 #include <iterator>
 #include <list>
 #include <map>
+#include <memory>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -22,8 +24,8 @@
 #include <variant>
 #include <vector>
 
-// TODO: Add examples to everything as well as complexity,
-// explain difference on inserting vs implacing
+// TODO: Add examples to everything as well as complexities for,
+// operations
 
 /*
 STL Containers
@@ -1258,4 +1260,55 @@ void forward() {
   int n = 9;
   wrapper(n);  // lvalue
   wrapper(10); // rvalue
+}
+
+// Smart pointers
+// handle deletion of objects when out of scope or not needed anymore
+
+/*
+unique_ptr
+in ensures unique ownership, it cannot be copied only moved
+only ensures destruction when out of scope
+
+*/
+
+void unique_ptr() {
+  std::unique_ptr<int> ptr = std::make_unique<int>(20);
+  std::unique_ptr<int> ptr2 = std::move(ptr);
+
+  // Custom deleters -> when ever file goes out of scope, fclose is called
+  std::unique_ptr<FILE, decltype(&fclose)> file(fopen("adas.txt", "r"),
+                                                &fclose);
+};
+
+/*
+shared_ptr
+smart pointer that shares ownership, is destroy the object is pointing
+to when the last shared_ptr is destroyed, it keeps count of the owners
+
+*/
+
+void shared_ptr() {
+  std::shared_ptr<uint> ptr = std::make_shared<uint>(20);
+  std::shared_ptr<uint> ptr2 = ptr;
+}
+
+/*
+weak_ptr
+is a smart pointer used with shared_ptr that does not increment
+owner count, to prevent loops - cycling references.
+
+*/
+
+void weak_ptr() {
+  struct Node {
+    std::shared_ptr<Node> next;
+    std::weak_ptr<Node> prev;
+  };
+
+  auto n1 = std::make_shared<Node>();
+  auto n2 = std::make_shared<Node>();
+
+  n1->next = n2;
+  n2->prev = n1;
 }
