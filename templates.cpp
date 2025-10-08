@@ -60,3 +60,15 @@ the body of the function and if it can be proccess at compile time
 it does it else it just works as a normal function
 */
 constexpr int factorial(int n) { return (n <= 1) ? 1 : (n * factorial(n - 1)); }
+
+// it difers the return type based on the typename values
+template <typename T1, typename T2> auto add(T1 x, T2 y) -> decltype(x + y) {
+  return x + y;
+}
+
+template <class... Ts> struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+
+// C++17 later
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
