@@ -1223,3 +1223,20 @@ void visit() {
       },
       av, bv);
 };
+
+/*
+Move
+calls the move constructor without creating a copy and allocating
+new memory, so it basically steals it.
+
+the old container or var, becomes unspecified state, meaning it can
+be deleted or reassign but the value can not be sure to be there
+the only thing it garantees is that it wont crash
+
+*/
+
+void move() {
+  std::string s1 = "asda";
+  std::string s2 = s1;            // Calls the copy constructor
+  std::string s3 = std::move(s1); // Calls the move constructor
+}
