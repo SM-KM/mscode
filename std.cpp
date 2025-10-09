@@ -2,6 +2,7 @@
 #include <any>
 #include <array>
 #include <bitset>
+#include <cassert>
 #include <cstdio>
 #include <deque>
 #include <forward_list>
@@ -21,6 +22,7 @@
 #include <stack>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <variant>
@@ -1380,12 +1382,46 @@ void filestream() {
   std::ofstream out("ex.txt");
   out << "File here\n";
   out.close();
-
   std::ifstream in("ex.txt");
   std::string line;
   std::getline(in, line);
   std::cout << line << "\n";
-
   std::fstream file("x.txt", std::ios::in | std::ios::out | std::ios::binary |
                                  std::ios::app | std::ios::trunc);
+}
+
+/*
+static assert = validates something at compile time
+assert = validates something at runtime
+
+*/
+
+void static_ast() {
+  assert(sizeof(int) == 4);
+  static_assert(sizeof(int) == 4, "Int must be 4 bytes");
+}
+
+/*
+Decay, Decay_t
+transform the type into a form to what it would become if you passed it
+to a function
+
+decay_t is just a type alias for convinience to use with decay
+typeid = gives you info about a type or expression at runtime
+volatile = dont cache or optimize actually read it from memory every time
+
+*/
+
+template <typename T> void showType() {
+  std::cout << typeid(typename std::decay<T>::type).name() << "\n";
+}
+
+void decay() {
+  volatile int flag = 0;
+  while (flag == 0) {
+  };
+
+  showType<int>();
+  showType<const int *>();
+  showType<int[5]>();
 }
