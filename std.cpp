@@ -9,6 +9,8 @@
 #include <fstream>
 #include <functional>
 #include <initializer_list>
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <iterator>
 #include <list>
@@ -1424,4 +1426,40 @@ void decay() {
   showType<int>();
   showType<const int *>();
   showType<int[5]>();
+}
+
+/*
+Iomanip header
+is used for formatting and manipulation of I/O streams
+
+Floating point
+std::fixed = forces to use fixed point notation
+std::scientific = forces scientific notation
+std::setprecision(n) = sets how many digits after the point are printed
+std::showpoint = always use showpoint
+std::uppercase = uses scientific letters in uppercase
+std::showpos = adds + before positive numbers
+
+Integer
+std::dec = prints number in decimal
+std::hex = prints number in hexadecimal
+std::oct = prints number in octal
+std::showbase = shows base of number ex...hex(0x)
+std::setw(int n) = sets minimum width of next output field
+std::setfill(char c) = sets fill character for unused width spaces
+std::left, std::right, std::internal = controls pos within width
+
+Input
+std::ws = eats leading whitespace
+std::skipws / std::noskipws = enable/disable skipping whitespace
+
+*/
+
+void iomanip() {
+  std::cout << std::fixed << std::setprecision(2);
+  std::cout << std::showpoint << std::uppercase;
+  std::cout << std::showpos;
+  std::cout << std::dec << std::hex << std::oct;
+  std::cout << std::showbase << std::setw(50);
+  std::cout << std::setfill('r') << std::left;
 }
