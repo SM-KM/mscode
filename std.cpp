@@ -3,8 +3,10 @@
 #include <array>
 #include <bitset>
 #include <cassert>
+#include <condition_variable>
 #include <cstdio>
 #include <deque>
+#include <format>
 #include <forward_list>
 #include <fstream>
 #include <functional>
@@ -16,6 +18,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -23,6 +26,7 @@
 #include <sstream>
 #include <stack>
 #include <string>
+#include <thread>
 #include <tuple>
 #include <type_traits>
 #include <unordered_set>
@@ -1462,4 +1466,190 @@ void iomanip() {
   std::cout << std::dec << std::hex << std::oct;
   std::cout << std::showbase << std::setw(50);
   std::cout << std::setfill('r') << std::left;
+}
+
+/*
+Format
+allows to format a string from a format string lol
+
+*/
+
+void format() { std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6); }
+
+/*
+Threads
+each thread has a unique id
+
+OS level
+
+Problems
+Deadlock: is when two threads are forever blocked because they are waiting for
+shared resources that the other one holds.
+
+Race condition: is when two threads are accessing to the same shared resources
+and the final state of the resources is dependant on the order in which the
+threads finish
+
+Starvation: other threads gets locks and priority on resources needed on a
+thread stopping it.
+
+
+Thread
+    - accepts a callable: function, functor, lambda, static non-static member
+    funcs
+
+Mutex
+locks threads so that shared resources dont cause race conditions
+
+Unique_lock
+allows to handle better the mutexes, locking and unlocking manually, and
+automatically transfer ownership of the mutex, or lock for different reasons
+
+Lock_guard
+provides a safe way of lock a mutex during the duration of a scope
+
+Condition variable
+blocks one or multiple threads until another thread both modifies the shared
+value and notifies the condition variable.
+
+Atomic
+is used in threads <- // TODO: need to see more examples
+                      // cause i didnt understand
+*/
+
+void tfunc() { std::cout << "Finishing something on this thread"; }
+struct Send {
+  uint x;
+  Send(uint x) : x(x) {};
+
+  void operator()() const { std::cout << x; }
+  void sum(int x, int y) { std::cout << x + y; }
+  static void set(uint y) { std::cout << y; }
+};
+
+struct Box {
+  std::mutex m;
+  int n;
+
+  explicit Box(int n) : n(n) {};
+};
+
+void transfer(Box &from, Box &to, int num) {
+  std::unique_lock lock1{from.m, std::defer_lock};
+  std::unique_lock lock2{to.m, std::defer_lock};
+
+  // Lock both mutexes without deadlock using std::lock()
+  std::lock(lock1, lock2);
+
+  from.n -= num;
+  to.n += num;
+
+  // When getting out of scope both unique_locks unlock the mutexes
+}
+
+std::mutex mux;
+uint n = 0; // <- shared resource that the mutex prevents from being written two
+            // in a race
+
+void mult() {
+  mux.lock(); // lock n during this execution
+  for (size_t i = 0; i < 100000; i++) {
+    n = n + i;
+  }
+
+  mux.unlock(); // unlock n when finished using it
+}
+
+volatile int g_i = 0;
+std::mutex g_i_mutex;
+
+void safe_increment(int iterations) {
+  const std::lock_guard<std::mutex> lock(g_i_mutex);
+  while (iterations-- > 0)
+    g_i = g_i + 1;
+
+  // when it gets out of scope it unlocks the mutex
+}
+
+// do race condition on purpose to show usage
+void unsafe_increment(int iterations) {
+  while (iterations-- > 0)
+    g_i = g_i + 1;
+  // the final result when using this in a thread is unpredictable
+}
+
+// Show use of condition_variables
+std::mutex condm;
+std::condition_variable cv;
+std::string data;
+bool ready = false;
+bool processed = false;
+
+void worker_thread() {
+  // wait until main sets data, simulate send
+  std::unique_lock lk(condm);
+  cv.wait(lk, [] { return ready; });
+
+  // after the wait this thread owns the lock
+  std::cout << "Worked processing data \n";
+  data += "after begin processed";
+  processed = true;
+
+  std::cout << "Worker thread signals data processing completed\n";
+
+  lk.unlock();
+  cv.notify_one();
+}
+
+void worker_main() {
+  std::thread worker(worker_thread);
+  data = "Example data";
+
+  // simulate sending data to thread by setting data
+  // locking inside braces {}, to unlock when exiting the scope
+  {
+    std::lock_guard lk(condm);
+    ready = true;
+    std::cout << "worker_main sent data";
+  }
+  cv.notify_one();
+
+  // wait for worker
+  {
+    std::unique_lock lk(condm);
+    cv.wait(lk, [] { return processed; });
+  }
+  std::cout << "Back in main(), data = " << data << '\n';
+  worker.join();
+}
+
+void threads() {
+  // function
+  std::thread t(tfunc);
+
+  // Safe shared resources guaranting result
+  std::thread trace1(mult);
+  std::thread trace2(mult);
+
+  // functor
+  std::thread t2(Send(3));
+
+  // lambda
+  std::thread t3([](uint x) { std::cout << x; });
+
+  // static <- dont need the object
+  std::thread t4(&Send::set, 5);
+
+  // non-static <- need the object to apply this
+  Send s(4);
+  std::thread t5(&Send::sum, s, 4, 6);
+
+  Box ac1{100};
+  Box ac2{50};
+
+  std::thread thread1{transfer, ac1, ac2, 10};
+  std::thread thread2{transfer, ac2, ac1, 5};
+
+  thread1.join();
+  thread2.join();
 }
