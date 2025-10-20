@@ -573,7 +573,9 @@ Methods:
 */
 
 std::multimap<int, std::string> mm;
-void methodsMultimap() { ms.equal_range(3); }
+void methodsMultimap() {
+  ms.equal_range(3);
+}
 
 /*
 Bitset
@@ -1090,7 +1092,9 @@ Params:
 
 */
 
-std::tuple<std::string, char, uint> getT(uint id) { return {"Name", 'A', id}; }
+std::tuple<std::string, char, uint> getT(uint id) {
+  return {"Name", 'A', id};
+}
 void tuple() {
   std::string name;
   char l;
@@ -1115,7 +1119,9 @@ std::optional<std::string> create(bool b) {
   return {};
 };
 
-void optional() { std::cout << create(false).value_or("emp"); }
+void optional() {
+  std::cout << create(false).value_or("emp");
+}
 
 /*
 Variant
@@ -1134,7 +1140,9 @@ Holds any type of data
 
 */
 
-void any() { std::any p = 3; }
+void any() {
+  std::any p = 3;
+}
 
 /*
 Bind
@@ -1149,8 +1157,12 @@ Params:
 void bind() {
   using namespace std::placeholders;
   struct subs {
-    int mult(int a, int b) const { return a * b; };
-    int operator()(int a, int b) const { return a - b; };
+    int mult(int a, int b) const {
+      return a * b;
+    };
+    int operator()(int a, int b) const {
+      return a - b;
+    };
   };
 
   subs sub;
@@ -1168,7 +1180,9 @@ called like a function
 
 */
 
-int add(int a, int b) { return a + b; };
+int add(int a, int b) {
+  return a + b;
+};
 void function() {
   // free function
   std::function<int(int, int)> f = add;
@@ -1178,8 +1192,12 @@ void function() {
 
   // functor
   struct subs {
-    int mult(int a, int b) const { return a * b; };
-    int operator()(int a, int b) const { return a - b; };
+    int mult(int a, int b) const {
+      return a * b;
+    };
+    int operator()(int a, int b) const {
+      return a - b;
+    };
   };
   std::function<int(int a, int b)> functor = subs();
 
@@ -1211,7 +1229,9 @@ void p(std::initializer_list<std::variant<int, std::string>> v) {
   };
 };
 
-void initializer_list() { p({2, 4, "asads"}); }
+void initializer_list() {
+  p({2, 4, "asads"});
+}
 
 /*
 Visit
@@ -1270,7 +1290,9 @@ is used to preserve the value category, meaning lvalue or rvalue
 void print(int &i) {};  // lvalue
 void print(int &&i) {}; // rvalue
 
-template <typename V> void wrapper(V &&v) { print(std::forward<V>(v)); }
+template <typename V> void wrapper(V &&v) {
+  print(std::forward<V>(v));
+}
 
 void forward() {
   int n = 9;
@@ -1480,7 +1502,9 @@ allows to format a string from a format string lol
 
 */
 
-void format() { std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6); }
+void format() {
+  std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6);
+}
 
 /*
 Threads
@@ -1523,14 +1547,22 @@ is used in threads <- // TODO: need to see more examples
                       // cause i didnt understand
 */
 
-void tfunc() { std::cout << "Finishing something on this thread"; }
+void tfunc() {
+  std::cout << "Finishing something on this thread";
+}
 struct Send {
   uint x;
   Send(uint x) : x(x) {};
 
-  void operator()() const { std::cout << x; }
-  void sum(int x, int y) { std::cout << x + y; }
-  static void set(uint y) { std::cout << y; }
+  void operator()() const {
+    std::cout << x;
+  }
+  void sum(int x, int y) {
+    std::cout << x + y;
+  }
+  static void set(uint y) {
+    std::cout << y;
+  }
 };
 
 struct Box {
@@ -1672,8 +1704,12 @@ Handles comunication between threads, with the help of future as well
 
 */
 
-int returntwo() { return 2; };
-void foo(std::promise<int> p) { p.set_value(25); }
+int returntwo() {
+  return 2;
+};
+void foo(std::promise<int> p) {
+  p.set_value(25);
+}
 
 void future() {
   std::future<int> f = std::async(std::launch::async, returntwo);
@@ -1767,21 +1803,91 @@ void chrono() {
 
 /*
 Allocator / Allocator_traits
+abstracts the proccess of allocating and deallocating memory
+
+Allocator_traits provides fallbacks for the custom allocators
+in case not all required parts are set, using SFINAE (Substitution failture is
+not an error) compiler silently fails a template specialization, if there is
+another valid specialization
 
 */
+template <typename T> struct MAllocator {
+  using value_type = T;
 
-void allocator() {}
+  MAllocator() noexcept {};
 
-/*
-Hash
+  // It uses a new template os that when rebinding between types
+  // it can do ti otherwise it would only work when T == U
+  template <typename U> MAllocator(const MAllocator<U> &) noexcept {};
 
-*/
+  // TODO: add explanation for this
+  // ::operator
+  [[nodiscard]] T *allocate(std::size_t t) {
+    return static_cast<T *>(::operator new(n * sizeof(T)));
+  }
 
-void hash() {}
+  void deallocate(T *p) noexcept {
+    ::operator delete(p);
+  }
+
+  // U is the place in memory to construct, and the args are passed to
+  // the constructor using perfect forwarding, meaning lvalue/rvalue ness is
+  // preserved
+  template <class U, class... Args> void construct(U *p, Args &&...args) {
+    ::new ((void *)p) U(std::forward<Args>(args)...);
+  };
+
+  template <class U> void destroy(U *p) {
+    p->~U();
+  }
+
+  template <class U> struct rebind {
+    using other = MAllocator<U>;
+  };
+};
+
+void allocator() {
+  std::vector<int, MAllocator<int>> v;
+  v.push_back(45);
+}
 
 /*
 Policy
+class implementation type of policy
+its a way to define defaults and construction behaviors that
+should follow, to instrict defaults but allow customization
+
+excecution policies in std
+
 
 */
 
-void policy() {}
+struct NoLogPolicy {
+  void log(const std::string &s) const {};
+};
+
+struct StdOutLogPolicy {
+  void log(const std::string &s) const {
+    std::cout << s << std::endl;
+  }
+};
+
+template <typename T, typename LogPolicy = NoLogPolicy> class MArray {
+  LogPolicy logger;
+  T *data;
+  size_t size_;
+
+public:
+  MArray(size_t n) : data(new T[n]), size_(n) {
+    logger.log("Allocated MyArray of size " + std::to_string(n));
+  }
+  ~MArray() {
+    delete[] data;
+    logger.log("Deallocated MyArray of size " + std::to_string(size_));
+  }
+};
+
+void policy() {
+  MArray<int> r(10);
+  MArray<int, StdOutLogPolicy> rout(10); // will log
+}

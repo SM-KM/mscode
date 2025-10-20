@@ -1,0 +1,3 @@
+BraceWrapping:
+  AfterFunction: true
+AllowShortFunctionsOnASingleLine: Empty
