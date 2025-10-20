@@ -6,10 +6,12 @@
 #include <condition_variable>
 #include <cstdio>
 #include <deque>
+#include <exception>
 #include <format>
 #include <forward_list>
 #include <fstream>
 #include <functional>
+#include <future>
 #include <initializer_list>
 #include <iomanip>
 #include <ios>
@@ -1653,3 +1655,93 @@ void threads() {
   thread1.join();
   thread2.join();
 }
+
+/*
+Future
+provides a mechanism to access the result of asynchronous operations
+
+Async
+handles running code asynchronously
+
+Promise
+Handles comunication between threads, with the help of future as well
+
+*/
+
+int returntwo() { return 2; };
+void foo(std::promise<int> p) { p.set_value(25); }
+
+void future() {
+  std::future<int> f = std::async(std::launch::async, returntwo);
+  std::cout << f.get();
+
+  std::promise<int> p;
+  std::future<int> fut = p.get_future();
+
+  std::thread t(foo, std::move(p));
+  t.join();
+
+  std::cout << fut.get();
+}
+
+void async() {}
+
+void retreiveValue(std::promise<uint> &p) {
+  try {
+    int ans = 1371283718;
+    p.set_value(ans);
+  } catch (...) {
+    p.set_exception(std::current_exception());
+  }
+}
+
+void promise() {
+  std::promise<uint> p;
+  std::future<uint> f = p.get_future();
+
+  std::thread t(retreiveValue, p);
+
+  try {
+    int res = f.get();
+    std::cout << res;
+  } catch (const std::exception &e) {
+    std::cout << e.what();
+  }
+
+  t.join();
+}
+
+/*
+Chrono
+
+*/
+
+void chrono() {}
+
+/*
+Heap
+
+*/
+
+void heap() {}
+
+/*
+Allocator
+
+*/
+
+void allocator() {}
+
+/*
+Hash
+
+*/
+
+void hash() {}
+
+/*
+Policy
+
+*/
+
+void policy() {}
