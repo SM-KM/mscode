@@ -1,10 +1,13 @@
 #include <algorithm>
 #include <any>
 #include <array>
+#include <bits/chrono.h>
 #include <bitset>
 #include <cassert>
+#include <chrono>
 #include <condition_variable>
 #include <cstdio>
+#include <ctime>
 #include <deque>
 #include <exception>
 #include <format>
@@ -24,6 +27,7 @@
 #include <numeric>
 #include <optional>
 #include <queue>
+#include <ratio>
 #include <set>
 #include <sstream>
 #include <stack>
@@ -1716,17 +1720,53 @@ Chrono
 
 */
 
-void chrono() {}
+template <typename T1, typename T2> using mul = std::ratio_multiply<T1, T2>;
+
+void chrono() {
+  using namespace std::chrono;
+
+  milliseconds mil(1000);
+  mil = mil * 60;
+
+  std::cout << mil.count();
+  std::cout << (mil.count() * milliseconds::period::num /
+                milliseconds::period::den);
+
+  // duration_cast with precision loss, it would just print 0
+  std::cout << duration_cast<minutes>(1s).count();
+
+  // custom duration types
+  using microforthnights =
+      duration<float, mul<mul<std::ratio<2>, weeks::period>, std::micro>>;
+  using nanocenturies =
+      duration<float, mul<mul<std::hecto, years::period>, std::nano>>;
+  using fps_24 = duration<double, std::ratio<1, 24>>;
+
+  // floating point scale conversions
+  std::cout << microforthnights(1s).count();
+  std::cout << nanocenturies(1s).count();
+  std::cout << fps_24(1s).count();
+
+  // types of clocks, is based on UTC
+  system_clock s;            // internally adjusted by the OS
+  steady_clock sc;           // time between ticks is constant
+  high_resolution_clock hrc; // it has the lowest tick possible
+
+  // Time point
+
+  using namespace std::literals;
+  const time_point<system_clock> now = system_clock::now();
+
+  const time_t t_c = system_clock::to_time_t(now - 24h);
+  std::cout << std::put_time(std::localtime(&t_c), "%F %T.\n");
+
+  const time_point<steady_clock> start = steady_clock::now();
+  std::cout << "System_clock" << now.time_since_epoch() << std::endl;
+  std::cout << "Steady_clock" << start.time_since_epoch() << std::endl;
+}
 
 /*
-Heap
-
-*/
-
-void heap() {}
-
-/*
-Allocator
+Allocator / Allocator_traits
 
 */
 
