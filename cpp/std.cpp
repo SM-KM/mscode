@@ -142,7 +142,7 @@ void methodsArray() {
   arr.at(2);
   int f = arr.front();
   int b = arr.back();
-  int *p = arr.data();
+  int* p = arr.data();
   int s = arr.size();
   bool em = arr.empty();
   arr.swap(arrswap);
@@ -260,7 +260,8 @@ the pos of iterator
     For iterators it only includes forward iterators
 */
 
-std::forward_list<int> fl = {3, 4, 5};
+std::forward_list<int, std::allocator<int>> fl = {3, 4, 5};
+std::forward_list<int, std::allocator<int>> fl2 = {3, 7, 5};
 
 void methodsForwardList() {
   fl.push_front(20);
@@ -270,8 +271,15 @@ void methodsForwardList() {
   fl.remove(3);
   fl.remove_if([](int x) { return x % 2 == 0; });
   fl.clear();
+  const int f = fl.front();
+  int fn = fl.front();
+  fl.assign({4, 5, 6});
+  fl.emplace_after(fl.cbegin(), 2);
   bool em = fl.empty();
   fl.insert_after(fl.before_begin(), 2);
+  fl.resize(40, 4);
+  fl.splice_after(fl.begin(), fl, fl.end());
+  fl.sort();
 }
 
 /*
@@ -573,9 +581,7 @@ Methods:
 */
 
 std::multimap<int, std::string> mm;
-void methodsMultimap() {
-  ms.equal_range(3);
-}
+void methodsMultimap() { ms.equal_range(3); }
 
 /*
 Bitset
@@ -711,7 +717,7 @@ void sort() {
   std::vector<Point> points = {{3, 4}, {6, 7}};
   std::sort(v.begin(), v.end());
   std::sort(points.begin(), points.end(),
-            [](const Point &p, const Point &b) { return p.x > b.x; });
+            [](const Point& p, const Point& b) { return p.x > b.x; });
 }
 
 /*
@@ -1092,9 +1098,7 @@ Params:
 
 */
 
-std::tuple<std::string, char, uint> getT(uint id) {
-  return {"Name", 'A', id};
-}
+std::tuple<std::string, char, uint> getT(uint id) { return {"Name", 'A', id}; }
 void tuple() {
   std::string name;
   char l;
@@ -1119,9 +1123,7 @@ std::optional<std::string> create(bool b) {
   return {};
 };
 
-void optional() {
-  std::cout << create(false).value_or("emp");
-}
+void optional() { std::cout << create(false).value_or("emp"); }
 
 /*
 Variant
@@ -1130,8 +1132,8 @@ holds multiple posible values for the same v
 */
 
 void variant() {
-  std::variant<uint, void const *> variant;
-  std::holds_alternative<void const *>(variant);
+  std::variant<uint, void const*> variant;
+  std::holds_alternative<void const*>(variant);
 }
 
 /*
@@ -1140,9 +1142,7 @@ Holds any type of data
 
 */
 
-void any() {
-  std::any p = 3;
-}
+void any() { std::any p = 3; }
 
 /*
 Bind
@@ -1157,12 +1157,8 @@ Params:
 void bind() {
   using namespace std::placeholders;
   struct subs {
-    int mult(int a, int b) const {
-      return a * b;
-    };
-    int operator()(int a, int b) const {
-      return a - b;
-    };
+    int mult(int a, int b) const { return a * b; };
+    int operator()(int a, int b) const { return a - b; };
   };
 
   subs sub;
@@ -1180,9 +1176,7 @@ called like a function
 
 */
 
-int add(int a, int b) {
-  return a + b;
-};
+int add(int a, int b) { return a + b; };
 void function() {
   // free function
   std::function<int(int, int)> f = add;
@@ -1192,12 +1186,8 @@ void function() {
 
   // functor
   struct subs {
-    int mult(int a, int b) const {
-      return a * b;
-    };
-    int operator()(int a, int b) const {
-      return a - b;
-    };
+    int mult(int a, int b) const { return a * b; };
+    int operator()(int a, int b) const { return a - b; };
   };
   std::function<int(int a, int b)> functor = subs();
 
@@ -1224,14 +1214,12 @@ std::vector<int> = { 1, 3, 4, 5 };
 */
 
 void p(std::initializer_list<std::variant<int, std::string>> v) {
-  for (auto &e : v) {
-    std::visit([](auto &&a) { std::cout << a; }, e);
+  for (auto& e : v) {
+    std::visit([](auto&& a) { std::cout << a; }, e);
   };
 };
 
-void initializer_list() {
-  p({2, 4, "asads"});
-}
+void initializer_list() { p({2, 4, "asads"}); }
 
 /*
 Visit
@@ -1257,7 +1245,7 @@ decltype(av) decav = av;
 void visit() {
   std::visit(
       overloaded{
-          [](auto &&x, auto &&y) { std::cout << x << " " << y; },
+          [](auto&& x, auto&& y) { std::cout << x << " " << y; },
       },
       av, bv);
 };
@@ -1287,12 +1275,10 @@ is used to preserve the value category, meaning lvalue or rvalue
 
 */
 
-void print(int &i) {};  // lvalue
-void print(int &&i) {}; // rvalue
+void print(int& i) {};  // lvalue
+void print(int&& i) {}; // rvalue
 
-template <typename V> void wrapper(V &&v) {
-  print(std::forward<V>(v));
-}
+template <typename V> void wrapper(V&& v) { print(std::forward<V>(v)); }
 
 void forward() {
   int n = 9;
@@ -1456,7 +1442,7 @@ void decay() {
   };
 
   showType<int>();
-  showType<const int *>();
+  showType<const int*>();
   showType<int[5]>();
 }
 
@@ -1502,9 +1488,7 @@ allows to format a string from a format string lol
 
 */
 
-void format() {
-  std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6);
-}
+void format() { std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6); }
 
 /*
 Threads
@@ -1547,22 +1531,14 @@ is used in threads <- // TODO: need to see more examples
                       // cause i didnt understand
 */
 
-void tfunc() {
-  std::cout << "Finishing something on this thread";
-}
+void tfunc() { std::cout << "Finishing something on this thread"; }
 struct Send {
   uint x;
   Send(uint x) : x(x) {};
 
-  void operator()() const {
-    std::cout << x;
-  }
-  void sum(int x, int y) {
-    std::cout << x + y;
-  }
-  static void set(uint y) {
-    std::cout << y;
-  }
+  void operator()() const { std::cout << x; }
+  void sum(int x, int y) { std::cout << x + y; }
+  static void set(uint y) { std::cout << y; }
 };
 
 struct Box {
@@ -1572,7 +1548,7 @@ struct Box {
   explicit Box(int n) : n(n) {};
 };
 
-void transfer(Box &from, Box &to, int num) {
+void transfer(Box& from, Box& to, int num) {
   std::unique_lock lock1{from.m, std::defer_lock};
   std::unique_lock lock2{to.m, std::defer_lock};
 
@@ -1704,12 +1680,8 @@ Handles comunication between threads, with the help of future as well
 
 */
 
-int returntwo() {
-  return 2;
-};
-void foo(std::promise<int> p) {
-  p.set_value(25);
-}
+int returntwo() { return 2; };
+void foo(std::promise<int> p) { p.set_value(25); }
 
 void future() {
   std::future<int> f = std::async(std::launch::async, returntwo);
@@ -1726,7 +1698,7 @@ void future() {
 
 void async() {}
 
-void retreiveValue(std::promise<uint> &p) {
+void retreiveValue(std::promise<uint>& p) {
   try {
     int ans = 1371283718;
     p.set_value(ans);
@@ -1744,7 +1716,7 @@ void promise() {
   try {
     int res = f.get();
     std::cout << res;
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::cout << e.what();
   }
 
@@ -1818,28 +1790,24 @@ template <typename T> struct MAllocator {
 
   // It uses a new template os that when rebinding between types
   // it can do ti otherwise it would only work when T == U
-  template <typename U> MAllocator(const MAllocator<U> &) noexcept {};
+  template <typename U> MAllocator(const MAllocator<U>&) noexcept {};
 
   // TODO: add explanation for this
   // ::operator
-  [[nodiscard]] T *allocate(std::size_t t) {
-    return static_cast<T *>(::operator new(n * sizeof(T)));
+  [[nodiscard]] T* allocate(std::size_t t) {
+    return static_cast<T*>(::operator new(n * sizeof(T)));
   }
 
-  void deallocate(T *p) noexcept {
-    ::operator delete(p);
-  }
+  void deallocate(T* p) noexcept { ::operator delete(p); }
 
   // U is the place in memory to construct, and the args are passed to
   // the constructor using perfect forwarding, meaning lvalue/rvalue ness is
   // preserved
-  template <class U, class... Args> void construct(U *p, Args &&...args) {
-    ::new ((void *)p) U(std::forward<Args>(args)...);
+  template <class U, class... Args> void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
   };
 
-  template <class U> void destroy(U *p) {
-    p->~U();
-  }
+  template <class U> void destroy(U* p) { p->~U(); }
 
   template <class U> struct rebind {
     using other = MAllocator<U>;
@@ -1863,18 +1831,16 @@ excecution policies in std
 */
 
 struct NoLogPolicy {
-  void log(const std::string &s) const {};
+  void log(const std::string& s) const {};
 };
 
 struct StdOutLogPolicy {
-  void log(const std::string &s) const {
-    std::cout << s << std::endl;
-  }
+  void log(const std::string& s) const { std::cout << s << std::endl; }
 };
 
 template <typename T, typename LogPolicy = NoLogPolicy> class MArray {
   LogPolicy logger;
-  T *data;
+  T* data;
   size_t size_;
 
 public:
