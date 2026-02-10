@@ -1,38 +1,72 @@
-#ifndef SINGLELINKEDLIST_H
-#define SINGLELINKEDLIST_H
+#ifndef FORWARD_LIST_H
+#define FORWARD_LIST_H
 
 #include <concepts>
 #include <forward_list>
 #include <initializer_list>
 #include <iostream>
 #include <memory>
+#include <utility>
 
 namespace dss {
+template <typename T> struct forward_list_node {
+  T m_data;
+  forward_list_node* m_next;
 
-template <typename T> struct SingleLinkedList_Node {
-  T data;
-  SingleLinkedList_Node* next;
+  forward_list_node() {
+    m_data = T();
+    m_next = nullptr;
+  };
 
-  SingleLinkedList_Node();
-  SingleLinkedList_Node(T data);
-  ~SingleLinkedList_Node();
+  forward_list_node(T data) {
+    m_data = data;
+    m_next = nullptr;
+  };
 
-  SingleLinkedList_Node(const SingleLinkedList_Node& sln);
-  SingleLinkedList_Node& operator=(const SingleLinkedList_Node& sln);
-  SingleLinkedList_Node(SingleLinkedList_Node&& sln);
-  SingleLinkedList_Node& operator=(SingleLinkedList_Node&& sln);
+  ~forward_list_node();
+
+  forward_list_node(const forward_list_node& sln) {
+    m_data = sln.m_data;
+    m_next = sln.m_next;
+  };
+
+  forward_list_node& operator=(const forward_list_node& sln) {
+    std::swap(m_data, sln.m_data);
+    std::swap(m_next, sln.m_next);
+    return *this;
+  };
+
+  forward_list_node(forward_list_node&& sln) {
+    m_data = sln.m_data;
+    m_next = sln.m_next;
+    sln.m_data = T();
+    sln.m_next = nullptr;
+  };
+
+  forward_list_node& operator=(forward_list_node&& sln) {
+    if (this != sln) {
+      delete m_data;
+      delete m_next;
+
+      m_data = std::move(sln.m_data);
+      m_next = std::move(sln.m_next);
+      sln.m_data = T();
+      sln.m_next = nullptr;
+    }
+
+    return *this;
+  };
 };
 
 template <typename T, class Allocator = std::allocator<T>, bool Debug = false>
-class SingleLinkedList {
+class forward_list {
 private:
   bool debug_ = Debug;
-  SingleLinkedList_Node<T> root_;
-  SingleLinkedList_Node<T> tail_;
+  forward_list_node<T> root_;
+  forward_list_node<T> tail_;
 
 public:
-  // Custom iterator -- maybe implement outside
-  struct iterator {
+  class iterator {
     T m_ptr;
 
     using iterator_category = std::forward_iterator_tag;
@@ -64,7 +98,6 @@ public:
       return a.m_ptr != b.m_ptr;
     }
   };
-
   using value_type = T;
   using allocator_type = Allocator;
   using pointer = typename std::allocator_traits<Allocator>::pointer;
@@ -78,24 +111,24 @@ public:
   using size_type = size_t;
 
   // ctors, dtor
-  SingleLinkedList() : SingleLinkedList(Allocator()) {};
-  explicit SingleLinkedList(const Allocator&);
-  explicit SingleLinkedList(size_type n, const Allocator& = Allocator());
-  SingleLinkedList(std::initializer_list<T>);
-  SingleLinkedList(size_type n, const T& value, const Allocator& = Allocator());
-  ~SingleLinkedList();
+  forward_list() : forward_list(Allocator()) {};
+  explicit forward_list(const Allocator&);
+  explicit forward_list(size_type n, const Allocator& = Allocator());
+  forward_list(std::initializer_list<T>);
+  forward_list(size_type n, const T& value, const Allocator& = Allocator());
+  ~forward_list();
 
   // to create SingleLinkedList from other stl containers
   template <typename InputIt>
-  SingleLinkedList(InputIt begin, InputIt end, const Allocator& = Allocator());
+  forward_list(InputIt begin, InputIt end, const Allocator& = Allocator());
 
   // copy
-  SingleLinkedList(const SingleLinkedList& other);
-  SingleLinkedList& operator=(const SingleLinkedList& other);
+  forward_list(const forward_list& other);
+  forward_list& operator=(const forward_list& other);
 
   // move
-  SingleLinkedList(SingleLinkedList&& other);
-  SingleLinkedList& operator=(SingleLinkedList&& other);
+  forward_list(forward_list&& other);
+  forward_list& operator=(forward_list&& other);
 
   // iterators
   iterator begin() noexcept { return iterator(&root_); };
@@ -139,7 +172,7 @@ public:
 
   // noexpect compares if the allocator passed to the SingleLinkedList to swap
   // are equal
-  void swap(SingleLinkedList& sl) noexcept(
+  void swap(forward_list& sl) noexcept(
       std::allocator_traits<Allocator>::is_always_equal::value);
 
   void resize(size_type s);
@@ -148,15 +181,15 @@ public:
                                     // smaller than s, elements with value_type
                                     // are added untill the new size is matched
 
-  void splice_after(const_iterator position, SingleLinkedList& sl);
-  void splice_after(const_iterator position, SingleLinkedList&& sl);
-  void splice_after(const_iterator position, SingleLinkedList& sl,
+  void splice_after(const_iterator position, forward_list& sl);
+  void splice_after(const_iterator position, forward_list&& sl);
+  void splice_after(const_iterator position, forward_list& sl,
                     const_iterator i);
-  void splice_after(const_iterator position, SingleLinkedList&& sl,
+  void splice_after(const_iterator position, forward_list&& sl,
                     const_iterator i);
-  void splice_after(const_iterator position, SingleLinkedList& sl,
+  void splice_after(const_iterator position, forward_list& sl,
                     const_iterator begin, const_iterator end);
-  void splice_after(const_iterator position, SingleLinkedList&& sl,
+  void splice_after(const_iterator position, forward_list&& sl,
                     const_iterator begin, const_iterator end);
 
   // Cool improvement C++20 enforce that the param passed to remove_if is
@@ -172,10 +205,10 @@ public:
   template <typename BinaryPredicate>
   size_type unique(BinaryPredicate binary_pred);
 
-  void merge(SingleLinkedList& sl);
-  void merge(SingleLinkedList&& sl);
-  template <typename Compare> void merge(SingleLinkedList& sl, Compare comp);
-  template <typename Compare> void merge(SingleLinkedList&& sl, Compare comp);
+  void merge(forward_list& sl);
+  void merge(forward_list&& sl);
+  template <typename Compare> void merge(forward_list& sl, Compare comp);
+  template <typename Compare> void merge(forward_list&& sl, Compare comp);
 
   void sort();
   template <typename Compare> void sort(Compare comp);

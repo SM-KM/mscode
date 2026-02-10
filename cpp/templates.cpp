@@ -14,7 +14,6 @@ after C++17:
 
 // Templates using typename to infer the type
 template <typename T> T Max(T x, T y) { return (x > y) ? x : y; };
-
 // Class template
 template <typename T> class C {
 public:
@@ -60,6 +59,7 @@ the body of the function and if it can be proccess at compile time
 it does it else it just works as a normal function
 */
 constexpr int factorial(int n) { return (n <= 1) ? 1 : (n * factorial(n - 1)); }
+consteval int sqr(int n) { return n * n; }
 
 // it difers the return type based on the typename values
 template <typename T1, typename T2> auto add(T1 x, T2 y) -> decltype(x + y) {
