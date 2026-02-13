@@ -7,14 +7,47 @@
 #include <iterator>
 #include <memory>
 
-namespace dss {
-template <typename T, typename Allocator = std::allocator<T>> class vector {
-  class iterator {};
+namespace dss
+{
+template <typename T, typename Allocator = std::allocator<T>>
+class vector
+{
+  // considerations i want reference
+  // access to iterators
+  class iterator
+  {
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = T;
+    using reference = T&;
+    using pointer = T *;
+    using difference_type = std::ptrdiff_t;
+
+  private:
+    T *ptr;
+
+  public:
+    constexpr iterator() = default;
+    constexpr explicit iterator(vector& vec) {}
+
+    constexpr iterator& operator++()
+    {
+      ++ptr;
+      return *this;
+    }
+
+    constexpr iterator operator++(int)
+    {
+      auto prev = *this;
+      ++(*this);
+      return prev;
+    }
+  };
 
 public:
   using value_type = T;
 
-  template <typename U> using type_identity_t = U;
+  template <typename U>
+  using type_identity_t = U;
   using pointer = typename std::allocator_traits<Allocator>::pointer;
   using const_pointer =
       typename std::allocator_traits<Allocator>::const_pointer;
