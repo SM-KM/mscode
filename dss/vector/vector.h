@@ -7,6 +7,7 @@
 #include <iterator>
 #include <memory>
 #include <ranges>
+#include <vector>
 
 namespace dss
 {
@@ -258,6 +259,26 @@ public:
   void resize(size_type count, const value_type& value) {}
 
   constexpr void swap(vector& other) noexcept {}
+
+  template <typename I, typename Alloc>
+  constexpr void swap(std::vector<T, Alloc>& lhs,
+                      std::vector<T, Alloc>& rhs) noexcept
+  {
+  }
+
+  template <typename I, class Alloc, class U>
+  constexpr typename std::vector<T, Alloc>::size_type
+  erase(std::vector<T, Alloc>& c, const U& value) {};
+
+  template <class I, class Alloc, class Pred>
+  constexpr typename std::vector<T, Alloc>::size_type
+  erase_if(std::vector<T, Alloc>& c, Pred pred) {};
+
+  // Fix the deduction guide
+  // template <std::ranges::input_range R,
+  //           class Alloc = std::allocator<std::ranges::range_value_t<R>>>
+  // vector(std::from_range_t, R&&, Alloc = Alloc())
+  //     -> vector<std::ranges::range_value_t<R>, Alloc>;
 
   // iterators
   constexpr Allocator getAllocator() const noexcept;
