@@ -135,7 +135,6 @@ public:
       : m_allocator{alloc}, m_size{n}
   {
   }
-
   constexpr vector(size_type n, const T& value,
                    const Allocator& alloc = Allocator())
       : m_allocator{alloc}, m_size{n} {};
@@ -163,8 +162,6 @@ public:
     m_data = m_allocator.allocate(m_size);
     std::uninitialized_copy(init.begin(), init.end(), m_data);
   };
-
-  ~vector();
 
   constexpr vector& operator=(const vector& x);
 
@@ -329,6 +326,33 @@ public:
       throw;
     }
   }
+
+  // take in consideration that if for example the last one fails, it would
+  // destroy everything before the element that fails
+  template <typename It>
+    requires std::forward_iterator<It>
+  void copy_rng_aux(It first, It last)
+  {
+    auto i{begin()};
+    auto j{first};
+    try
+    {
+      for (; j != last; ++i, ++j)
+        std::construct_at(i.m_ptr, *j);
+    }
+    catch (const std::exception&)
+    {
+      // in the case that it fails the copy does not happen but the user does
+      // not know about it
+      cleanup_on_fail_aux(i);
+    }
+  }
+
+  // use instead std::allocator<T>, maybe do it to a variable for debugging and
+  // logging support with policies
+  pointer allocate_aux(size_type new_capacity) { return new T[new_capacity]; }
+
+  ~vector() { clear(); };
 
 private:
   pointer m_data{nullptr};
