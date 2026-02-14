@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <memory>
+#include <ranges>
 
 namespace dss
 {
@@ -198,6 +199,42 @@ public:
   constexpr T *data() noexcept {};
   constexpr T *data() const noexcept {};
 
+  constexpr size_type max_size() const noexcept
+  {
+    return std::distance(begin(), end());
+  }
+
+  [[nodiscard]] constexpr bool is_empty() const noexcept
+  {
+    return m_size == 0;
+  };
+  constexpr size_type size() const noexcept { return m_size; };
+  constexpr void reserve(size_type new_cap) {}
+
+  constexpr size_type capacity() const noexcept { return m_capacity; }
+  constexpr void shrink_to_fit() {}
+  constexpr void clear() noexcept {}
+
+  constexpr iterator insert(const_iterator pos, const T& value) {}
+  constexpr iterator insert(const_iterator pos, T&& value) {}
+  constexpr iterator insert(const_iterator pos, size_type count, const T& value)
+  {
+  }
+
+  template <typename InputIt>
+  constexpr iterator insert(const_iterator pos, InputIt first, InputIt last)
+  {
+  }
+
+  constexpr iterator insert(const_iterator pos, std::initializer_list<T> init)
+  {
+  }
+
+  template <std::ranges::input_range R>
+  constexpr iterator insert_range(const_iterator pos, R&& rg)
+  {
+  }
+
   // iterators
   constexpr Allocator getAllocator() const noexcept;
   constexpr iterator begin() noexcept;
@@ -213,12 +250,6 @@ public:
   constexpr const_iterator cend() const noexcept;
   constexpr const_reverse_iterator crbegin() const noexcept;
   constexpr const_reverse_iterator crend() const noexcept;
-
-  [[nodiscard]] constexpr bool is_empty() const noexcept
-  {
-    return m_size == 0;
-  };
-  constexpr size_type size() const noexcept { return m_size; };
 
 private:
   T *m_data;
