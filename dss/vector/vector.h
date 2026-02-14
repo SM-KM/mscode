@@ -119,26 +119,50 @@ public:
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+  using allocator_type = Allocator;
+
+  constexpr allocator_type get_allocator() const noexcept
+  {
+    return m_allocator;
+  };
+
   // the allocator constructor has to be no expect as well
   constexpr vector() noexcept(noexcept(Allocator())) : vector(Allocator()) {};
-  constexpr explicit vector(const Allocator&) noexcept;
-  constexpr explicit vector(size_type n, const Allocator& = Allocator());
+  constexpr explicit vector(const Allocator& alloc) noexcept
+      : m_allocator{alloc} {};
+  constexpr explicit vector(size_type n, const Allocator& alloc = Allocator())
+      : m_allocator{alloc}, m_size{n}
+  {
+  }
 
-  constexpr vector(size_type n, const T& value, const Allocator& = Allocator());
+  constexpr vector(size_type n, const T& value,
+                   const Allocator& alloc = Allocator())
+      : m_allocator{alloc}, m_size{n} {};
 
   // from iterators
   template <typename InputIt>
-  constexpr vector(InputIt first, InputIt last, const Allocator& = Allocator());
+  constexpr vector(InputIt first, InputIt last,
+                   const Allocator& alloc = Allocator())
+      : m_allocator{alloc} {};
 
   // template<container-compatible-range<T> R>
   // constexpr void assign_range(R&& rg);
+  constexpr vector(const vector& x) {};
+  constexpr vector(vector&& vec) noexcept {};
 
-  constexpr vector(const vector& x);
-  constexpr vector(vector&&) noexcept;
   // type_identity_t is used so that the type of the allcoator is preserved
   constexpr vector(const vector&, const type_identity_t<Allocator>&);
   constexpr vector(vector&&, const type_identity_t<Allocator>&);
-  constexpr vector(std::initializer_list<T>, const Allocator& = Allocator());
+  constexpr vector(std::initializer_list<T> init,
+                   const Allocator& alloc = Allocator())
+      : m_allocator{alloc}
+  {
+    m_size = init.size();
+    m_capacity = m_size;
+    m_data = m_allocator.allocate(m_size);
+    std::uninitialized_copy(init.begin(), init.end(), m_data);
+  };
+
   ~vector();
 
   constexpr vector& operator=(const vector& x);
@@ -172,8 +196,19 @@ public:
   constexpr const_reverse_iterator crbegin() const noexcept;
   constexpr const_reverse_iterator crend() const noexcept;
 
-  [[nodiscard]] constexpr bool isEmpty() const noexcept;
-  constexpr size_type size() const noexcept;
+  [[nodiscard]] constexpr bool isEmpty() const noexcept { return m_size == 0; };
+  constexpr size_type size() const noexcept { return m_size; };
+
+  constexpr void push_back(T&& value) {};
+  constexpr void push_back(const T& value) {};
+
+private:
+  T *m_data;
+  size_type m_size = 0;
+  size_type m_capacity = 0;
+
+  // Internal allocator defined Allocator
+  Allocator m_allocator;
 };
 
 } // namespace dss
