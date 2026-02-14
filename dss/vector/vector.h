@@ -235,6 +235,30 @@ public:
   {
   }
 
+  template <std::ranges::input_range R>
+  constexpr void append_range(R&& rg)
+  {
+  }
+
+  template <typename... Args>
+  constexpr iterator emplace(const_iterator pos, Args&&...args)
+  {
+  }
+
+  constexpr iterator erase(const_iterator pos) {}
+  constexpr iterator erase(const_iterator first, const_iterator last) {}
+
+  template <typename... Args>
+  constexpr reference emplace_back(Args&&...args)
+  {
+  }
+
+  constexpr void pop_back() {};
+  void resize(size_type count) {};
+  void resize(size_type count, const value_type& value) {}
+
+  constexpr void swap(vector& other) noexcept {}
+
   // iterators
   constexpr Allocator getAllocator() const noexcept;
   constexpr iterator begin() noexcept;
