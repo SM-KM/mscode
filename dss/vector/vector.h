@@ -3,6 +3,7 @@
 
 #include <alloca.h>
 #include <cstddef>
+#include <exception>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
@@ -19,15 +20,13 @@ class vector
   class iterator
   {
     using iterator_category = std::contiguous_iterator_tag;
+    using difference_type = std::ptrdiff_t;
     using value_type = T;
     using reference = T&;
     using pointer = T *;
-    using difference_type = std::ptrdiff_t;
-
-  private:
-    T *ptr;
 
   public:
+    T *ptr;
     // Constructors
     constexpr iterator() = default;
     constexpr explicit iterator(vector& vec) {}
@@ -209,10 +208,19 @@ public:
   {
     return m_size == 0;
   };
-  constexpr size_type size() const noexcept { return m_size; };
-  constexpr void reserve(size_type new_cap) {}
+  [[nodiscard]] constexpr size_type size() const noexcept { return m_size; };
+  [[nodiscard]] constexpr size_type capacity() const noexcept
+  {
+    return m_capacity;
+  }
 
-  constexpr size_type capacity() const noexcept { return m_capacity; }
+  [[nodiscard]] constexpr bool full() const { return size() == capacity(); }
+  void grow()
+  {
+    reserve(capacity() > 0 ? capacity() * m_grow_multiplier : m_new_capacity);
+  };
+
+  constexpr void reserve(size_type new_cap) {}
   constexpr void shrink_to_fit() {}
   constexpr void clear() noexcept {}
 
@@ -274,7 +282,7 @@ public:
   constexpr typename std::vector<T, Alloc>::size_type
   erase_if(std::vector<T, Alloc>& c, Pred pred) {};
 
-  // Fix the deduction guide
+  // Fix the deduction guide!
   // template <std::ranges::input_range R,
   //           class Alloc = std::allocator<std::ranges::range_value_t<R>>>
   // vector(std::from_range_t, R&&, Alloc = Alloc())
@@ -296,13 +304,42 @@ public:
   constexpr const_reverse_iterator crbegin() const noexcept;
   constexpr const_reverse_iterator crend() const noexcept;
 
+  // Helpers
+  void cleanup_on_fail_aux(iterator last)
+  {
+    auto p{begin()};
+    for (; p != last; ++p)
+      std::destroy_at(p.m_ptr);
+    delete (m_data);
+  }
+
+  template <typename U>
+    requires std::is_convertible_v<U, T>
+  void copy_aux(const U& init, size_type size)
+  {
+    auto i{begin()};
+    try
+    {
+      for (; i != begin() + size; ++i)
+        std::construct_at(i.m_ptr, init);
+    }
+    catch (const std::exception&)
+    {
+      cleanup_on_fail_aux(i);
+      throw;
+    }
+  }
+
 private:
-  T *m_data;
-  size_type m_size = 0;
-  size_type m_capacity = 0;
+  pointer m_data{nullptr};
+  size_type m_size{0};
+  size_type m_capacity{0};
 
   // Internal allocator defined Allocator
   Allocator m_allocator;
+
+  const int m_grow_multiplier = 2;
+  const int m_new_capacity = 16;
 };
 
 } // namespace dss
