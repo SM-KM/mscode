@@ -33,6 +33,11 @@ public:
 
   long use_count() const noexcept;
 
+  template <typename Y>
+  bool owner_before(const shared_ptr<Y>& other) const noexcept;
+  template <typename Y>
+  bool owner_before(const std::weak_ptr<Y>& other) const noexcept;
+
   ~shared_ptr();
 };
 
