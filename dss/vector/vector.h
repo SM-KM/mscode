@@ -173,12 +173,30 @@ public:
           Allocator>::propagate_on_container_move_assignment::value ||
       std::allocator_traits<Allocator>::is_always_equal::value);
 
-  constexpr vector& operator=(std::initializer_list<T>);
+  constexpr vector& operator=(std::initializer_list<T> init) {};
+
+  reference operator[](size_type pos) {}
+  const_reference operator[](size_type pos) const {}
 
   template <typename InputIt>
   constexpr void assign(InputIt first, InputIt last);
   constexpr void assign(size_type n, const T& u);
   constexpr void assign(std::initializer_list<T>);
+
+  constexpr void push_back(T&& value) {};
+  constexpr void push_back(const T& value) {};
+
+  reference at(size_type pos) {}
+  const_reference at(size_type pos) const {};
+
+  reference front() {};
+  const_reference front() const {}
+
+  reference back() {}
+  const_reference back() const {}
+
+  constexpr T *data() noexcept {};
+  constexpr T *data() const noexcept {};
 
   // iterators
   constexpr Allocator getAllocator() const noexcept;
@@ -196,11 +214,11 @@ public:
   constexpr const_reverse_iterator crbegin() const noexcept;
   constexpr const_reverse_iterator crend() const noexcept;
 
-  [[nodiscard]] constexpr bool isEmpty() const noexcept { return m_size == 0; };
+  [[nodiscard]] constexpr bool is_empty() const noexcept
+  {
+    return m_size == 0;
+  };
   constexpr size_type size() const noexcept { return m_size; };
-
-  constexpr void push_back(T&& value) {};
-  constexpr void push_back(const T& value) {};
 
 private:
   T *m_data;
