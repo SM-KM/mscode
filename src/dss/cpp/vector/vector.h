@@ -8,6 +8,7 @@
 #include <iterator>
 #include <memory>
 #include <ranges>
+#include <type_traits>
 #include <vector>
 
 namespace dss
@@ -27,9 +28,11 @@ class vector
 
   public:
     T *ptr;
+    vector vec;
+
     // Constructors
     constexpr iterator() = default;
-    constexpr explicit iterator(vector& vec) {}
+    constexpr explicit iterator(vector& vec_) : vec{vec_} {}
 
     // Operators
     constexpr T& operator*() { return *ptr; }
@@ -184,8 +187,8 @@ public:
   constexpr void push_back(T&& value) {};
   constexpr void push_back(const T& value) {};
 
-  reference at(size_type pos) {}
-  const_reference at(size_type pos) const {};
+  reference at(size_type pos) { return m_data[pos]; }
+  const_reference at(size_type pos) const { return m_data[pos]; };
 
   reference front() {};
   const_reference front() const {}
@@ -286,9 +289,13 @@ public:
   //     -> vector<std::ranges::range_value_t<R>, Alloc>;
 
   // iterators
-  constexpr Allocator getAllocator() const noexcept;
-  constexpr iterator begin() noexcept;
-  constexpr const_iterator begin() const noexcept;
+  constexpr Allocator getAllocator() const noexcept { return m_allocator; };
+  constexpr iterator begin() noexcept { return iterator(m_data); };
+  constexpr const_iterator begin() const noexcept
+  {
+    return const_iterator(m_data);
+  };
+
   constexpr iterator end() noexcept;
   constexpr const_iterator end() const noexcept;
   constexpr reverse_iterator rbegin() noexcept;
@@ -306,7 +313,7 @@ public:
   {
     auto p{begin()};
     for (; p != last; ++p)
-      std::destroy_at(p.m_ptr);
+      std::destroy_at(p.ptr);
     delete (m_data);
   }
 
@@ -318,7 +325,7 @@ public:
     try
     {
       for (; i != begin() + size; ++i)
-        std::construct_at(i.m_ptr, init);
+        std::construct_at(i.ptr, init);
     }
     catch (const std::exception&)
     {
@@ -338,7 +345,7 @@ public:
     try
     {
       for (; j != last; ++i, ++j)
-        std::construct_at(i.m_ptr, *j);
+        std::construct_at(i.ptr, *j);
     }
     catch (const std::exception&)
     {
@@ -351,7 +358,6 @@ public:
   // use instead std::allocator<T>, maybe do it to a variable for debugging and
   // logging support with policies
   pointer allocate_aux(size_type new_capacity) { return new T[new_capacity]; }
-
   ~vector() { clear(); };
 
 private:
