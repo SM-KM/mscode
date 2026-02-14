@@ -16,7 +16,7 @@ class vector
   // access to iterators
   class iterator
   {
-    using iterator_category = std::random_access_iterator_tag;
+    using iterator_category = std::contiguous_iterator_tag;
     using value_type = T;
     using reference = T&;
     using pointer = T *;
@@ -26,8 +26,16 @@ class vector
     T *ptr;
 
   public:
+    // Constructors
     constexpr iterator() = default;
     constexpr explicit iterator(vector& vec) {}
+
+    // Operators
+    constexpr T& operator*() { return *ptr; }
+    constexpr bool operator==(const iterator& other) const
+    {
+      return other.ptr == ptr;
+    }
 
     constexpr iterator& operator++()
     {
@@ -41,6 +49,56 @@ class vector
       ++(*this);
       return prev;
     }
+
+    constexpr iterator& operator--()
+    {
+      --ptr;
+      return *this;
+    }
+
+    constexpr iterator operator--(int)
+    {
+      auto prev = *this;
+      ++(*this);
+      return prev;
+    }
+
+    constexpr iterator& operator+=(difference_type n)
+    {
+      ptr += n;
+      return *this;
+    }
+
+    constexpr iterator operator+(difference_type n) const
+    {
+      auto next = *this;
+      next += n;
+      return next;
+    }
+
+    constexpr iterator& operator-=(difference_type n)
+    {
+      ptr -= n;
+      return *this;
+    }
+
+    constexpr iterator operator-(difference_type n) const
+    {
+      auto next = *this;
+      next -= n;
+      return next;
+    }
+
+    difference_type operator-(const iterator& other) const
+    {
+      return ptr - other.ptr;
+    }
+    constexpr T& operator[](difference_type n) { return ptr[n]; }
+    constexpr auto operator<=>(const iterator& other)
+    {
+      return other.ptr <=> ptr;
+    }
+    constexpr T *operator->() const { return ptr->data(); }
   };
 
 public:
