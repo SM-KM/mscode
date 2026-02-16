@@ -30,6 +30,8 @@ class any
   // Most operations on std::any decays the valuetype
   template <typename ValueType, typename... Args>
   std::decay_t<ValueType>& emplace(Args&&...args);
+  template <typename ValueType, typename U, typename... Args>
+  std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&...args);
 
   ~any();
 };
