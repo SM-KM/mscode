@@ -6,6 +6,9 @@
 #include <typeinfo>
 #include <utility>
 
+namespace dss
+{
+
 // Any is not a templated class is an implementation from C++17,
 // that allows to hold any time
 class any
@@ -42,7 +45,28 @@ class any
   void swap(any& other) noexcept;
   bool has_value() const noexcept;
 
+  // std::type_info describes the information of the type stored if any
   const std::type_info& type() const noexcept;
 };
+
+// any_cast
+template <typename T>
+T any_cast(const any& operand);
+
+template <typename T>
+T any_cast(any& operand);
+
+template <typename T>
+T any_cast(any&& operand);
+
+template <typename T>
+const T *any_cast(const any *operand) noexcept;
+
+template <typename T>
+T *any_cast(any *operand) noexcept;
+
+// make_any
+
+} // namespace dss
 
 #endif // ANY_H
