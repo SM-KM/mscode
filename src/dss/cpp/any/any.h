@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
 
 // Any is not a templated class is an implementation from C++17,
@@ -39,8 +40,9 @@ class any
   void reset() noexcept;
 
   void swap(any& other) noexcept;
-
   bool has_value() const noexcept;
+
+  const std::type_info& type() const noexcept;
 };
 
 #endif // ANY_H
