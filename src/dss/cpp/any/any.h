@@ -1,6 +1,7 @@
 #ifndef ANY_H
 #define ANY_H
 
+#include <any>
 #include <initializer_list>
 #include <type_traits>
 #include <typeinfo>
@@ -66,6 +67,11 @@ template <typename T>
 T *any_cast(any *operand) noexcept;
 
 // make_any
+template <typename T, typename... Args>
+std::any make_any(Args... args);
+
+template <typename T, typename U, typename... Args>
+std::any make_any(std::initializer_list<U> il, Args... args);
 
 } // namespace dss
 
