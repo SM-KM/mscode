@@ -1,16 +1,18 @@
 #ifndef ANY_H
 #define ANY_H
 
-// Any is not a templated class is an implementation from C++17,
-// that allows to hold any time
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
+
+// Any is not a templated class is an implementation from C++17,
+// that allows to hold any time
 class any
 {
   constexpr any() noexcept;
   any(const any& other);
   any(const any&& other) noexcept;
+  ~any();
 
   template <typename ValueType>
   any(ValueType&& value);
@@ -33,7 +35,8 @@ class any
   template <typename ValueType, typename U, typename... Args>
   std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&...args);
 
-  ~any();
+  // Destroy the contained object
+  void reset() noexcept;
 };
 
 #endif // ANY_H
