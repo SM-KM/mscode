@@ -50,6 +50,13 @@ class any
   const std::type_info& type() const noexcept;
 };
 
+// bad_any_cast
+class bad_any_cast : std::bad_cast
+{
+  bad_any_cast() noexcept;
+  bad_any_cast(const bad_any_cast& other) noexcept;
+};
+
 // any_cast
 template <typename T>
 T any_cast(const any& operand);
