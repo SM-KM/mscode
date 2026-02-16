@@ -37,6 +37,10 @@ class any
 
   // Destroy the contained object
   void reset() noexcept;
+
+  void swap(any& other) noexcept;
+
+  bool has_value() const noexcept;
 };
 
 #endif // ANY_H
