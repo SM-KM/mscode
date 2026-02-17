@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <mutex>
+
 namespace dss
 {
 
@@ -10,7 +11,7 @@ class mutex
 {
 public:
   constexpr mutex() noexcept;
-  mutex(const mutex&) = delete; // mutexes are not copyable
+  mutex(const mutex&) = delete;
   ~mutex();
 
   void lock();
@@ -20,6 +21,23 @@ public:
 
 class timed_mutex
 {
+public:
+  timed_mutex();
+  timed_mutex(const timed_mutex&) = delete;
+  ~timed_mutex();
+
+  void lock();
+  [[nodiscard]] bool try_lock();
+
+  template <typename Rep, typename Period>
+  [[nodiscard]] bool
+  try_lock_for(const std::chrono::duration<Rep, Period>& timeout_duration);
+
+  template <typename Clock, typename Duration>
+  [[nodiscard]] bool
+  try_lock_for(const std::chrono::time_point<Clock, Duration>& timeout_time);
+
+  void unlock();
 };
 
 template <typename Mutex>
