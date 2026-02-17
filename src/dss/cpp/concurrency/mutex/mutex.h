@@ -63,6 +63,15 @@ public:
   template <typename Clock, typename Duration>
   [[nodiscard]] bool
   try_lock_until(std::chrono::duration<Clock, Duration>& timeout_duration);
+
+  void unlock();
+
+  void swap(unique_lock& other) noexcept;
+  mutex_type *release() noexcept;
+  mutex_type *mutex() const noexcept;
+
+  [[nodiscard]] bool owns_lock() const noexcept;
+  explicit operator bool() const noexcept;
 };
 
 class scoped_lock
