@@ -1,8 +1,8 @@
-#include "../mutex/mutex.h";
-#include <chrono>
-
 #ifndef CONDITION_VARIABLE_H
 #define CONDITION_VARIABLE_H
+
+#include "../mutex/mutex.h"
+#include <chrono>
 
 namespace dss
 {
