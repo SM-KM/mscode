@@ -74,8 +74,13 @@ public:
   explicit operator bool() const noexcept;
 };
 
+template <typename... MutexTypes>
 class scoped_lock
 {
+  explicit scoped_lock(MutexTypes&...m);
+  scoped_lock(std::adopt_lock_t t, MutexTypes&...m);
+  scoped_lock(const scoped_lock&) = delete;
+  ~scoped_lock();
 };
 
 template <typename... Lockables>
