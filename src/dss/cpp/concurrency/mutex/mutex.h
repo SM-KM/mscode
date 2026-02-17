@@ -22,8 +22,15 @@ class timed_mutex
 {
 };
 
+template <typename Mutex>
 class lock_guard
 {
+public:
+  using mutex_type = Mutex;
+
+  explicit lock_guard(mutex_type& m);
+  lock_guard(mutex_type& m, std::adopt_lock_t t);
+  lock_guard(const lock_guard&) = delete;
 };
 
 template <typename Mutex>
