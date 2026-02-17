@@ -69,6 +69,13 @@ public:
 };
 
 // make optional
+template <class T>
+constexpr dss::optional<std::decay_t<T>> make_optional(T&& value);
+template <class T, class... Args>
+constexpr dss::optional<T> make_optional(Args&&...args);
+template <class T, class U, class... Args>
+constexpr dss::optional<T> make_optional(std::initializer_list<U> il,
+                                         Args&&...args);
 
 } // namespace dss
 
