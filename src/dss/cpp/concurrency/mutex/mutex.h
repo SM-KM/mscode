@@ -6,6 +6,11 @@ namespace dss
 
 class mutex
 {
+  constexpr mutex() noexcept;
+  mutex(const mutex&) = delete; // mutexes are not copyable
+  ~mutex();
+
+  void lock();
 };
 
 class timed_mutex
