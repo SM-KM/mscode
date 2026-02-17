@@ -50,6 +50,8 @@ public:
   ~unique_lock();
   unique_lock& operator=(unique_lock&& other);
 
+  // TODO: chrono support with concepts
+
   // Locking strategies
   void Lock();
   [[nodiscard]] bool try_lock();
@@ -57,6 +59,10 @@ public:
   template <typename Rep, typename Period>
   [[nodiscard]] bool
   try_lock_for(std::chrono::duration<Rep, Period>& timeout_duration);
+
+  template <typename Clock, typename Duration>
+  [[nodiscard]] bool
+  try_lock_until(std::chrono::duration<Clock, Duration>& timeout_duration);
 };
 
 class scoped_lock
