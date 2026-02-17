@@ -78,9 +78,8 @@ class scoped_lock
 {
 };
 
-class lock
-{
-};
+template <typename... Lockables>
+void lock(Lockables&...lockables) {};
 
 } // namespace dss
 
