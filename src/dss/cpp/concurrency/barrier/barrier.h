@@ -25,6 +25,7 @@ public:
   private:
     friend class barrier;
   };
+
   constexpr explicit barrier(std::ptrdiff_t expected,
                              CompletionFunction f = CompletionFunction());
   barrier(const barrier&) = delete;
