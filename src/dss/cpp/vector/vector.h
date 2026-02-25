@@ -337,7 +337,7 @@ public:
   // take in consideration that if for example the last one fails, it would
   // destroy everything before the element that fails
   template <typename It>
-    requires std::forward_iterator<It>
+    requires std::bidirectional_iterator<It>
   void copy_rng_aux(It first, It last)
   {
     auto i{begin()};
