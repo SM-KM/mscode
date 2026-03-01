@@ -2,6 +2,7 @@
 #define ORDERBOOK_H
 
 #include <algorithm>
+#include <cstdint>
 #include <format>
 #include <functional>
 #include <iterator>

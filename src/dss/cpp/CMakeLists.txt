@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 project(dss)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SOURCES ./orderbook/orderbook.h)
-set(ORDERBOOK_ENTRY ./orderbook/main.cpp)
-add_executable(orderbook ${SOURCES} ${ORDERBOOK_ENTRY})
+add_executable(orderbook ./orderbook/main.cpp)
+target_include_directories(orderbook PRIVATE orderbook)
 
 option(BUILD_TESTS "Build unit test" OFF)
 if(BUILD_TESTS) 
