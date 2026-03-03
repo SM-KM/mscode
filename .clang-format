@@ -1,8 +1,8 @@
-# BasedOnStyle: Google
+BasedOnStyle: Google
 # IndentWidth: 4
 AlwaysBreakTemplateDeclarations: Yes
 SpacesBeforeTrailingComments: 1
-BreakBeforeBraces: Allman
+BreakBeforeBraces: llvm
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Always
 # AllowShortSpecializationsOnASingleLine: true
