@@ -241,19 +241,7 @@ class vector {
   };
 
   constexpr vector& operator=(std::initializer_list<T> init) {
-    if (init.size() == 0) return;
-    m_capacity = init.size();
-    m_data = m_allocator.allocate(m_capacity);
-
-    try {
-      std::uninitialized_copy(init.begin(), init.end(), m_data);
-      m_size = m_capacity;
-    } catch (...) {
-      m_allocator.deallocate(m_data, m_capacity);
-      throw;
-    }
-
-    return *this;
+    return vector(init.begin(), init.end());
   };
 
   reference operator[](size_type pos) { return m_data[pos]; }
@@ -279,7 +267,7 @@ class vector {
       try {
         for (; i < m_size; ++i)
           std::construct_at(p + i, std::move_if_noexcept(m_data[i]));
-        std::construct_at(p + m_size, std::move_if_noexcept(std::move(value)));
+        std::construct_at(p + m_size, std::move_if_noexcept(value));
       } catch (...) {
         // if while moving them it fails destroy everything and throw
         std::destroy(p, p + i);
