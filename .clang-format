@@ -2,7 +2,7 @@ BasedOnStyle: Google
 # IndentWidth: 4
 AlwaysBreakTemplateDeclarations: Yes
 SpacesBeforeTrailingComments: 1
-BreakBeforeBraces: llvm
+# BreakBeforeBraces: llvm
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Always
 # AllowShortSpecializationsOnASingleLine: true
