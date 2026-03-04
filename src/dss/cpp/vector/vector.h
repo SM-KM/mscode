@@ -220,11 +220,45 @@ class vector {
     reserve(capacity() > 0 ? capacity() * m_grow_multiplier : m_new_capacity);
   };
 
-  constexpr void reserve(size_type new_cap) {}
+  constexpr void reserve(size_type new_cap) {
+    // check with allocator_traits if the size passed
+    // is within max, maybe return a conditio to check if the
+    // reserve was valid
+    if (std::allocator_traits<allocator_type>::max_size <= new_cap)
+      throw std::bad_alloc();
+
+    // if the new capacity is <= to the current capacity do nothing
+    if (new_cap <= m_capacity) return;
+    if (new_cap > m_capacity) {
+      T* new_data = m_allocator.allocate(new_cap);
+      if (m_size == 0) {
+        m_data = new_data;
+        m_capacity = new_cap;
+        return;
+      }
+
+      // is correct capacity to reserve but there are
+      // elements on the vector
+      size_t i = 0;
+      try {
+        for (; i < m_size; i++) {
+          std::construct_at(new_data + i, std::move_if_noexcept(m_data[i]));
+          std::destroy_at(m_data + i);
+        }
+      } catch (const std::exception& e) {
+        for (size_t j = 0; j < i; ++j) std::destroy_at(new_data + j);
+        m_allocator.deallocate(new_data, m_size);
+        throw e;
+      }
+      m_data = new_data;
+      m_capacity = new_cap;
+    }
+  }
   constexpr void shrink_to_fit() {
-    // allocate size, construct elements on this new size,
-    // and destroy eleemnts in current size and deallocate the memory
+    // if there is something to shrink allocate size, construct elements on this
+    // new size, and destroy eleemnts in current size and deallocate the memory
     // and finally reassign the data_ and the capacity_
+    if (m_capacity == m_size) return;
     T* new_data = m_allocator.allocate(m_size);
     size_t i = 0;
     try {
