@@ -27,11 +27,10 @@ class vector {
 
    public:
     pointer ptr;
-    vector vec;
 
     // Constructors
     constexpr Iterator() = default;
-    constexpr explicit Iterator(pointer vec_) : vec{vec_} {}
+    constexpr explicit Iterator(pointer p) : ptr{p} {}
 
     // Operators
     constexpr T& operator*() { return *ptr; }
@@ -123,6 +122,7 @@ class vector {
       : m_allocator{alloc} {
     m_data = m_allocator.allocate(m_size);
   };
+
   constexpr explicit vector(size_type n, const Allocator& alloc = Allocator())
       : m_allocator{alloc}, m_size{n} {}
   constexpr vector(size_type n, const T& value,
@@ -142,23 +142,27 @@ class vector {
 
   // template<container-compatible-range<T> R>
   // constexpr void assign_range(R&& rg);
-  constexpr vector(const vector<T>& x) {
-    if (x == this) return;
-    for (auto [i, el] : x) {
-      m_data[i] = el;
-    }
-  };
+  constexpr vector(const vector<T>& x) {};
   constexpr vector(vector&& vec) noexcept {};
   // type_identity_t is used so that the type of the allcoator is preserved
   constexpr vector(const vector&, const type_identity_t<Allocator>&);
   constexpr vector(vector&&, const type_identity_t<Allocator>&);
+
   constexpr vector(std::initializer_list<T> init,
                    const Allocator& alloc = Allocator())
       : m_allocator{alloc} {
-    m_size = init.size();
-    m_capacity = m_size;
-    m_data = m_allocator.allocate(m_size);
-    std::uninitialized_copy(init.begin(), init.end(), m_data);
+    // we dont do anything if the initializer_list is empty
+    if (init.size() == 0) return;
+    m_capacity = init.size();
+    m_data = m_allocator.allocate(m_capacity);
+
+    try {
+      std::uninitialized_copy(init.begin(), init.end(), m_data);
+      m_size = m_capacity;
+    } catch (...) {
+      m_allocator.deallocate(m_data, m_capacity);
+      throw;
+    }
   };
 
   constexpr vector& operator=(const vector& x);
@@ -438,7 +442,6 @@ class vector {
   // use instead std::allocator<T>, maybe do it to a variable for debugging and
   // logging support with policies
   pointer allocate_aux(size_type new_capacity) { return new T[new_capacity]; }
-
   ~vector() { clear(); };
 
  private:
