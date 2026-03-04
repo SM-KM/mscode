@@ -1,0 +1,4 @@
+/home/smkm/personal/projects/mscode/src/dss/cpp/vector/build/CMakeFiles/vector_td.dir
+/home/smkm/personal/projects/mscode/src/dss/cpp/vector/build/CMakeFiles/vector_test.dir
+/home/smkm/personal/projects/mscode/src/dss/cpp/vector/build/CMakeFiles/edit_cache.dir
+/home/smkm/personal/projects/mscode/src/dss/cpp/vector/build/CMakeFiles/rebuild_cache.dir
