@@ -1,10 +1,10 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <concepts>
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <ranges>
@@ -13,6 +13,12 @@
 #include <vector>
 
 namespace dss {
+
+template <typename T, typename R>
+concept container_compatible_range =
+    std::ranges::range<T> &&
+    std::convertible_to<std::ranges::range_value_t<R>, T>;
+
 template <typename T, typename Allocator = std::allocator<T>>
 class vector {
   // considerations i want reference
@@ -157,8 +163,12 @@ class vector {
                    const Allocator& alloc = Allocator())
       : m_allocator{alloc} {};
 
-  // template<container-compatible-range<T> R>
-  // constexpr void assign_range(R&& rg);
+  // this is compatible with ranges / views
+  template <container_compatible_range<T> R>
+  constexpr void assign_range(R&& rg) {
+    for (auto&& elem : rg) push_back(std::forward<decltype(elem)>(elem));
+  };
+
   constexpr vector(const vector<T>& x) {};
   constexpr vector(vector&& vec) noexcept {};
   // type_identity_t is used so that the type of the allcoator is preserved
@@ -200,8 +210,9 @@ class vector {
   reference operator[](size_type pos) { return m_data[pos]; }
   const_reference operator[](size_type pos) const { return m_data[pos]; }
 
-  template <typename InputIt>
+  template <std::input_iterator InputIt>
   constexpr void assign(InputIt first, InputIt last);
+
   constexpr void assign(size_type n, const T& u);
   constexpr void assign(std::initializer_list<T>);
 
