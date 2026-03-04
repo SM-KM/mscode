@@ -1,7 +1,6 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <algorithm>
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
@@ -9,7 +8,6 @@
 #include <memory>
 #include <ranges>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -124,7 +122,10 @@ class vector {
   };
 
   constexpr explicit vector(size_type n, const Allocator& alloc = Allocator())
-      : m_allocator{alloc}, m_size{n} {}
+      : m_allocator{alloc}, m_capacity{n} {
+    m_data = m_allocator.allocate(m_capacity);
+  }
+
   constexpr vector(size_type n, const T& value,
                    const Allocator& alloc = Allocator())
       : m_allocator{alloc}, m_size{n} {
@@ -359,7 +360,10 @@ class vector {
   void resize(size_type count) {};
   void resize(size_type count, const value_type& value) {}
 
-  constexpr void swap(vector& other) noexcept {}
+  constexpr void swap(vector& other) noexcept {
+    // if movable swap move them otherwise
+    // just copy them
+  }
 
   template <typename I, typename Alloc>
   constexpr void swap(std::vector<T, Alloc>& lhs,
@@ -376,7 +380,7 @@ class vector {
   // Fix the deduction guide!
   // template <std::ranges::input_range R,
   //           class Alloc = std::allocator<std::ranges::range_value_t<R>>>
-  // vector(std::from_range_t, R&&, Alloc = Alloc())
+  // auto vector(std::from_range_t, R&&, Alloc = Alloc())
   //     -> vector<std::ranges::range_value_t<R>, Alloc>;
 
   // iterators
@@ -413,45 +417,6 @@ class vector {
   constexpr const_reverse_iterator crend() const noexcept {
     return const_reverse_iterator(m_data - 1);
   };
-
-  // helpers:
-  void cleanup_on_fail_aux(iterator last) {
-    auto p{begin()};
-    for (; p != last; ++p) std::destroy_at(p.ptr);
-    delete (m_data);
-  }
-
-  template <typename U>
-    requires std::is_convertible_v<U, T>
-  void copy_aux(const U& init, size_type size) {
-    auto i{begin()};
-    try {
-      for (; i != begin() + size; ++i) std::construct_at(i.ptr, init);
-    } catch (const std::exception&) {
-      cleanup_on_fail_aux(i);
-      throw;
-    }
-  }
-
-  // take in consideration that if for example the last one fails, it would
-  // destroy everything before the element that fails
-  template <typename It>
-    requires std::bidirectional_iterator<It>
-  void copy_rng_aux(It first, It last) {
-    auto i{begin()};
-    auto j{first};
-    try {
-      for (; j != last; ++i, ++j) std::construct_at(i.ptr, *j);
-    } catch (const std::exception&) {
-      // in the case that it fails the copy does not
-      // happen but the user does not know about it
-      cleanup_on_fail_aux(i);
-    }
-  }
-
-  // use instead std::allocator<T>, maybe do it to a variable for debugging and
-  // logging support with policies
-  pointer allocate_aux(size_type new_capacity) { return new T[new_capacity]; }
   ~vector() { clear(); };
 
  private:
