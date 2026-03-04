@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/vector_td.dir/link.d CMakeFiles/vector_td.dir/vector_td.cpp.o -o vector_td
