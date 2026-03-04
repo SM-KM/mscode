@@ -1,34 +1,23 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <alloca.h>
-
 #include <cstddef>
 #include <exception>
-#include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
-#include <new>
 #include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-class A {
-  virtual void d();
-};
-class B : A {
-  virtual void d();
-};
-
 namespace dss {
 template <typename T, typename Allocator = std::allocator<T>>
 class vector {
   // considerations i want reference
   // access to iterators
-  class iterator {
+  class Iterator {
     using iterator_category = std::contiguous_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
@@ -36,68 +25,68 @@ class vector {
     using pointer = T*;
 
    public:
-    T* ptr;
+    pointer ptr;
     vector vec;
 
     // Constructors
-    constexpr iterator() = default;
-    constexpr explicit iterator(vector& vec_) : vec{vec_} {}
+    constexpr Iterator() = default;
+    constexpr explicit Iterator(pointer vec_) : vec{vec_} {}
 
     // Operators
     constexpr T& operator*() { return *ptr; }
-    constexpr bool operator==(const iterator& other) const {
+    constexpr bool operator==(const Iterator& other) const {
       return other.ptr == ptr;
     }
 
-    constexpr iterator& operator++() {
+    constexpr Iterator& operator++() {
       ++ptr;
       return *this;
     }
 
-    constexpr iterator operator++(int) {
+    constexpr Iterator operator++(int) {
       auto prev = *this;
       ++(*this);
       return prev;
     }
 
-    constexpr iterator& operator--() {
+    constexpr Iterator& operator--() {
       --ptr;
       return *this;
     }
 
-    constexpr iterator operator--(int) {
+    constexpr Iterator operator--(int) {
       auto prev = *this;
       ++(*this);
       return prev;
     }
 
-    constexpr iterator& operator+=(difference_type n) {
+    constexpr Iterator& operator+=(difference_type n) {
       ptr += n;
       return *this;
     }
 
-    constexpr iterator operator+(difference_type n) const {
+    constexpr Iterator operator+(difference_type n) const {
       auto next = *this;
       next += n;
       return next;
     }
 
-    constexpr iterator& operator-=(difference_type n) {
+    constexpr Iterator& operator-=(difference_type n) {
       ptr -= n;
       return *this;
     }
 
-    constexpr iterator operator-(difference_type n) const {
+    constexpr Iterator operator-(difference_type n) const {
       auto next = *this;
       next -= n;
       return next;
     }
 
-    difference_type operator-(const iterator& other) const {
+    difference_type operator-(const Iterator& other) const {
       return ptr - other.ptr;
     }
     constexpr T& operator[](difference_type n) { return ptr[n]; }
-    constexpr auto operator<=>(const iterator& other) {
+    constexpr auto operator<=>(const Iterator& other) {
       return other.ptr <=> ptr;
     }
     constexpr T* operator->() const { return ptr->data(); }
@@ -116,7 +105,7 @@ class vector {
   using const_reference = const value_type&;
   using size_type = size_t;
   using difference_type = ptrdiff_t;
-  using iterator = iterator;
+  using iterator = Iterator;
   using const_iterator = const iterator;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
@@ -131,7 +120,7 @@ class vector {
   constexpr vector() noexcept(noexcept(Allocator())) : vector(Allocator()) {};
   constexpr explicit vector(const Allocator& alloc) noexcept
       : m_allocator{alloc} {
-    m_allocator.allocate(m_size);
+    m_data = m_allocator.allocate(m_size);
   };
   constexpr explicit vector(size_type n, const Allocator& alloc = Allocator())
       : m_allocator{alloc}, m_size{n} {}
@@ -159,7 +148,6 @@ class vector {
     }
   };
   constexpr vector(vector&& vec) noexcept {};
-
   // type_identity_t is used so that the type of the allcoator is preserved
   constexpr vector(const vector&, const type_identity_t<Allocator>&);
   constexpr vector(vector&&, const type_identity_t<Allocator>&);
@@ -173,7 +161,6 @@ class vector {
   };
 
   constexpr vector& operator=(const vector& x);
-
   // check what this parts of allocator traits do
   constexpr vector& operator=(vector&& x) noexcept(
       std::allocator_traits<
@@ -287,8 +274,12 @@ class vector {
   // we assume that the destructor of the user defined type does not throw
   // otherwise std::terminate
   constexpr void clear() noexcept {
-    auto p{begin()};
-    for (; p != end(); ++p) std::destroy_at(p);
+    // can the destructor throw?, when trying to destroy the elements
+    for (size_type i = 0; i < m_size; ++i) std::destroy_at(m_data + i);
+
+    // after all have been completely deleted deallocate mem
+    m_allocator.deallocate(m_data, m_capacity);
+    m_size = 0;
   }
 
   constexpr iterator insert(const_iterator pos, const T& value) {}
@@ -347,9 +338,9 @@ class vector {
     return const_iterator(m_data);
   };
 
-  constexpr iterator end() noexcept { return iterator(m_data[m_size]); };
+  constexpr iterator end() noexcept { return iterator(m_data + m_size); };
   constexpr const_iterator end() const noexcept {
-    return iterator(m_data[m_size]);
+    return iterator(m_data + m_size);
   };
   constexpr reverse_iterator rbegin() noexcept {
     return reverse_iterator(m_data[m_size - 1]);
