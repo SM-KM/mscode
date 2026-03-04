@@ -208,11 +208,19 @@ class vector {
     }
   };
 
-  constexpr vector& operator=(const vector& x) {
+  constexpr vector& operator=(const vector& other) {
     // dont allow if the sizes of the vectors to
     // copy assign are not equal and when reassigning the copy
     // from the other vector it should not throw
 
+    if (this == &other) return;
+    m_allocator.deallocate(m_data, m_capacity);
+    m_data = m_allocator.allocate(other.m_capacity);
+    m_capacity = other.m_capacity;
+    m_size = other.m_size;
+
+    for (size_type i{0}; i < m_size; ++i) m_data[i] = other.m_data[i];
+    return *this;
   };
 
   // check what this parts of allocator traits do
