@@ -224,10 +224,19 @@ class vector {
   };
 
   // check what this parts of allocator traits do
-  constexpr vector& operator=(vector&& x) noexcept(
+  constexpr vector& operator=(vector&& other) noexcept(
       std::allocator_traits<
           Allocator>::propagate_on_container_move_assignment::value ||
-      std::allocator_traits<Allocator>::is_always_equal::value);
+      std::allocator_traits<Allocator>::is_always_equal::value) {
+    if (this == &other) return;
+    m_data = other.m_data;
+    m_capacity = other.m_capacity;
+    m_size = other.m_size;
+
+    other.m_data = nullptr;
+    other.m_capacity = 0;
+    other.m_size = 0;
+  };
 
   constexpr vector& operator=(std::initializer_list<T> init) {};
 
