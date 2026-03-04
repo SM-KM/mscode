@@ -401,15 +401,16 @@ class vector {
     m_size = 0;
   }
 
-  constexpr iterator insert(const_iterator pos, const T& value) {}
-  constexpr iterator insert(const_iterator pos, T&& value) {}
-  constexpr iterator insert(const_iterator pos, size_type count,
-                            const T& value) {}
+  constexpr iterator insert_at(const_iterator pos, const T& value) {}
+  constexpr iterator insert_at(const_iterator pos, T&& value) {}
+  constexpr iterator insert_at(const_iterator pos, size_type count,
+                               const T& value) {}
 
   template <typename InputIt>
-  constexpr iterator insert(const_iterator pos, InputIt first, InputIt last) {}
-  constexpr iterator insert(const_iterator pos, std::initializer_list<T> init) {
-  }
+  constexpr iterator insert_at(const_iterator pos, InputIt first,
+                               InputIt last) {}
+  constexpr iterator insert_at(const_iterator pos,
+                               std::initializer_list<T> init) {}
 
   template <std::ranges::input_range R>
   constexpr iterator insert_range(const_iterator pos, R&& rg) {}
@@ -420,7 +421,7 @@ class vector {
   template <typename... Args>
   constexpr iterator emplace(const_iterator pos, Args&&... args) {}
 
-  constexpr iterator erase(const_iterator pos) {}
+  constexpr iterator erase_at(const_iterator pos) {}
   constexpr iterator erase(const_iterator first, const_iterator last) {}
 
   template <typename... Args>
@@ -472,8 +473,11 @@ class vector {
   }
 
   constexpr void swap(vector& other) noexcept {
-    // if movable swap move them otherwise
-    // just copy them
+    using std::swap;
+    swap(m_data, other.m_data);
+    swap(m_size, other.m_size);
+    swap(m_capacity, other.m_capacity);
+    swap(m_allocator, other.m_allocator);
   }
 
   template <typename I, typename Alloc>
