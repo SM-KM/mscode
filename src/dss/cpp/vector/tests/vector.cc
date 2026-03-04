@@ -2,13 +2,35 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
 TEST(vector, constructor) {
   dss::vector<int> vec;
   EXPECT_TRUE(vec.size() == 0);
   EXPECT_TRUE(vec.capacity() == 0);
+}
+
+TEST(vector, copyctr) {
+  dss::vector<int> vec = {2, 4, 6};
+  dss::vector<int> v{vec};
+  EXPECT_TRUE(v.size() == 3);
+  EXPECT_TRUE(v.capacity() == 3);
+  for (size_t i{0}; i < v.size(); ++i) EXPECT_TRUE(v[i] == vec[i]);
+};
+
+TEST(vector, movectr) {
+  dss::vector<int> origin = {2, 4, 6};
+  dss::vector<int> moved{std::move(origin)};
+  EXPECT_TRUE(moved.size() == 3);
+  EXPECT_TRUE(moved.capacity() == 3);
+
+  // defaulted state for vec
+  EXPECT_TRUE(origin.size() == 0);
+  EXPECT_TRUE(origin.capacity() == 0);
+  EXPECT_TRUE(origin.data() == nullptr);
 }
 
 TEST(vector, size_value_constructor) {

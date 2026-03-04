@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <ranges>
