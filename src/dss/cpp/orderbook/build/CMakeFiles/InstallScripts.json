@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/smkm/personal/projects/mscode/src/dss/cpp/orderbook/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
