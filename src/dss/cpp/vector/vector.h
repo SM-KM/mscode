@@ -218,7 +218,13 @@ class vector {
 
   constexpr void reserve(size_type new_cap) {}
   constexpr void shrink_to_fit() {}
-  constexpr void clear() noexcept {}
+
+  // we assume that the destructor of the user defined type does not throw
+  // otherwise std::terminate
+  constexpr void clear() noexcept {
+    auto p{begin()};
+    for (; p != end(); ++p) std::destroy_at(p);
+  }
 
   constexpr iterator insert(const_iterator pos, const T& value) {}
   constexpr iterator insert(const_iterator pos, T&& value) {}
@@ -343,6 +349,7 @@ class vector {
   // use instead std::allocator<T>, maybe do it to a variable for debugging and
   // logging support with policies
   pointer allocate_aux(size_type new_capacity) { return new T[new_capacity]; }
+
   ~vector() { clear(); };
 
  private:
