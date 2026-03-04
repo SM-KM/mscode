@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <ranges>
@@ -162,7 +161,9 @@ class vector {
   template <std::input_iterator InputIt>
   constexpr vector(InputIt first, InputIt last,
                    const Allocator& alloc = Allocator())
-      : m_allocator{alloc} {};
+      : m_allocator{alloc} {
+    for (; first != last; ++first) push_back(*first);
+  };
 
   // this is compatible with ranges / views
   template <container_compatible_range<T> R>
@@ -213,7 +214,7 @@ class vector {
     // copy assign are not equal and when reassigning the copy
     // from the other vector it should not throw
 
-    if (this == &other) return;
+    if (this == &other) return *this;
     m_allocator.deallocate(m_data, m_capacity);
     m_data = m_allocator.allocate(other.m_capacity);
     m_capacity = other.m_capacity;
@@ -228,7 +229,7 @@ class vector {
       std::allocator_traits<
           Allocator>::propagate_on_container_move_assignment::value ||
       std::allocator_traits<Allocator>::is_always_equal::value) {
-    if (this == &other) return;
+    if (this == &other) return *this;
     m_data = other.m_data;
     m_capacity = other.m_capacity;
     m_size = other.m_size;
