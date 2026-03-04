@@ -11,6 +11,7 @@ set_target_properties(vector_td PROPERTIES CXX_CLANG_TIDY
 
 if(BUILD_TESTS) 
     add_executable(vector_test ./tests/vector.cc)
+    target_compile_features(vector_test PRIVATE cxx_std_23)
     target_link_libraries(vector_test gtest gtest_main)
 endif()
 
