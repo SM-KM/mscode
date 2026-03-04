@@ -239,7 +239,21 @@ class vector {
     other.m_size = 0;
   };
 
-  constexpr vector& operator=(std::initializer_list<T> init) {};
+  constexpr vector& operator=(std::initializer_list<T> init) {
+    if (init.size() == 0) return;
+    m_capacity = init.size();
+    m_data = m_allocator.allocate(m_capacity);
+
+    try {
+      std::uninitialized_copy(init.begin(), init.end(), m_data);
+      m_size = m_capacity;
+    } catch (...) {
+      m_allocator.deallocate(m_data, m_capacity);
+      throw;
+    }
+
+    return *this;
+  };
 
   reference operator[](size_type pos) { return m_data[pos]; }
   const_reference operator[](size_type pos) const { return m_data[pos]; }
