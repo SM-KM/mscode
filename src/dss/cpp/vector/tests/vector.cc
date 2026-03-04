@@ -11,6 +11,13 @@ TEST(vector, constructor) {
   EXPECT_TRUE(vec.capacity() == 0);
 }
 
+TEST(vector, size_value_constructor) {
+  dss::vector<int> vec(5, 5);
+  EXPECT_TRUE(vec.size() == 5);
+  EXPECT_TRUE(vec.capacity() == 5);
+  for (size_t i = 0; i < vec.size(); ++i) EXPECT_TRUE(vec[i] == 5);
+}
+
 TEST(vector, capacity_constructor) {
   dss::vector<int> vec(10);
   EXPECT_TRUE(vec.capacity() == 10);

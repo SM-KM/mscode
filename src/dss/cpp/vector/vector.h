@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <ranges>
@@ -128,15 +129,30 @@ class vector {
 
   constexpr vector(size_type n, const T& value,
                    const Allocator& alloc = Allocator())
-      : m_allocator{alloc}, m_size{n} {
+      : m_allocator{alloc}, m_capacity{n} {
     // check for available memory to allocate, and default initialize
     // type T on every single position
-    auto p{begin()};
-    for (auto i = 0; i < n; i++) std::construct_at(p.ptr, value);
+    if (n == 0) return;
+    m_data = m_allocator.allocate(m_capacity);
+    try {
+      for (; m_size < n; ++m_size) std::construct_at(m_data + m_size, value);
+    } catch (...) {
+      std::destroy(m_data, m_data + m_size);
+      m_allocator.deallocate(m_data, m_capacity);
+
+      // ensure is not in a malformed state
+      m_data = nullptr;
+      m_capacity = 0;
+
+      // the object dies inmediatly so maybe could skip this
+      // resetting, for hygine
+      m_size = 0;
+      throw;
+    }
   };
 
   // from iterators
-  template <typename InputIt>
+  template <std::input_iterator InputIt>
   constexpr vector(InputIt first, InputIt last,
                    const Allocator& alloc = Allocator())
       : m_allocator{alloc} {};
