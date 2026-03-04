@@ -1,6 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <algorithm>
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
@@ -169,7 +170,7 @@ class vector {
 
   constexpr vector& operator=(std::initializer_list<T> init) {};
 
-  reference operator[](size_type pos) {}
+  reference operator[](size_type pos) { return m_data[pos]; }
   const_reference operator[](size_type pos) const {}
 
   template <typename InputIt>
@@ -177,7 +178,40 @@ class vector {
   constexpr void assign(size_type n, const T& u);
   constexpr void assign(std::initializer_list<T>);
 
-  constexpr void push_back(T&& value) {};
+  constexpr void push_back(T&& value) {
+    // if the vector is full grow the vector, move the
+    // elemnts already inside and allocate the new element,
+    // else just allocate the new element
+    if (full()) {
+      size_type new_capacity =
+          capacity() > 0 ? capacity() * m_grow_multiplier : m_new_capacity;
+      pointer p{m_allocator.allocate(new_capacity)};
+
+      // move the old storage into the new
+      size_type i{0};
+      try {
+        for (; i < m_size; ++i)
+          std::construct_at(p + i, std::move_if_noexcept(m_data[i]));
+        std::construct_at(p + m_size, std::move_if_noexcept(value));
+      } catch (...) {
+        // if while moving them it fails destroy everything and throw
+        std::destroy(p, p + i);
+        m_allocator.deallocate(p, new_capacity);
+        throw;
+      }
+
+      // deallocate old storage
+      std::destroy(begin(), end());
+      m_allocator.deallocate(m_data, m_capacity);
+
+      m_data = p;
+      m_capacity = new_capacity;
+    } else {
+      std::construct_at(m_data + m_size, std::move_if_noexcept(value));
+    }
+    ++m_size;
+  };
+
   constexpr void push_back(const T& value) {};
 
   reference at(size_type pos) { return m_data[pos]; }
@@ -332,7 +366,6 @@ class vector {
   //     -> vector<std::ranges::range_value_t<R>, Alloc>;
 
   // iterators
-  constexpr Allocator getAllocator() const noexcept { return m_allocator; };
   constexpr iterator begin() noexcept { return iterator(m_data); };
   constexpr const_iterator begin() const noexcept {
     return const_iterator(m_data);
@@ -367,7 +400,7 @@ class vector {
     return const_reverse_iterator(m_data - 1);
   };
 
-  // Helpers
+  // helpers:
   void cleanup_on_fail_aux(iterator last) {
     auto p{begin()};
     for (; p != last; ++p) std::destroy_at(p.ptr);
