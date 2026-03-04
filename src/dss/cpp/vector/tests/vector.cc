@@ -1,6 +1,5 @@
 #include "../vector.h"
 
-#include <gtest/gtest-message.h>
 #include <gtest/gtest.h>
 
 #include <memory>
@@ -12,6 +11,15 @@ TEST(vector, constructor) {
   EXPECT_TRUE(vec.capacity() == 0);
 }
 
+TEST(vector, initializer_list_constructor) {
+  dss::vector<int> vec = {1, 2, 5};
+  EXPECT_TRUE(vec.size() == 3);
+  EXPECT_TRUE(vec.capacity() == 3);
+}
+
+TEST(vector, push_back) {
+  EXPECT_TRUE(true);
+}
 TEST(vector, reserve) {
   dss::vector<int> vec;
   auto alloc = vec.get_allocator();
@@ -38,4 +46,21 @@ TEST(vector, reserve) {
   v.reserve(5);
   EXPECT_TRUE(v.capacity() == 5);
   EXPECT_TRUE(v.size() == 2);
+}
+
+TEST(vector, shrink_to_fit) {
+  dss::vector<int> v;
+  EXPECT_TRUE(v.size() == 0);
+  EXPECT_TRUE(v.capacity() == 0);
+  v.shrink_to_fit();
+  EXPECT_TRUE(v.size() == 0);
+  EXPECT_TRUE(v.capacity() == 0);
+
+  // when ther is elements
+  v.push_back(20);
+  EXPECT_TRUE(v.capacity() == 16);
+  EXPECT_TRUE(v.size() == 1);
+  v.shrink_to_fit();
+  EXPECT_TRUE(v.capacity() == 1);
+  EXPECT_TRUE(v.size() == 1);
 }
