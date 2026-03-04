@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/smkm/personal/projects/mscode/src/dss/cpp/build/cmake_install.cmake",
-		"/home/smkm/personal/projects/mscode/src/dss/cpp/build/vector/cmake_install.cmake",
-		"/home/smkm/personal/projects/mscode/src/dss/cpp/build/orderbook/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

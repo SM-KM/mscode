@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/orderbook_test.dir/link.d CMakeFiles/orderbook_test.dir/tests/orderbook.cc.o -o orderbook_test  -lgtest -lgtest_main
