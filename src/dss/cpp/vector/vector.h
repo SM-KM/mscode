@@ -165,7 +165,13 @@ class vector {
     }
   };
 
-  constexpr vector& operator=(const vector& x);
+  constexpr vector& operator=(const vector& x) {
+    // dont allow if the sizes of the vectors to
+    // copy assign are not equal and when reassigning the copy
+    // from the other vector it should not throw
+
+  };
+
   // check what this parts of allocator traits do
   constexpr vector& operator=(vector&& x) noexcept(
       std::allocator_traits<
@@ -175,7 +181,7 @@ class vector {
   constexpr vector& operator=(std::initializer_list<T> init) {};
 
   reference operator[](size_type pos) { return m_data[pos]; }
-  const_reference operator[](size_type pos) const {}
+  const_reference operator[](size_type pos) const { return m_data[pos]; }
 
   template <typename InputIt>
   constexpr void assign(InputIt first, InputIt last);
@@ -345,7 +351,11 @@ class vector {
   template <typename... Args>
   constexpr reference emplace_back(Args&&... args) {}
 
-  constexpr void pop_back() {};
+  constexpr void pop_back() {
+    --m_size;
+    std::destroy_at(end());
+  };
+
   void resize(size_type count) {};
   void resize(size_type count, const value_type& value) {}
 
