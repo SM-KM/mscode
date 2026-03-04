@@ -1,6 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <algorithm>
 #include <concepts>
 #include <cstddef>
 #include <exception>
@@ -278,7 +279,7 @@ class vector {
       try {
         for (; i < m_size; ++i)
           std::construct_at(p + i, std::move_if_noexcept(m_data[i]));
-        std::construct_at(p + m_size, std::move_if_noexcept(value));
+        std::construct_at(p + m_size, std::move_if_noexcept(std::move(value)));
       } catch (...) {
         // if while moving them it fails destroy everything and throw
         std::destroy(p, p + i);
@@ -299,7 +300,6 @@ class vector {
   };
 
   constexpr void push_back(const T& value) {};
-
   reference at(size_type pos) { return m_data[pos]; }
   const_reference at(size_type pos) const { return m_data[pos]; };
 
@@ -396,7 +396,6 @@ class vector {
   constexpr void clear() noexcept {
     // can the destructor throw?, when trying to destroy the elements
     for (size_type i = 0; i < m_size; ++i) std::destroy_at(m_data + i);
-
     // after all have been completely deleted deallocate mem
     m_allocator.deallocate(m_data, m_capacity);
     m_size = 0;
@@ -432,8 +431,45 @@ class vector {
     std::destroy_at(end());
   };
 
-  void resize(size_type count) {};
-  void resize(size_type count, const value_type& value) {}
+  // if the count is smaller than the actual size
+  // destroy the extra elements
+  //
+  // if the count is bigger than the size, and bigger than the capacity,
+  // triger a reallocation with the grow factor as in push back and
+  // move all of the elements and construct up to getting to the count
+  //
+  // if the new count is bigger than the size but smaller thatn the
+  // capacity default construct or if the version construct the value
+  // passed
+  void resize(size_type count) {
+    if (count == m_size) return;
+    if (count < m_size) {
+      for (size_type i{m_size}; i < count; ++i) std::destroy_at(m_data[i]);
+      m_size = count;
+      return;
+    }
+    if (count > m_capacity) {
+      reserve(count);
+    }
+
+    for (auto p{begin() + m_size}; p != begin() + count; ++p)
+      std::construct_at(p, value_type{});
+  }
+
+  void resize(size_type count, const value_type& value) {
+    if (count == m_size) return;
+    if (count < m_size) {
+      for (size_type i{m_size}; i < count; ++i) std::destroy_at(m_data[i]);
+      m_size = count;
+      return;
+    }
+    if (count > m_capacity) {
+      reserve(count);
+    }
+
+    for (auto p{begin() + m_size}; p != begin() + count; ++p)
+      std::construct_at(p, value);
+  }
 
   constexpr void swap(vector& other) noexcept {
     // if movable swap move them otherwise
