@@ -9,8 +9,10 @@
 #include <initializer_list>
 #include <iterator>
 #include <memory>
+#include <new>
 #include <ranges>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 class A {
@@ -219,7 +221,29 @@ class vector {
   };
 
   constexpr void reserve(size_type new_cap) {}
-  constexpr void shrink_to_fit() {}
+  constexpr void shrink_to_fit() {
+    // allocate size, construct elements on this new size,
+    // and destroy eleemnts in current size and deallocate the memory
+    // and finally reassign the data_ and the capacity_
+    T* new_data = m_allocator.allocate(m_size);
+    size_t i = 0;
+    try {
+      for (; i < m_size; i++) {
+        std::construct_at(new_data + i, std::move_if_noexcept(m_data[i]));
+        std::destroy_at(m_data + i);
+      }
+    } catch (const std::exception& e) {
+      // destroy the elements that has been created
+      // and deallocate the memory
+      for (size_t j = 0; j < i; ++j) std::destroy_at(new_data + j);
+      m_allocator.deallocate(new_data, m_size);
+      throw e;
+    }
+
+    m_allocator.deallocate(m_data, m_size);
+    m_data = new_data;
+    m_capacity = m_size;
+  }
 
   // we assume that the destructor of the user defined type does not throw
   // otherwise std::terminate
