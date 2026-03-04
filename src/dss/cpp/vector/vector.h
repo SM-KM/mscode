@@ -127,7 +127,9 @@ class vector {
   // the allocator constructor has to be no expect as well
   constexpr vector() noexcept(noexcept(Allocator())) : vector(Allocator()) {};
   constexpr explicit vector(const Allocator& alloc) noexcept
-      : m_allocator{alloc} {};
+      : m_allocator{alloc} {
+    m_allocator.allocate(m_size);
+  };
   constexpr explicit vector(size_type n, const Allocator& alloc = Allocator())
       : m_allocator{alloc}, m_size{n} {}
   constexpr vector(size_type n, const T& value,
