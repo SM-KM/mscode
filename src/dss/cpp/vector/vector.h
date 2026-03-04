@@ -169,8 +169,23 @@ class vector {
     for (auto&& elem : rg) push_back(std::forward<decltype(elem)>(elem));
   };
 
-  constexpr vector(const vector<T>& x) {};
-  constexpr vector(vector&& vec) noexcept {};
+  constexpr vector(const vector& other) {
+    m_capacity = other.m_capacity;
+    m_size = other.m_size;
+    m_data = m_allocator.allocate(m_capacity);
+    for (size_type i{0}; i < m_size; ++i) m_data[i] = other.m_data[i];
+  };
+
+  constexpr vector(vector&& vec) noexcept {
+    m_data = vec.m_data;
+    m_capacity = vec.m_capacity;
+    m_size = vec.m_size;
+
+    vec.m_data = nullptr;
+    vec.m_size = 0;
+    vec.m_capacity = 0;
+  };
+
   // type_identity_t is used so that the type of the allcoator is preserved
   constexpr vector(const vector&, const type_identity_t<Allocator>&);
   constexpr vector(vector&&, const type_identity_t<Allocator>&);
