@@ -11,6 +11,7 @@
 #include <memory>
 #include <new>
 #include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -224,36 +225,40 @@ class vector {
     // check with allocator_traits if the size passed
     // is within max, maybe return a conditio to check if the
     // reserve was valid
-    if (std::allocator_traits<allocator_type>::max_size <= new_cap)
-      throw std::bad_alloc();
+    if (std::allocator_traits<allocator_type>::max_size(m_allocator) < new_cap)
+      throw std::length_error("reserve exceddes max cap");
 
     // if the new capacity is <= to the current capacity do nothing
     if (new_cap <= m_capacity) return;
-    if (new_cap > m_capacity) {
-      T* new_data = m_allocator.allocate(new_cap);
-      if (m_size == 0) {
-        m_data = new_data;
-        m_capacity = new_cap;
-        return;
-      }
-
-      // is correct capacity to reserve but there are
-      // elements on the vector
-      size_t i = 0;
-      try {
-        for (; i < m_size; i++) {
-          std::construct_at(new_data + i, std::move_if_noexcept(m_data[i]));
-          std::destroy_at(m_data + i);
-        }
-      } catch (const std::exception& e) {
-        for (size_t j = 0; j < i; ++j) std::destroy_at(new_data + j);
-        m_allocator.deallocate(new_data, m_size);
-        throw e;
-      }
+    T* new_data = m_allocator.allocate(new_cap);
+    if (m_size == 0) {
       m_data = new_data;
       m_capacity = new_cap;
+      return;
     }
+
+    // is correct capacity to reserve but there are
+    // elements on the vector
+    size_type i = 0;
+    try {
+      for (; i < m_size; i++) {
+        std::construct_at(new_data + i, std::move_if_noexcept(m_data[i]));
+      }
+    } catch (const std::exception& e) {
+      for (size_t j = 0; j < i; ++j) std::destroy_at(new_data + j);
+      m_allocator.deallocate(new_data, new_cap);
+      throw e;
+    }
+
+    // just destroy them after all have been moved or copied so that
+    // we cannot have half constructed - half destructed
+    for (size_type i = 0; i < m_size; i++) std::destroy_at(m_data + i);
+
+    m_allocator.deallocate(m_data, m_capacity);
+    m_data = new_data;
+    m_capacity = new_cap;
   }
+
   constexpr void shrink_to_fit() {
     // if there is something to shrink allocate size, construct elements on this
     // new size, and destroy eleemnts in current size and deallocate the memory
