@@ -144,12 +144,11 @@ template <class T, class Alloc>
 constexpr auto operator<=>(const deque<T, Alloc>& lhs,
                            const deque<T, Alloc>& rhs);
 
-} // namespace dss
-
 // deduction guide for ranges
 // template <std::ranges::input_range R,
 //           class Alloc = std::allocator<std::ranges::range_value_t<R>>>
 // dss::deque(std::from_range_t, R&&, Alloc = Alloc())
 //     ->dss::deque<std::ranges::range_value_t<R>, Alloc>;
+} // namespace dss
 
 #endif // DEQUE_H
