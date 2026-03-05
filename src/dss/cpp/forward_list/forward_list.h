@@ -1,219 +1,165 @@
 #ifndef FORWARD_LIST_H
 #define FORWARD_LIST_H
 
-#include <concepts>
-#include <forward_list>
-#include <initializer_list>
-#include <iostream>
+#include <cstddef>
+#include <iterator>
 #include <memory>
-#include <utility>
+
+#include "../utils/utils.h"
 
 namespace dss {
-template <typename T> struct forward_list_node {
-  T m_data;
-  forward_list_node* m_next;
 
-  forward_list_node() {
-    m_data = T();
-    m_next = nullptr;
-  };
-
-  forward_list_node(T data) {
-    m_data = data;
-    m_next = nullptr;
-  };
-
-  ~forward_list_node();
-
-  forward_list_node(const forward_list_node& sln) {
-    m_data = sln.m_data;
-    m_next = sln.m_next;
-  };
-
-  forward_list_node& operator=(const forward_list_node& sln) {
-    std::swap(m_data, sln.m_data);
-    std::swap(m_next, sln.m_next);
-    return *this;
-  };
-
-  forward_list_node(forward_list_node&& sln) {
-    m_data = sln.m_data;
-    m_next = sln.m_next;
-    sln.m_data = T();
-    sln.m_next = nullptr;
-  };
-
-  forward_list_node& operator=(forward_list_node&& sln) {
-    if (this != sln) {
-      delete m_data;
-      delete m_next;
-
-      m_data = std::move(sln.m_data);
-      m_next = std::move(sln.m_next);
-      sln.m_data = T();
-      sln.m_next = nullptr;
-    }
-
-    return *this;
-  };
-};
-
-template <typename T, class Allocator = std::allocator<T>, bool Debug = false>
+template <typename T, typename Allocator = std::allocator<T>>
 class forward_list {
-private:
-  bool debug_ = Debug;
-  forward_list_node<T> root_;
-  forward_list_node<T> tail_;
-
-public:
-  class iterator {
-    T m_ptr;
-
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = T;
-    using difference_type = std::ptrdiff_t;
-    using pointer = T*;
-    using const_pointer = const T*;
-    using reference = T&;
-
-    iterator(pointer p) : m_ptr(p) {}
-    reference operator*() { return *m_ptr; }
-    pointer operator->() { return m_ptr; }
-
-    iterator& operator++() {
-      iterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    iterator operator++(T) {
-      ++m_ptr;
-      return *this;
-    }
-
-    friend bool operator==(const iterator& a, const iterator& b) {
-      return a.m_ptr == b.m_ptr;
-    }
-    friend bool operator!=(const iterator& a, const iterator& b) {
-      return a.m_ptr != b.m_ptr;
-    }
-  };
   using value_type = T;
   using allocator_type = Allocator;
-  using pointer = typename std::allocator_traits<Allocator>::pointer;
-  using const_pointer =
-      typename std::allocator_traits<Allocator>::const_pointer;
-
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
   using reference = value_type&;
   using const_reference = const value_type&;
-  using iterator = iterator;
-  using const_iterator = const iterator;
-  using size_type = size_t;
+  using pointer = std::allocator_traits<allocator_type>::pointer;
+  using const_pointer = std::allocator_traits<allocator_type>::const_pointer;
 
-  // ctors, dtor
-  forward_list() : forward_list(Allocator()) {};
-  explicit forward_list(const Allocator&);
-  explicit forward_list(size_type n, const Allocator& = Allocator());
-  forward_list(std::initializer_list<T>);
-  forward_list(size_type n, const T& value, const Allocator& = Allocator());
+  // forward iterator of value type
+  class Iterator {};
+
+  using iterator = Iterator;
+  using const_iterator = const iterator;
+
+  forward_list();
+  explicit forward_list(const Allocator& alloc);
+  forward_list(size_type count, const T& value,
+               const Allocator& alloc = Allocator());
+  explicit forward_list(size_type count);
+  explicit forward_list(size_type count, const Allocator& alloc = Allocator());
+
+  forward_list(const forward_list& other);
+  forward_list(const forward_list& other, const Allocator& alloc);
+  forward_list(forward_list&& other);
+  forward_list(forward_list&& other, const Allocator& alloc);
+  forward_list(std::initializer_list<T> init,
+               const Allocator& alloc = Allocator());
+
+  template <std::input_iterator InputIt>
+  forward_list(InputIt first, InputIt last,
+               const Allocator& alloc = Allocator());
+
+#if defined(__cpp_lib_containers_ranges) && \
+    __cpp_lib_containers_ranges >= 202202L
+  template <container_compatible_range<T> R>
+  forward_list(std::from_range_t, R&& rg, const Allocator& alloc = Allocator());
+
+  template <container_compatible_range<T> R>
+  void assign_range(R&& rg);
+
+  template <container_compatible_range<T> R>
+  iterator insert_range_after(const_iterator pos, R&& rg);
+
+  template <container_compatible_range<T> R>
+  void prepend_range(R&& rg);
+#endif
+
   ~forward_list();
 
-  // to create SingleLinkedList from other stl containers
-  template <typename InputIt>
-  forward_list(InputIt begin, InputIt end, const Allocator& = Allocator());
-
-  // copy
-  forward_list(const forward_list& other);
   forward_list& operator=(const forward_list& other);
+  forward_list& operator=(forward_list&& other) noexcept(
+      std::allocator_traits<
+          allocator_type>::propagate_on_container_move_assignment::value);
+  forward_list& operator=(std::initializer_list<T> ilist);
 
-  // move
-  forward_list(forward_list&& other);
-  forward_list& operator=(forward_list&& other);
+  void assign(size_type count, const T& value);
+  template <std::input_iterator InputIt>
+  void assign(InputIt first, InputIt last);
+  void assign(std::initializer_list<T> ilist);
 
-  // iterators
-  iterator begin() noexcept { return iterator(&root_); };
+  allocator_type get_allocator() const noexcept { return m_allocator; };
+
+  reference front();
+  const_reference front() const;
+
+  iterator before_begin() noexcept;
+  const_iterator before_begin() const noexcept;
+  const_iterator cbefore_begin() const noexcept;
+  iterator begin() noexcept;
+  const_iterator begin() const noexcept;
   const_iterator cbegin() const noexcept;
-  const_iterator cend() const noexcept;
   iterator end() noexcept;
-  iterator rbegin() noexcept;
-  iterator rend() noexcept;
-
-  size_t size();
-
-  // assign elements from other stl container, using iterators
-  template <typename InputIt> void assign(InputIt begin, InputIt end);
-  void assign(size_type n, const T& t);
-  void assign(std::initializer_list<T>);
+  const_iterator end() const noexcept;
+  const_iterator cend() const noexcept;
 
   [[nodiscard]] bool empty() const noexcept;
   size_type max_size() const noexcept;
 
-  // element access
-  reference front();
-  const_reference front() const;
-
-  // modifiers
-  template <typename... Args>
-  reference emplace_front(Args&&... args); // think well how this works
-
-  void push_front(const T& x);
-  void push_front(T&& x);
-  void pop_front();
   void clear() noexcept;
 
-  template <typename... Args>
-  iterator emplace_after(const_iterator position, Args&&... args);
-  iterator insert_after(const_iterator position, const T& x);
-  iterator insert_after(const_iterator position, T&& x);
-  iterator insert_after(const_iterator position, size_type n, const T& x);
+  iterator insert_after(const_iterator pos, const T& value);
+  iterator insert_after(const_iterator pos, T&& value);
+  iterator insert_after(const_iterator pos, size_type count, const T& value);
+  template <std::input_iterator InputIt>
+  iterator insert_after(const_iterator pos, InputIt first, InputIt last);
+  iterator insert_after(const_iterator pos, std::initializer_list<T> ilist);
 
-  iterator erase_after(const_iterator position);
-  iterator erase_after(const_iterator begin, const_iterator end);
+  template <class... Args>
+  iterator emplace_after(const_iterator pos, Args&&... args);
 
-  // noexpect compares if the allocator passed to the SingleLinkedList to swap
-  // are equal
-  void swap(forward_list& sl) noexcept(
-      std::allocator_traits<Allocator>::is_always_equal::value);
+  iterator erase_after(const_iterator pos);
+  iterator erase_after(const_iterator first, const_iterator last);
 
-  void resize(size_type s);
-  void resize(size_type s,
-              const value_type& t); // if the rezised SingleLinkedList is
-                                    // smaller than s, elements with value_type
-                                    // are added untill the new size is matched
+  void push_front(T&& value);
+  void pop_front();
 
-  void splice_after(const_iterator position, forward_list& sl);
-  void splice_after(const_iterator position, forward_list&& sl);
-  void splice_after(const_iterator position, forward_list& sl,
-                    const_iterator i);
-  void splice_after(const_iterator position, forward_list&& sl,
-                    const_iterator i);
-  void splice_after(const_iterator position, forward_list& sl,
-                    const_iterator begin, const_iterator end);
-  void splice_after(const_iterator position, forward_list&& sl,
-                    const_iterator begin, const_iterator end);
+  template <class... Args>
+  reference emplace_front(Args&&... args);
 
-  // Cool improvement C++20 enforce that the param passed to remove_if is
-  // callable using std::predicate<T> that would throw an error before compile
-  // time, so basically before it tries to call predicate and the thing cannot
-  // be called
-  size_type remove(const T& t);
-  template <typename Predicate> size_type remove_if(Predicate pred);
+  void resize(size_type count);
+  void resize(size_type count, const value_type& value);
 
-  size_type unique(); // deletes all duplicated of elements, but not permantly
-                      // the memory still needs to be handled
+  void swap(forward_list& other) noexcept(
+      std::allocator_traits<allocator_type>::is_always_equal::value);
 
+  void merge(forward_list& other);
+  void merge(forward_list&& other);
+  template <typename Compare>
+  void merge(forward_list& other, Compare comp);
+  template <typename Compare>
+  void merge(forward_list&& other, Compare comp);
+
+  void splice_after(const_iterator pos, forward_list& other);
+  void splice_after(const_iterator pos, forward_list&& other);
+  void splice_after(const_iterator pos, forward_list& other, const_iterator it);
+  void splice_after(const_iterator pos, forward_list&& other,
+                    const_iterator it);
+  void splice_after(const_iterator pos, forward_list& other,
+                    const_iterator first, const_iterator last);
+  void splice_after(const_iterator pos, forward_list&& other,
+                    const_iterator first, const_iterator last);
+
+  size_type remove(const T& value);
+  template <typename UnaryPredicate>
+  size_type remove_if(UnaryPredicate p);
+  void reverse() noexcept;
+
+  size_type unique();
   template <typename BinaryPredicate>
-  size_type unique(BinaryPredicate binary_pred);
-
-  void merge(forward_list& sl);
-  void merge(forward_list&& sl);
-  template <typename Compare> void merge(forward_list& sl, Compare comp);
-  template <typename Compare> void merge(forward_list&& sl, Compare comp);
+  size_type unique(BinaryPredicate p);
 
   void sort();
-  template <typename Compare> void sort(Compare comp);
-  void reverse() noexcept;
+  template <class Compare>
+  void sort(Compare comp);
+
+ private:
+  allocator_type m_allocator = Allocator{};
 };
 
+template <class T, class Alloc>
+constexpr auto operator<=>(const forward_list<T, Alloc>& lhs,
+                           const forward_list<T, Alloc>& rhs);
+
+template <std::ranges::input_range R,
+          class Alloc = std::allocator<std::ranges::range_value_t<R>>>
+forward_list(std::from_range_t, R&&, Alloc = Alloc())
+    -> forward_list<std::ranges::range_value_t<R>, Alloc>;
+
 } // namespace dss
+
 #endif // SINGLELINKEDLIST_H
