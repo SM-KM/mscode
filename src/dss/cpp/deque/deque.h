@@ -1,9 +1,11 @@
 #ifndef DEQUE_H
 #define DEQUE_H
 
+#include <compare>
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <ranges>
 
 #include "../utils/utils.h"
 
@@ -75,7 +77,72 @@ class deque {
   const_reference front() const;
   reference back();
   const_reference back() const;
+
+  // iterators
+  iterator begin() noexcept;
+  const_iterator begin() const noexcept;
+  const_iterator cbegin() const noexcept;
+  iterator end() noexcept;
+  const_iterator end() const noexcept;
+  const_iterator cend() const noexcept;
+  reverse_iterator rbegin() noexcept;
+  const_reverse_iterator rbegin() const noexcept;
+  const_reverse_iterator crbegin() const noexcept;
+  reverse_iterator rend() noexcept;
+  const_reverse_iterator rend() const noexcept;
+  const_reverse_iterator crend() const noexcept;
+
+  [[nodiscard]] bool empty() const noexcept;
+  size_type size() const noexcept;
+  size_type max_size() const noexcept;
+
+  void shrink_to_fit();
+  void clear() noexcept;
+
+  iterator insert(const_iterator pos, const T& value);
+  iterator insert(const_iterator pos, T&& value);
+  iterator insert(const_iterator pos, size_type count, const T& value);
+  template <class InputIt>
+  iterator insert(const_iterator pos, InputIt first, InputIt last);
+  iterator insert(const_iterator pos, std::initializer_list<T> ilist);
+
+  // validate ranges is supported with the additions of c++23
+#if defined(__cpp_lib_containers_ranges) && \
+    __cpp_lib_containers_ranges >= 202202L
+  template <container_compatible_range<T> R>
+  iterator insert_range(const_iterator pos, R&& rg);
+  template <container_compatible_range<T> R>
+  void append_range(R&& rg);
+  template <container_compatible_range<T> R>
+  void prepend_range(R&& rg);
+#endif // __cplusplus >= 202302L
+
+  template <class... Args>
+  iterator emplace(const_iterator pos, Args&&... args);
+
+  iterator erase(const_iterator pos);
+  iterator erase(const_iterator first, const_iterator last);
+
+  void push_back(T&& value);
+  void pop_back();
+  void pop_front();
+  void push_front(T&& value);
+
+  template <class... Args>
+  reference emplace_back(Args&&... args);
+  template <class... Args>
+  reference emplace_front(Args&&... args);
+
+  void resize(size_type count);
+  void resize(size_type count, const value_type& value);
+
+  void swap(deque& other) noexcept(
+      std::allocator_traits<allocator_type>::is_always_equal::value);
 };
+
+template <class T, class Alloc>
+constexpr auto operator<=>(const deque<T, Alloc>& lhs,
+                           const deque<T, Alloc>& rhs);
 
 } // namespace dss
 
