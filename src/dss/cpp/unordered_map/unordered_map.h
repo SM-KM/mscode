@@ -167,6 +167,58 @@ class unordered_map {
   template <class... Args>
   std::pair<iterator, bool> emplace(Args&&... args);
 
+  template <class... Args>
+  iterator emplace_hint(const_iterator hint, Args&&... args);
+
+  // trying emplace for copies and move values
+  template <typename... Args>
+  std::pair<iterator, bool> try_emplace(const Key& k, Args&&... args);
+  template <typename... Args>
+  std::pair<iterator, bool> try_emplace(Key&& k, Args&&... args);
+  template <typename... Args>
+  iterator try_emplace(const_iterator hint, const Key& k, Args&&... args);
+  template <typename... Args>
+  iterator try_emplace(const_iterator hint, Key&& k, Args&&... args);
+
+  iterator erase(const_iterator pos);
+  iterator erase(const_iterator first, const_iterator last);
+  size_type erase(const Key& key);
+  template <class K>
+  size_type erase(K&& x);
+
+  node_type extract(const_iterator position);
+  node_type extract(const Key& k);
+  template <class K>
+  node_type extract(K&& x);
+
+  // merge
+  template <class H2, class P2>
+  void merge(std::unordered_map<Key, T, H2, P2, Allocator>& source);
+  template <class H2, class P2>
+  void merge(std::unordered_map<Key, T, H2, P2, Allocator>&& source);
+  template <class H2, class P2>
+  void merge(std::unordered_multimap<Key, T, H2, P2, Allocator>& source);
+  template <class H2, class P2>
+  void merge(std::unordered_multimap<Key, T, H2, P2, Allocator>&& source);
+
+  // Lokking to find elements
+  T& at(const Key& key);
+  const T& at(const Key& key) const;
+  T& operator[](const Key& key);
+  T& operator[](Key&& key);
+
+  size_type count(const Key& key) const;
+  template <typename K>
+  size_type count(const K& x) const;
+
+  // Finding specific elements on the map
+  iterator find(const Key& key);
+  const_iterator find(const Key& key) const;
+  template <typename K>
+  iterator find(const K& x);
+  template <class K>
+  const_iterator find(const K& x) const;
+
  private:
   static const size_t m_min_buckets = 16;
   size_type m_size;
