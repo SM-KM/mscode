@@ -1,7 +1,6 @@
 #ifndef DEQUE_H
 #define DEQUE_H
 
-#include <compare>
 #include <cstddef>
 #include <iterator>
 #include <memory>
