@@ -2,18 +2,16 @@
 #define JTHREAD_H
 
 #include <thread>
-namespace dss
-{
+namespace dss {
 
-class jthread
-{
-public:
+class jthread {
+ public:
   using id = std::thread::id;
 
   jthread() noexcept;
   jthread(jthread&& other) noexcept;
   template <typename Function, typename... Args>
-  explicit jthread(Function&& f, Args&&...args);
+  explicit jthread(Function&& f, Args&&... args);
   jthread(const jthread&) = delete;
   ~jthread();
 
@@ -29,14 +27,12 @@ public:
   void swap(dss::jthread& other) noexcept;
 };
 
-struct nostopstate_t
-{
+struct nostopstate_t {
   explicit nostopstate_t() = default;
 };
 
-class stop_source
-{
-public:
+class stop_source {
+ public:
   stop_source();
   explicit stop_source(dss::nostopstate_t nss) noexcept;
   stop_source(const stop_source& other) noexcept;

@@ -3,12 +3,11 @@
 
 #include <cstddef>
 #include <semaphore>
-namespace dss
-{
+
+namespace dss {
 
 template <std::ptrdiff_t LeastMaxValue = 10>
-class counting_semaphore
-{
+class counting_semaphore {
   constexpr explicit counting_semaphore(std::ptrdiff_t desired);
   counting_semaphore(const counting_semaphore&) = delete;
   ~counting_semaphore();
@@ -21,8 +20,8 @@ class counting_semaphore
   bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time);
 
   template <class Clock, class Duration>
-  [[nodiscard]] bool
-  try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time);
+  [[nodiscard]] bool try_acquire_until(
+      const std::chrono::time_point<Clock, Duration>& abs_time);
 
   constexpr std::ptrdiff_t max() noexcept;
 };
