@@ -7,44 +7,42 @@
 #include <utility>
 
 namespace dss {
-template <typename Key, typename T, typename Hash = std::hash<Key>,
-          typename Pred = std::equal_to<Key>,
+template <class Key, class T, class Hash = std::hash<Key>,
+          class KeyEqual = std::equal_to<Key>,
           class Allocator = std::allocator<std::pair<const Key, T>>>
-class UnorderedMap {
-public:
-  struct iterator {
-    T m_ptr;
-  };
+class unordered_map {
+  // iterator invalidation cases
+  // always: clear, rehash, reserve, operator=, and for emplacing and
+  // inserting also operator[] only if it causes a rehash
 
   using key_type = Key;
   using mapped_type = T;
   using value_type = std::pair<const Key, T>;
-  using hasher = Hash;
-  using key_equal = Pred;
-  using allocator_type = Allocator;
-  using pointer = typename std::allocator_traits<Allocator>::pointer;
-  using const_pointer =
-      typename std::allocator_traits<Allocator>::const_allocator;
-  using reference = value_type&;
-  using const_reference = const value_type&;
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
+  using hasher = Hash;
+  using key_equal = KeyEqual;
+  using allocator_type = Allocator;
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = std::allocator_traits<allocator_type>::pointer;
+  using const_pointer = std::allocator_traits<allocator_type>::const_pointer;
 
-  using iterator = std::nullptr_t;
-  using const_iterator = std::nullptr_t;
-  using local_iterator =
-      std::nullptr_t; // is used for iterating in a single bucket
+  // forward iterators
+  class Iterator {};
+  class LocalIterator {}; // use to iterate on the current bucket
 
-  // using node_type <- search this
-  // using insert_return_type =  <- also search this
+  template <typename K, typename V>
+  class NodeHandle {};
 
-  UnorderedMap();
+  using iterator = Iterator;
+  using const_iterator = const Iterator;
+  using local_iterator = LocalIterator;
+  using const_local_iterator = const LocalIterator;
+  using node_type = NodeHandle<key_type, value_type>;
+
+  unordered_map();
 };
-
-template <typename Key, typename T, typename Hash, typename Pred,
-          typename Alloc>
-bool operator==(const UnorderedMap<Key, T, Hash, Pred, Alloc>& a,
-                const UnorderedMap<Key, T, Hash, Pred, Alloc>& b);
 
 } // namespace dss
 #endif // UNORDEREDMAP_H
