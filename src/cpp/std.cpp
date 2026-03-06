@@ -1,7 +1,8 @@
+#include <bits/chrono.h>
+
 #include <algorithm>
 #include <any>
 #include <array>
-#include <bits/chrono.h>
 #include <bitset>
 #include <cassert>
 #include <chrono>
@@ -300,7 +301,7 @@ Methods:
 */
 
 struct Point {
-public:
+ public:
   int x;
   int y;
 
@@ -581,7 +582,9 @@ Methods:
 */
 
 std::multimap<int, std::string> mm;
-void methodsMultimap() { ms.equal_range(3); }
+void methodsMultimap() {
+  ms.equal_range(3);
+}
 
 /*
 Bitset
@@ -1098,7 +1101,9 @@ Params:
 
 */
 
-std::tuple<std::string, char, uint> getT(uint id) { return {"Name", 'A', id}; }
+std::tuple<std::string, char, uint> getT(uint id) {
+  return {"Name", 'A', id};
+}
 void tuple() {
   std::string name;
   char l;
@@ -1118,12 +1123,13 @@ better and values that are modified constantly
 */
 
 std::optional<std::string> create(bool b) {
-  if (b)
-    return "God";
+  if (b) return "God";
   return {};
 };
 
-void optional() { std::cout << create(false).value_or("emp"); }
+void optional() {
+  std::cout << create(false).value_or("emp");
+}
 
 /*
 Variant
@@ -1142,7 +1148,9 @@ Holds any type of data
 
 */
 
-void any() { std::any p = 3; }
+void any() {
+  std::any p = 3;
+}
 
 /*
 Bind
@@ -1176,7 +1184,9 @@ called like a function
 
 */
 
-int add(int a, int b) { return a + b; };
+int add(int a, int b) {
+  return a + b;
+};
 void function() {
   // free function
   std::function<int(int, int)> f = add;
@@ -1219,7 +1229,9 @@ void p(std::initializer_list<std::variant<int, std::string>> v) {
   };
 };
 
-void initializer_list() { p({2, 4, "asads"}); }
+void initializer_list() {
+  p({2, 4, "asads"});
+}
 
 /*
 Visit
@@ -1232,12 +1244,14 @@ std::variant<uint, bool> av = (uint)5;
 std::variant<std::string, long> bv = (uint)5;
 
 // TODO: add in deep example
-template <class... Ts> struct overloaded : Ts... {
+template <class... Ts>
+struct overloaded : Ts... {
   using Ts::operator()...;
 };
 
 // C++17 later
-template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 // Gets its type at compile time, dont evaluate
 decltype(av) decav = av;
@@ -1278,7 +1292,10 @@ is used to preserve the value category, meaning lvalue or rvalue
 void print(int& i) {};  // lvalue
 void print(int&& i) {}; // rvalue
 
-template <typename V> void wrapper(V&& v) { print(std::forward<V>(v)); }
+template <typename V>
+void wrapper(V&& v) {
+  print(std::forward<V>(v));
+}
 
 void forward() {
   int n = 9;
@@ -1432,7 +1449,8 @@ volatile = dont cache or optimize actually read it from memory every time
 
 */
 
-template <typename T> void showType() {
+template <typename T>
+void showType() {
   std::cout << typeid(typename std::decay<T>::type).name() << "\n";
 }
 
@@ -1488,7 +1506,9 @@ allows to format a string from a format string lol
 
 */
 
-void format() { std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6); }
+void format() {
+  std::cout << std::format("{0} + {1} / {2}^{0}", 2, 3, 6);
+}
 
 /*
 Threads
@@ -1531,7 +1551,9 @@ is used in threads <- // TODO: need to see more examples
                       // cause i didnt understand
 */
 
-void tfunc() { std::cout << "Finishing something on this thread"; }
+void tfunc() {
+  std::cout << "Finishing something on this thread";
+}
 struct Send {
   uint x;
   Send(uint x) : x(x) {};
@@ -1579,16 +1601,14 @@ std::mutex g_i_mutex;
 
 void safe_increment(int iterations) {
   const std::lock_guard<std::mutex> lock(g_i_mutex);
-  while (iterations-- > 0)
-    g_i = g_i + 1;
+  while (iterations-- > 0) g_i = g_i + 1;
 
   // when it gets out of scope it unlocks the mutex
 }
 
 // do race condition on purpose to show usage
 void unsafe_increment(int iterations) {
-  while (iterations-- > 0)
-    g_i = g_i + 1;
+  while (iterations-- > 0) g_i = g_i + 1;
   // the final result when using this in a thread is unpredictable
 }
 
@@ -1680,8 +1700,12 @@ Handles comunication between threads, with the help of future as well
 
 */
 
-int returntwo() { return 2; };
-void foo(std::promise<int> p) { p.set_value(25); }
+int returntwo() {
+  return 2;
+};
+void foo(std::promise<int> p) {
+  p.set_value(25);
+}
 
 void future() {
   std::future<int> f = std::async(std::launch::async, returntwo);
@@ -1696,7 +1720,8 @@ void future() {
   std::cout << fut.get();
 }
 
-void async() {}
+void async() {
+}
 
 void retreiveValue(std::promise<uint>& p) {
   try {
@@ -1728,7 +1753,8 @@ Chrono
 
 */
 
-template <typename T1, typename T2> using mul = std::ratio_multiply<T1, T2>;
+template <typename T1, typename T2>
+using mul = std::ratio_multiply<T1, T2>;
 
 void chrono() {
   using namespace std::chrono;
@@ -1783,14 +1809,16 @@ not an error) compiler silently fails a template specialization, if there is
 another valid specialization
 
 */
-template <typename T> struct MAllocator {
+template <typename T>
+struct MAllocator {
   using value_type = T;
 
   MAllocator() noexcept {};
 
   // It uses a new template os that when rebinding between types
   // it can do ti otherwise it would only work when T == U
-  template <typename U> MAllocator(const MAllocator<U>&) noexcept {};
+  template <typename U>
+  MAllocator(const MAllocator<U>&) noexcept {};
 
   // TODO: add explanation for this
   // ::operator
@@ -1803,13 +1831,18 @@ template <typename T> struct MAllocator {
   // U is the place in memory to construct, and the args are passed to
   // the constructor using perfect forwarding, meaning lvalue/rvalue ness is
   // preserved
-  template <class U, class... Args> void construct(U* p, Args&&... args) {
+  template <class U, class... Args>
+  void construct(U* p, Args&&... args) {
     ::new ((void*)p) U(std::forward<Args>(args)...);
   };
 
-  template <class U> void destroy(U* p) { p->~U(); }
+  template <class U>
+  void destroy(U* p) {
+    p->~U();
+  }
 
-  template <class U> struct rebind {
+  template <class U>
+  struct rebind {
     using other = MAllocator<U>;
   };
 };
@@ -1838,12 +1871,13 @@ struct StdOutLogPolicy {
   void log(const std::string& s) const { std::cout << s << std::endl; }
 };
 
-template <typename T, typename LogPolicy = NoLogPolicy> class MArray {
+template <typename T, typename LogPolicy = NoLogPolicy>
+class MArray {
   LogPolicy logger;
   T* data;
   size_t size_;
 
-public:
+ public:
   MArray(size_t n) : data(new T[n]), size_(n) {
     logger.log("Allocated MyArray of size " + std::to_string(n));
   }
