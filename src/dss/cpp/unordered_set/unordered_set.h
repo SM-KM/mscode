@@ -6,7 +6,6 @@
 #include <iterator>
 #include <memory>
 
-#include "../unordered_multiset/unordered_multiset.h"
 #include "../utils/utils.h"
 
 namespace dss {
@@ -171,10 +170,6 @@ class unordered_set {
   void merge(unordered_set<Key, H2, P2, Allocator>& source);
   template <typename H2, typename P2>
   void merge(unordered_set<Key, H2, P2, Allocator>&& source);
-  template <typename H2, typename P2>
-  void merge(unordered_multiset<Key, H2, P2, Allocator>& source);
-  template <typename H2, typename P2>
-  void merge(unordered_multiset<Key, H2, P2, Allocator>&& source);
 
   size_type count(const Key& key) const;
   template <typename K>
