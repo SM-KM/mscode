@@ -5,17 +5,13 @@
 #include <functional>
 #include <iterator>
 
-namespace dss
-{
+namespace dss {
 template <class Key, class Compare = std::less<Key>,
           class Allocator = std::allocator<Key>>
-class set
-{
-  class Iterator
-  {
-  };
+class set {
+  class Iterator {};
 
-public:
+ public:
   using key_type = Key;
   using value_type = Key;
   using size_type = std::size_t;
@@ -36,9 +32,9 @@ public:
   // using node_type
 };
 
-class mutliset
-{
-};
+template <class Key, class Compare = std::less<Key>,
+          class Allocator = std::allocator<Key>>
+class multiset {};
 
 } // namespace dss
 
