@@ -56,7 +56,7 @@ class unordered_map {
   explicit unordered_map(const Allocator& alloc);
   template <class InputIt>
   unordered_map(InputIt first, InputIt last,
-                size_type bucket_count = m_min_buckets,
+                size_type bucket_count = m_max_buckets,
                 const Hash& hash = Hash(), const key_equal& equal = key_equal(),
                 const Allocator& alloc = Allocator());
 
@@ -77,7 +77,7 @@ class unordered_map {
 
   // maybe remove this one and always have to define the bucket count
   unordered_map(std::initializer_list<value_type> init,
-                size_type bucket_count = m_min_buckets,
+                size_type bucket_count = m_max_buckets,
                 const Hash& hash = Hash(), const key_equal& equal = key_equal(),
                 const Allocator& alloc = Allocator());
 
@@ -93,7 +93,7 @@ class unordered_map {
     __cpp_lib_containers_ranges >= 202202L
   template <container_compatible_range<value_type> R>
   unordered_map(std::from_range_t, R&& rg,
-                size_type bucket_count = m_min_buckets,
+                size_type bucket_count = m_max_buckets,
                 const Hash& hash = Hash(), const key_equal& equal = key_equal(),
                 const Allocator& alloc = Allocator());
 
@@ -219,8 +219,44 @@ class unordered_map {
   template <class K>
   const_iterator find(const K& x) const;
 
+  // contains
+  bool contains(const Key& key) const;
+  template <class K>
+  bool contains(const K& x) const;
+
+  std::pair<iterator, iterator> equal_range(const Key& key);
+  std::pair<const_iterator, const_iterator> equal_range(const Key& key) const;
+  template <class K>
+  std::pair<iterator, iterator> equal_range(const K& x);
+  template <class K>
+  std::pair<const_iterator, const_iterator> equal_range(const K& x) const;
+
+  // Bucket interface, methods and utils
+  local_iterator begin(size_type n);
+  const_local_iterator begin(size_type n) const;
+  const_local_iterator cbegin(size_type n) const;
+  local_iterator end(size_type n);
+  const_local_iterator end(size_type n) const;
+  const_local_iterator cend(size_type n) const;
+
+  size_type bucket_count() const;
+  size_type max_bucket_count() const { return m_max_buckets; };
+  size_type bucket_size(size_type n) const;
+  size_type bucket(const Key& key) const;
+
+  // Hash policy
+  float load_factor() const;
+  float max_load_factor() const;
+  void max_load_factor(float ml);
+  void rehash(size_type count);
+  void reserve(size_type count);
+
+  // Obervers
+  hasher hash_function() const;
+  key_equal key_eq() const;
+
  private:
-  static const size_t m_min_buckets = 16;
+  static const size_t m_max_buckets = 16;
   size_type m_size;
 };
 
