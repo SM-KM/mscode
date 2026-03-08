@@ -2,7 +2,6 @@
 #define VECTOR_H
 
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
@@ -13,12 +12,9 @@
 #include <utility>
 #include <vector>
 
-namespace dss {
+#include "../utils/utils.h"
 
-template <typename T, typename R>
-concept container_compatible_range =
-    std::ranges::range<T> &&
-    std::convertible_to<std::ranges::range_value_t<R>, T>;
+namespace dss {
 
 template <typename T, typename Allocator = std::allocator<T>>
 class vector {
@@ -479,12 +475,6 @@ class vector {
   template <class I, class Alloc, class Pred>
   constexpr typename std::vector<T, Alloc>::size_type erase_if(
       std::vector<T, Alloc>& c, Pred pred) {};
-
-  // Fix the deduction guide!
-  // template <std::ranges::input_range R,
-  //           class Alloc = std::allocator<std::ranges::range_value_t<R>>>
-  // auto vector(std::from_range_t, R&&, Alloc = Alloc())
-  //     -> vector<std::ranges::range_value_t<R>, Alloc>;
 
   // iterators
   constexpr iterator begin() noexcept { return iterator(m_data); };
