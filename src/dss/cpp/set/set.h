@@ -32,7 +32,146 @@ class set {
   using reverse_iterator = std::reverse_iterator<Iterator>;
   using const_reverse_iterator = const std::reverse_iterator<Iterator>;
   using node_type = NodeHandle;
+
+  set() : set(Compare()) {}
+  explicit set(const Compare& comp, const Allocator& alloc = Allocator());
+  explicit set(const Allocator& alloc);
+  template <class InputIt>
+  set(InputIt first, InputIt last, const Compare& comp = Compare(),
+      const Allocator& alloc = Allocator());
+  template <class InputIt>
+  set(InputIt first, InputIt last, const Allocator& alloc)
+      : set(first, last, Compare(), alloc) {}
+  set(const set& other);
+  set(const set& other, const Allocator& alloc);
+  set(set&& other);
+  set(set&& other, const Allocator& alloc);
+  set(std::initializer_list<value_type> init, const Compare& comp = Compare(),
+      const Allocator& alloc = Allocator());
+  set(std::initializer_list<value_type> init, const Allocator& alloc)
+      : set(init, Compare(), alloc) {}
+
+#if defined(__cpp_lib_containers_ranges) && \
+    __cpp_lib_containers_ranges >= 202202L
+  template <container_compatible_range<value_type> R>
+  set(std::from_range_t, R&& rg, const Compare& comp = Compare(),
+      const Allocator& alloc = Allocator());
+
+  template <container_compatible_range<value_type> R>
+  set(std::from_range_t, R&& rg, const Allocator& alloc)
+      : set(std::from_range, std::forward<R>(rg), Compare(), alloc) {}
+
+  template <container_compatible_range<value_type> R>
+  void insert_range(R&& rg);
+#endif // 0
+
+  ~set();
+  set& operator=(const set& other);
+  set& operator=(set&& other) noexcept(
+      std::allocator_traits<
+          allocator_type>::propagate_on_container_copy_assignment::value);
+  set& operator=(std::initializer_list<value_type> ilist);
+  allocator_type get_allocator() const noexcept;
+
+  // iterators
+  iterator begin() noexcept;
+  const_iterator begin() const noexcept;
+  const_iterator cbegin() const noexcept;
+  iterator end() noexcept;
+  const_iterator end() const noexcept;
+  const_iterator cend() const noexcept;
+  reverse_iterator rbegin() noexcept;
+  const_reverse_iterator rbegin() const noexcept;
+  const_reverse_iterator crbegin() const noexcept;
+  reverse_iterator rend() noexcept;
+  const_reverse_iterator rend() const noexcept;
+  const_reverse_iterator crend() const noexcept;
+
+  [[nodiscard]] bool empty() const noexcept;
+  size_type size() const noexcept;
+  size_type max_size() const noexcept;
+  void clear() noexcept;
+
+  // insert
+  std::pair<iterator, bool> insert(const value_type& value);
+  std::pair<iterator, bool> insert(value_type&& value);
+  iterator insert(const_iterator pos, const value_type& value);
+  iterator insert(const_iterator pos, value_type&& value);
+  template <class InputIt>
+  void insert(InputIt first, InputIt last);
+  void insert(std::initializer_list<value_type> ilist);
+  iterator insert(const_iterator pos, node_type&& nh);
+
+  template <class... Args>
+  std::pair<iterator, bool> emplace(Args&&... args);
+  template <class... Args>
+  iterator emplace_hint(const_iterator hint, Args&&... args);
+
+  iterator erase(iterator pos);
+  iterator erase(iterator pos)
+    requires(!std::same_as<iterator, const_iterator>);
+  iterator erase(const_iterator first, const_iterator last);
+  size_type erase(const Key& key);
+  template <class K>
+  size_type erase(K&& x);
+
+  void swap(set& other) noexcept(
+      std::allocator_traits<
+          allocator_type>::propagate_on_container_swap::value);
+
+  node_type extract(const_iterator position);
+  node_type extract(const Key& k);
+  template <class K>
+  node_type extract(K&& x);
+
+  template <class C2>
+  void merge(set<Key, C2, Allocator>& source);
+  template <class C2>
+  void merge(set<Key, C2, Allocator>&& source);
+
+  size_type count(const Key& key) const;
+  template <class K>
+  size_type count(const K& x) const;
+
+  iterator find(const Key& key);
+  const_iterator find(const Key& key) const;
+  template <class K>
+  iterator find(const K& x);
+  template <class K>
+  const_iterator find(const K& x) const;
+
+  bool contains(const Key& key) const;
+  template <class K>
+  bool contains(const K& x) const;
+
+  std::pair<iterator, iterator> equal_range(const Key& key);
+  std::pair<const_iterator, const_iterator> equal_range(const Key& key) const;
+  template <class K>
+  std::pair<iterator, iterator> equal_range(const K& x);
+  template <class K>
+  std::pair<const_iterator, const_iterator> equal_range(const K& x) const;
+
+  iterator lower_bound(const Key& key);
+  const_iterator lower_bound(const Key& key) const;
+  template <class K>
+  iterator lower_bound(const K& x);
+  template <class K>
+  const_iterator lower_bound(const K& x) const;
+
+  iterator upper_bound(const Key& key);
+  const_iterator upper_bound(const Key& key) const;
+  template <class K>
+  iterator upper_bound(const K& x);
+  template <class K>
+  const_iterator upper_bound(const K& x) const;
+
+  key_compare key_comp() const;
+  set::value_compare value_comp() const;
 };
+
+template <class Key, class Compare, class Alloc>
+constexpr auto operator<=>(const set<Key, Compare, Alloc>& lhs,
+                           const set<Key, Compare, Alloc>& rhs);
 
 template <class Key, class Compare = std::less<Key>,
           class Allocator = std::allocator<Key>>
