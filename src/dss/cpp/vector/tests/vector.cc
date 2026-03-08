@@ -52,9 +52,6 @@ TEST(vector, initializer_list_constructor) {
   EXPECT_TRUE(vec.capacity() == 3);
 }
 
-TEST(vector, push_back) {
-  EXPECT_TRUE(true);
-}
 TEST(vector, reserve) {
   dss::vector<int> vec;
   auto alloc = vec.get_allocator();
@@ -91,7 +88,7 @@ TEST(vector, shrink_to_fit) {
   EXPECT_TRUE(v.size() == 0);
   EXPECT_TRUE(v.capacity() == 0);
 
-  // when ther is elements
+  // when there is elements
   v.push_back(20);
   EXPECT_TRUE(v.capacity() == 16);
   EXPECT_TRUE(v.size() == 1);
