@@ -54,6 +54,13 @@ fn inspect(evt: WebEvent) {
     }
 }
 
+// type aliases
+enum VeryVerboseNameOfEnumToDoWithNumbers {
+    Add,
+    Substract,
+}
+type Operations = VeryVerboseNameOfEnumToDoWithNumbers;
+
 pub fn enumss() {
     let pressed = WebEvent::KeyPress('x');
     let pasted = WebEvent::Paste("my text".to_owned());
