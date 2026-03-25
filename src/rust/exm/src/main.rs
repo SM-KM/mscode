@@ -1,6 +1,6 @@
-mod primitives;
-use primitives::arr_slices;
+mod structures;
+use structures::structures;
 
 fn main() {
-    arr_slices();
+    structures();
 }
