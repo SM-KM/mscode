@@ -17,6 +17,12 @@ fn call_me<F: Fn()>(f: F) {
     f();
 }
 
+// returnning closures as output parameters
+fn c_fn() -> impl Fn() {
+    let text = "Fn".to_owned();
+    move || println!("returning a closure, {}", text)
+}
+
 pub fn closures() {
     let outer = 5;
     let closure_annotaded = |i: i32| -> i32 { i + outer };
