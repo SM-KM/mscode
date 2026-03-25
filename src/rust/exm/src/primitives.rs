@@ -49,8 +49,22 @@ fn analyze_slice(slice: &[i32]) {
 
 pub fn arr_slices() {
     let xs: [i32; 5] = [1, 2, 3, 4, 5];
+
+    // all elements are default intizalized in this case
+    let ys: [i32; 500] = [0; 500];
     println!("Number of elements in array: {}", xs.len());
 
     // are stack allocated
     println!("Array occupies {} bytes", mem::size_of_val(&xs));
+    analyze_slice(&xs);
+    analyze_slice(&ys[1..4]);
+
+    // on purpose go 1 element far so that the none is
+    // triggered
+    for i in 0..xs.len() {
+        match xs.get(i) {
+            Some(xval) => println!("{}: {}", i, xval),
+            None => println!("Slow down! {} is too far", i),
+        }
+    }
 }
