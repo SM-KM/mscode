@@ -1,3 +1,17 @@
+fn apply<F>(f: F)
+where
+    F: FnOnce(),
+{
+    f();
+}
+
+fn apply_to_3<F>(f: F) -> i32
+where
+    F: Fn(i32) -> i32,
+{
+    f(3)
+}
+
 pub fn closures() {
     let outer = 5;
     let closure_annotaded = |i: i32| -> i32 { i + outer };
