@@ -1,11 +1,6 @@
-mod display;
 mod primitives;
-
-// use display::{display, formatting};
-use primitives::primitives;
+use primitives::arr_slices;
 
 fn main() {
-    // display();
-    // formatting();
-    primitives();
+    arr_slices();
 }
