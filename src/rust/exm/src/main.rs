@@ -1,6 +1,6 @@
-mod testcase;
-use testcase::testcases;
+mod conversions;
+use conversions::conversions;
 
 fn main() {
-    testcases();
+    conversions();
 }
