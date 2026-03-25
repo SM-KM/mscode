@@ -1,7 +1,11 @@
 mod display;
-use display::{display, formatting};
+mod primitives;
+
+// use display::{display, formatting};
+use primitives::primitives;
 
 fn main() {
-    display();
-    formatting();
+    // display();
+    // formatting();
+    primitives();
 }
