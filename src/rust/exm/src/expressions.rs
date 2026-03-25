@@ -22,3 +22,12 @@ pub fn expressions() {
     };
     println!("y: {:?}, z: {:?}", y, z);
 }
+
+pub fn binding() {
+    match 15 {
+        0 => println!("nothing"),
+        n @ 1..=12 => println!("child of age {}", n),
+        n @ 13..=19 => println!("teen fo age {}", n),
+        n => println!("old person: {}", n),
+    }
+}
