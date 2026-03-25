@@ -31,6 +31,17 @@ struct Color {
     blue: u8,
 }
 
+impl fmt::Display for Color {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "RGB (")?;
+        write!(
+            f,
+            "{}, {}, {}) 0x{:02x}{:02x}{:02x}",
+            self.red, self.green, self.blue, self.red, self.green, self.blue
+        )
+    }
+}
+
 impl fmt::Display for City {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let lat_c = if self.lat >= 0.0 { 'N' } else { 'S' };
@@ -61,6 +72,6 @@ pub fn formatting() {
         Color { red: 0, green: 3, blue: 254 },
         Color { red: 0, green: 0, blue: 0 },
     ] {
-        println!("{:?}", color);
+        println!("{}", color);
     }
 }
