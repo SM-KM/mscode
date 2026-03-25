@@ -1,6 +1,6 @@
-mod structures;
-use structures::structures;
+mod testcase;
+use testcase::testcases;
 
 fn main() {
-    structures();
+    testcases();
 }
