@@ -46,3 +46,14 @@ pub fn display() {
     let v = List(vec![1, 2, 3]);
     println!("{}", v);
 }
+
+pub fn formatting() {
+    // formatting
+    for city in [
+        City { name: "Dublin", lat: 53.347778, lon: -6.259722 },
+        City { name: "Oslo", lat: 59.95, lon: 10.75 },
+        City { name: "Vancouver", lat: 49.25, lon: -123.1 },
+    ] {
+        println!("{}", city);
+    }
+}
