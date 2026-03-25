@@ -1,11 +1,12 @@
-# dss
+# mscode
 
 implmentation of a good part of the std library of c++23, along side 
 interesting parts of the language, and a good bunch of [metaprogramming](/src/cpp/templates.cpp)
 
 ## Compiling
 can be done with the included CMakeLists.txt in the root of
-the project to compile everything at once, with or without tests.
+the project to compile everything at once, with or without tests, using
+the option variable defined on the root cmake file.
 
 ```cmake
 option(BUILD_TESTS "Build with tests globally" ON)
@@ -16,8 +17,7 @@ to compile specific part of the project, use the included CMakeLists.txt
 files included along side the implementation of each part of dss,
 and the tests for them can be disabled per part.
 
-minimal example of the cmake file for vector
-
+minimal example of the cmake file for vector:
 ```cmake
 cmake_minimum_required(VERSION 3.14)
 project(vector VERSION 0.0.1 LANGUAGES CXX)
