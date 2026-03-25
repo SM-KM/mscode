@@ -39,3 +39,18 @@ pub fn primitives() {
     println!("Matrix:\n{}", matrix);
     println!("Transpose:\n{}", transpose(matrix));
 }
+
+use std::mem;
+
+fn analyze_slice(slice: &[i32]) {
+    println!("first element of the slice: {}", slice[0]);
+    println!("the slice has {} elements", slice.len());
+}
+
+pub fn arr_slices() {
+    let xs: [i32; 5] = [1, 2, 3, 4, 5];
+    println!("Number of elements in array: {}", xs.len());
+
+    // are stack allocated
+    println!("Array occupies {} bytes", mem::size_of_val(&xs));
+}
