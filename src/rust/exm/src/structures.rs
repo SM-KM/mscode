@@ -61,6 +61,16 @@ enum VeryVerboseNameOfEnumToDoWithNumbers {
 }
 type Operations = VeryVerboseNameOfEnumToDoWithNumbers;
 
+enum Stage {
+    Begginer,
+    Advanced,
+}
+
+enum Role {
+    Student,
+    Teacher,
+}
+
 pub fn enumss() {
     let pressed = WebEvent::KeyPress('x');
     let pasted = WebEvent::Paste("my text".to_owned());
@@ -73,4 +83,11 @@ pub fn enumss() {
     inspect(click);
     inspect(load);
     inspect(unload);
+
+    // avoid the scoping using use for
+    // enums and modules
+    use Role::*;
+    use Stage::{Advanced, Begginer};
+    let _stage = Begginer;
+    let _role = Student;
 }
