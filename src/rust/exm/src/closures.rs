@@ -8,4 +8,8 @@ pub fn closures() {
 
     let one = || 1;
     println!("return 1: {}", one());
+
+    let hay = vec![1, 2, 3];
+    let contains = move |needle| hay.contains(needle);
+    contains(&2);
 }
