@@ -12,9 +12,15 @@ where
     f(3)
 }
 
+fn function() {}
+fn call_me<F: Fn()>(f: F) {
+    f();
+}
+
 pub fn closures() {
     let outer = 5;
     let closure_annotaded = |i: i32| -> i32 { i + outer };
+    let print = || println!("somthing");
     let closure_not = |i: i32| i + outer;
 
     println!("closure_annotated: {}", closure_annotaded(1));
@@ -26,4 +32,7 @@ pub fn closures() {
     let hay = vec![1, 2, 3];
     let contains = move |needle| hay.contains(needle);
     contains(&2);
+
+    call_me(print);
+    call_me(function);
 }
