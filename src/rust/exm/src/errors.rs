@@ -67,6 +67,15 @@ fn process(food: Option<Food>) -> Option<Cooked> {
     food.map(|f| Peeled(f)).map(|Peeled(f)| Chopped(f)).map(|Chopped(f)| Cooked(f))
 }
 
+#[derive(Debug)]
+enum Fruit {
+    Apple,
+    Orange,
+    Banana,
+    Kiwi,
+    Lemon,
+}
+
 pub fn errors() {
     let p = Person {
         job: Some(Job {
@@ -75,4 +84,10 @@ pub fn errors() {
     };
 
     assert_eq!(p.work_area_code(), Some(61));
+    let apple = Some(Fruit::Apple);
+    let orange = Some(Fruit::Orange);
+    let no_fruit: Option<Fruit> = None;
+
+    let first_available_fruit = no_fruit.or(orange).or(apple);
+    println!("first_available_fruit: {:?}", first_available_fruit);
 }
