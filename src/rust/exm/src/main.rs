@@ -1,6 +1,6 @@
-mod lifetimes;
-use lifetimes::lifetimes;
+mod traits;
+use traits::traits;
 
 fn main() {
-    lifetimes();
+    traits();
 }
