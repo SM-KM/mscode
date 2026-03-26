@@ -63,6 +63,11 @@ macro_rules! op {
     };
 }
 
+use std::ops::{Add, Mul, Sub};
+op!(add_assign,Add, +=, add);
+op!(mul_assign, Mul, *=, mul);
+op!(sub_assign, Sub, -=, sub);
+
 pub fn macros() {
     say_hl!();
     foo();
