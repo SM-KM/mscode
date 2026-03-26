@@ -1,6 +1,7 @@
-mod traits;
-use traits::traits;
+#![allow(dead_code)]
+mod macros;
+use macros::macros;
 
 fn main() {
-    traits();
+    macros();
 }
