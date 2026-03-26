@@ -24,6 +24,22 @@ fn area<T: HasArea>(t: &T) -> f64 {
     t.area()
 }
 
+// Multiple bounds
+fn compare_prints<T: Debug + Display>(t: &T) {}
+fn compare_types<T: Debug, U: Debug>(t: &T, u: &U) {}
+
+trait PrintOption {
+    fn print_option(self);
+}
+
+// is way clearer that using multiple bounds for the types
+impl<T> PrintOption for T
+where
+    Option<T>: Debug,
+{
+    fn print_option(self) {}
+}
+
 #[derive(Debug)]
 struct Rectangle {
     length: f64,
