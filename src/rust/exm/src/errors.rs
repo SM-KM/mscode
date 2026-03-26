@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 #[cfg(panic = "unwind")]
 fn ah() {
     println!("Spit it out!!!!");
@@ -51,18 +52,22 @@ impl Person {
     }
 }
 
+// conbinators = map
+enum Food {
+    Apple,
+    Carrot,
+    Tomato,
+}
+
+struct Peeled(Food);
+struct Cooked(Food);
+struct Chopped(Food);
+
+fn process(food: Option<Food>) -> Option<Cooked> {
+    food.map(|f| Peeled(f)).map(|Peeled(f)| Chopped(f)).map(|Chopped(f)| Cooked(f))
+}
+
 pub fn errors() {
-    let water = Some("water");
-    let void = None;
-
-    give_adlt(water);
-    give_adlt(void);
-
-    drink(water);
-    drink(void);
-
-    n_bit(None);
-
     let p = Person {
         job: Some(Job {
             phone_number: Some(PhoneNumber { area_code: Some(61), number: 439222222 }),
