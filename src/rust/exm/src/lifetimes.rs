@@ -10,6 +10,17 @@ fn add_one<'a>(x: &'a mut i32) -> &'a mut i32 {
     x
 }
 
+// lifetimes with methods
+struct Owner(i32);
+impl Owner {
+    fn add_one<'a>(&'a mut self) {
+        self.0 += 1;
+    }
+    fn print<'a>(&'a self) {
+        println!("val: {}", self.0);
+    }
+}
+
 pub fn lifetimes() {
     let (fo, nin) = (4, 9);
     print_refs(&fo, &nin);
