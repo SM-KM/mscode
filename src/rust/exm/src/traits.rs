@@ -52,4 +52,13 @@ fn make_cls(y: i32) -> impl Fn(i32) -> i32 {
     move |x: i32| x + y
 }
 
+// kind of inheritance, supertraits
+trait Person {
+    fn name(&self) -> String;
+}
+
+trait Student: Person {
+    fn uni(&self) -> String;
+}
+
 pub fn traits() {}
