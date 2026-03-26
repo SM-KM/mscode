@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+
+use std::num::ParseIntError;
 #[cfg(panic = "unwind")]
 fn ah() {
     println!("Spit it out!!!!");
@@ -76,10 +78,14 @@ enum Fruit {
     Lemon,
 }
 
-fn mult(first: &str, second: &str) -> i32 {
-    let fnum = first.parse::<i32>().unwrap();
-    let snum = second.parse::<i32>().unwrap();
-    fnum + snum
+fn mult(first: &str, second: &str) -> Result<i32, ParseIntError> {
+    match first.parse::<i32>() {
+        Ok(fnum) => match second.parse::<i32>() {
+            Ok(snum) => Ok(fnum + snum),
+            Err(e) => Err(e),
+        },
+        Err(e) => Err(e),
+    }
 }
 
 pub fn errors() {
