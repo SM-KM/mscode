@@ -90,4 +90,10 @@ pub fn errors() {
 
     let first_available_fruit = no_fruit.or(orange).or(apple);
     println!("first_available_fruit: {:?}", first_available_fruit);
+
+    let mut my_fruit: Option<Fruit> = None;
+    let apple = Fruit::Apple;
+
+    let f_ava = my_fruit.get_or_insert(apple);
+    println!("first_available_fruit is: {:?}", f_ava);
 }
