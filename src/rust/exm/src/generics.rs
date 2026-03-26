@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::fmt::{Debug, Display};
 
 trait DoubleDrop<T> {
@@ -25,8 +26,8 @@ fn area<T: HasArea>(t: &T) -> f64 {
 }
 
 // Multiple bounds
-fn compare_prints<T: Debug + Display>(t: &T) {}
-fn compare_types<T: Debug, U: Debug>(t: &T, u: &U) {}
+fn compare_prints<T: Debug + Display>(_t: &T) {}
+fn compare_types<T: Debug, U: Debug>(_t: &T, _u: &U) {}
 
 trait PrintOption {
     fn print_option(self);
@@ -54,6 +55,18 @@ struct Null;
 // be bound to the specific type
 fn printer<T: Display>(t: T) {
     println!("{}", t);
+}
+
+// associated types
+trait Contains {
+    type A;
+    type B;
+
+    fn contains(&self, _: &Self::A, _: &Self::B) -> bool;
+}
+
+fn difference<C: Contains>(_container: &C) -> i32 {
+    4
 }
 
 pub fn generics() {

@@ -1,6 +1,6 @@
-mod conversions;
-use conversions::conversions;
+mod generics;
+use generics::generics;
 
 fn main() {
-    conversions();
+    generics();
 }
