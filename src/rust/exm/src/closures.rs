@@ -22,12 +22,18 @@ fn c_fn() -> impl Fn() {
     let text = "Fn".to_owned();
     move || println!("returning a closure, {}", text)
 }
+fn is_odd(n: u32) -> bool {
+    n % 2 == 1
+}
 
 pub fn closures() {
     let outer = 5;
     let closure_annotaded = |i: i32| -> i32 { i + outer };
     let print = || println!("somthing");
     let closure_not = |i: i32| i + outer;
+
+    let upper = 1000;
+    let _sum: u32 = (0..).take_while(|&n| n * n < upper).filter(|&n| is_odd(n * n)).sum();
 
     println!("closure_annotated: {}", closure_annotaded(1));
     println!("closure_inferred: {}", closure_not(1));
