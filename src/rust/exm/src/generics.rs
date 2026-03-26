@@ -89,6 +89,14 @@ fn difference<C: Contains>(container: &C) -> i32 {
     container.last() - container.first()
 }
 
+// phantom
+use std::marker::PhantomData;
+
+// storage is allocated for A but not for B, so it cannot be used in
+// anything
+#[derive(PartialEq)]
+struct PhantomTuple<A, B>(A, PhantomData<B>); // B is never used
+
 pub fn ass_types() {
     let n1 = 3;
     let n2 = 10;
