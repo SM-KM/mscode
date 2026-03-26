@@ -78,7 +78,8 @@ enum Fruit {
     Lemon,
 }
 
-fn mult(first: &str, second: &str) -> Result<i32, ParseIntError> {
+type AliasedResult<T> = Result<T, ParseIntError>;
+fn mult(first: &str, second: &str) -> AliasedResult<i32> {
     match first.parse::<i32>() {
         Ok(fnum) => match second.parse::<i32>() {
             Ok(snum) => Ok(fnum + snum),
