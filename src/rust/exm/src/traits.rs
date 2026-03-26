@@ -61,4 +61,34 @@ trait Student: Person {
     fn uni(&self) -> String;
 }
 
-pub fn traits() {}
+// Disambiguating overlapping traits
+trait Username {
+    fn get(&self) -> String;
+}
+
+trait Age {
+    fn get(&self) -> u8;
+}
+
+struct Form {
+    username: String,
+    age: u8,
+}
+
+impl Username for Form {
+    fn get(&self) -> String {
+        self.username.clone()
+    }
+}
+
+impl Age for Form {
+    fn get(&self) -> u8 {
+        self.age
+    }
+}
+
+pub fn traits() {
+    let form = Form { username: "rustacean".to_owned(), age: 28 };
+    let _username = <Form as Username>::get(&form);
+    let _age = <Form as Age>::get(&form);
+}
