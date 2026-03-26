@@ -21,6 +21,10 @@ impl Owner {
     }
 }
 
+// lifetimes with bounds
+#[derive(Debug)]
+struct Ref<'a, T: 'a>(&'a T);
+
 pub fn lifetimes() {
     let (fo, nin) = (4, 9);
     print_refs(&fo, &nin);
