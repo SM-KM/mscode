@@ -76,6 +76,12 @@ macro_rules! calculate {
             println!("{} = {}", stringify!({$e}), val);
         }
     };
+
+
+    (eval $e:expr, $(eval $es:expr),+) => {{
+        calculate! { eval $e }
+        calculate! { $(eval $es),+ }
+    }}
 }
 
 pub fn macros() {
@@ -95,5 +101,11 @@ pub fn macros() {
 
     calculate! {
         eval 1 + 2
+    }
+
+    calculate! {
+        eval 1 + 2,
+        eval 3 + 4,
+        eval (2 * 3) + 1
     }
 }
