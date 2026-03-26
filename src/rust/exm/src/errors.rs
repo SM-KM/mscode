@@ -76,6 +76,12 @@ enum Fruit {
     Lemon,
 }
 
+fn mult(first: &str, second: &str) -> i32 {
+    let fnum = first.parse::<i32>().unwrap();
+    let snum = second.parse::<i32>().unwrap();
+    fnum + snum
+}
+
 pub fn errors() {
     let p = Person {
         job: Some(Job {
