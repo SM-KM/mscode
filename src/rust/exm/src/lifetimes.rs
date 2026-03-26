@@ -25,6 +25,11 @@ impl Owner {
 #[derive(Debug)]
 struct Ref<'a, T: 'a>(&'a T);
 
+// lifetimes coercion -> lifetime 'a needs to be as long as lifetime 'a
+fn choose_first<'a: 'b, 'b>(first: &'a i32, _: &'b i32) -> &'b i32 {
+    first
+}
+
 pub fn lifetimes() {
     let (fo, nin) = (4, 9);
     print_refs(&fo, &nin);

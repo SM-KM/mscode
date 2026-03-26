@@ -1,6 +1,6 @@
-mod generics;
-use generics::ass_types;
+mod lifetimes;
+use lifetimes::lifetimes;
 
 fn main() {
-    ass_types();
+    lifetimes();
 }
