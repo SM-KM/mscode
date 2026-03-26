@@ -26,4 +26,25 @@ impl Iterator for Fibonacci {
     }
 }
 
+// impl trait
+// fn parse_csv_docs<R: std::io::BufRead>(_src: R) {}, turn this into
+// using impl, something to avoid the extra generic R
+fn parse_csv_docs(_src: impl std::io::BufRead) {}
+
+use std::iter;
+use std::vec::IntoIter;
+
+// it helps to reduce the signature in some cases a lot
+fn combine_vecs_explicit_return(
+    v: Vec<i32>,
+    u: Vec<i32>,
+) -> iter::Cycle<iter::Chain<IntoIter<i32>, IntoIter<i32>>> {
+    v.into_iter().chain(u.into_iter()).cycle()
+}
+
+// turn it into something like:
+fn combine_vecs(v: Vec<i32>, u: Vec<i32>) -> impl Iterator<Item = i32> {
+    v.into_iter().chain(u.into_iter()).cycle()
+}
+
 pub fn traits() {}
