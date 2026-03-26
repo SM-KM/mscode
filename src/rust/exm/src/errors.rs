@@ -81,23 +81,9 @@ enum Fruit {
 type AliasedResult<T> = Result<T, ParseIntError>;
 fn mult(first: &str, second: &str) -> AliasedResult<i32> {
     // Early returns
-    let _first_number = match first.parse::<i32>() {
-        Ok(first_number) => first_number,
-        Err(e) => return Err(e),
-    };
-
-    let _second_number = match second.parse::<i32>() {
-        Ok(second_number) => second_number,
-        Err(e) => return Err(e),
-    };
-
-    match first.parse::<i32>() {
-        Ok(fnum) => match second.parse::<i32>() {
-            Ok(snum) => Ok(fnum + snum),
-            Err(e) => Err(e),
-        },
-        Err(e) => Err(e),
-    }
+    let _first_number = first.parse::<i32>()?;
+    let _second_number = second.parse::<i32>()?;
+    Ok(_first_number + _second_number)
 }
 
 pub fn errors() {
