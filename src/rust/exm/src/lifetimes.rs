@@ -34,3 +34,7 @@ pub fn lifetimes() {
     let (fo, nin) = (4, 9);
     print_refs(&fo, &nin);
 }
+
+// ellision
+// the compiler add common lifetimes when not defined
+// to improve readability
