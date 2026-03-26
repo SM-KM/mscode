@@ -58,11 +58,6 @@ fn printer<T: Display>(t: T) {
 }
 
 // associated types
-
-fn difference<C: Contains>(_container: &C) -> i32 {
-    4
-}
-
 // associated types example
 struct Container(i32, i32);
 
@@ -90,7 +85,20 @@ impl Contains for Container {
     }
 }
 
-pub fn ass_types() {}
+fn difference<C: Contains>(container: &C) -> i32 {
+    container.last() - container.first()
+}
+
+pub fn ass_types() {
+    let n1 = 3;
+    let n2 = 10;
+    let cont = Container(n1, n2);
+    println!("Does container contain {} and {}: {}", &n1, &n2, cont.contains(&n1, &n2));
+    println!("First number: {}", cont.first());
+    println!("Last number: {}", cont.last());
+
+    println!("The difference is: {}", difference(&cont));
+}
 
 pub fn generics() {
     let empty = Empty;
