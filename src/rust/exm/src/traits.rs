@@ -47,4 +47,9 @@ fn combine_vecs(v: Vec<i32>, u: Vec<i32>) -> impl Iterator<Item = i32> {
     v.into_iter().chain(u.into_iter()).cycle()
 }
 
+// allows to return closures without having to allocate in the heap first
+fn make_cls(y: i32) -> impl Fn(i32) -> i32 {
+    move |x: i32| x + y
+}
+
 pub fn traits() {}
