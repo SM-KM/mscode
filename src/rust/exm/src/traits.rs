@@ -10,4 +10,20 @@ fn rnd_anim(_dn: f64) -> Box<dyn Animal> {
 // implementing the traits inside core::ops, allows to
 // perform operator overloading
 
+// iterators
+struct Fibonacci {
+    curr: u32,
+    next: u32,
+}
+
+impl Iterator for Fibonacci {
+    type Item = u32;
+    fn next(&mut self) -> Option<Self::Item> {
+        let current = self.curr;
+        self.curr = self.next;
+        self.next = current + self.next;
+        Some(current)
+    }
+}
+
 pub fn traits() {}
