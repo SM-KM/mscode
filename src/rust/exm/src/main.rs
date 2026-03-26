@@ -1,6 +1,6 @@
 mod generics;
-use generics::generics;
+use generics::ass_types;
 
 fn main() {
-    generics();
+    ass_types();
 }
