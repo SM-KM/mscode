@@ -1,7 +1,7 @@
 #![allow(dead_code)]
-mod macros;
-use macros::macros;
+mod errors;
+use errors::errors;
 
 fn main() {
-    macros();
+    errors();
 }
