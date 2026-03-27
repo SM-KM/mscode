@@ -86,24 +86,17 @@ fn mult(first: &str, second: &str) -> AliasedResult<i32> {
     Ok(_first_number + _second_number)
 }
 
+fn double_first(vec: Vec<&str>) -> i32 {
+    let first = vec.first().unwrap();
+    2 * first.parse::<i32>().unwrap()
+}
+
 pub fn errors() {
-    let p = Person {
-        job: Some(Job {
-            phone_number: Some(PhoneNumber { area_code: Some(61), number: 439222222 }),
-        }),
-    };
+    let numbers = vec!["42", "93", "18"];
+    let empty = vec![];
+    let strings = vec!["tofu", "93", "18"];
 
-    assert_eq!(p.work_area_code(), Some(61));
-    let apple = Some(Fruit::Apple);
-    let orange = Some(Fruit::Orange);
-    let no_fruit: Option<Fruit> = None;
-
-    let first_available_fruit = no_fruit.or(orange).or(apple);
-    println!("first_available_fruit: {:?}", first_available_fruit);
-
-    let mut my_fruit: Option<Fruit> = None;
-    let apple = Fruit::Apple;
-
-    let f_ava = my_fruit.get_or_insert(apple);
-    println!("first_available_fruit is: {:?}", f_ava);
+    println!("The first doubled is {}", double_first(numbers));
+    println!("The first doubled is {}", double_first(empty));
+    println!("The first doubled is {}", double_first(strings));
 }
