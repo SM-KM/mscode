@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::fileio;
+use stdlibs::child_process;
 
 fn main() {
-    fileio();
+    child_process();
 }
