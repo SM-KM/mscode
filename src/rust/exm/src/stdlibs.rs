@@ -95,14 +95,29 @@ pub fn fileio() {
         Err(why) => panic!("could not create the file: {}", why),
     };
 
-    match file.write_all(LOREM_IPSUM.as_bytes()) {
-        Ok(_) => print!("wrote into: {}", display),
-        Err(why) => panic!("couldn't write {}: {}", display, why),
-    }
+    // match file.write_all(LOREM_IPSUM.as_bytes()) {
+    //     Ok(_) => print!("wrote into: {}", display),
+    //     Err(why) => panic!("couldn't write {}: {}", display, why),
+    // }
 
     if let Ok(lines) = read_lines("./hosts.txt") {
         for line in lines.map_while(Result::ok) {
             println!("{}", line)
         }
+    }
+}
+
+pub fn child_process() {
+    use std::process::Command;
+    let output = Command::new("rustc").arg("--version").output().unwrap_or_else(|e| {
+        panic!("failed to exec {}", e);
+    });
+
+    if output.status.success() {
+        let s = String::from_utf8_lossy(&output.stdout);
+        print!("rustc worked: {}", s);
+    } else {
+        let s = String::from_utf8_lossy(&output.stderr);
+        print!("rustc failed: {}", s);
     }
 }
