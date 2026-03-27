@@ -89,21 +89,22 @@ enum Fruit {
 use std::error;
 use std::fmt;
 
-type Result<T> = std::result::Result<T, DoubleErr>;
+type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
-#[derive(Debug, Clone)]
-struct DoubleErr;
+#[derive(Debug)]
+struct EmptyVec;
 
-impl fmt::Display for DoubleErr {
+impl fmt::Display for EmptyVec {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Invalid first item")
+        write!(f, "invalid first item to double")
     }
 }
+impl error::Error for EmptyVec {}
 
 fn double_first(vec: Vec<&str>) -> Result<i32> {
-    vec.first()
-        .ok_or(DoubleErr)
-        .and_then(|s| s.parse::<i32>().map_err(|_| DoubleErr).map(|i| 2 * i))
+    let first = vec.first().ok_or(EmptyVec)?;
+    let parsed = first.parse::<i32>()?;
+    Ok(2 * parsed)
 }
 
 // Boxing errors
