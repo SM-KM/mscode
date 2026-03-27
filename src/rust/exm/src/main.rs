@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::filesystem;
+use stdlibs::prog_args;
 
 fn main() {
-    filesystem();
+    prog_args();
 }
