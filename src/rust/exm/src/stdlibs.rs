@@ -80,7 +80,7 @@ pub fn fileio() {
         Err(why) => panic!("could not create the file: {}", why),
     };
 
-    match file.write(LOREM_IPSUM.as_bytes()) {
+    match file.write_all(LOREM_IPSUM.as_bytes()) {
         Ok(_) => print!("wrote into: {}", display),
         Err(why) => panic!("couldn't write {}: {}", display, why),
     }
