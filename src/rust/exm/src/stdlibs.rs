@@ -1,4 +1,5 @@
 use std::{
+    env::{self, args},
     fs::{File, OpenOptions, read_to_string},
     io::{self, BufRead, Read, Write},
     path::Path,
@@ -170,3 +171,8 @@ fn touch(path: &Path) -> io::Result<()> {
 }
 
 pub fn filesystem() {}
+
+pub fn prog_args() {
+    let args: Vec<String> = env::args().collect();
+    println!("args: {:?}", &args[1..]);
+}
