@@ -78,17 +78,30 @@ enum Fruit {
     Lemon,
 }
 
-type AliasedResult<T> = Result<T, ParseIntError>;
-fn mult(first: &str, second: &str) -> AliasedResult<i32> {
-    // Early returns
-    let _first_number = first.parse::<i32>()?;
-    let _second_number = second.parse::<i32>()?;
-    Ok(_first_number + _second_number)
+// type AliasedResult<T> = Result<T, ParseIntError>;
+// fn mult(first: &str, second: &str) -> AliasedResult<i32> {
+//     // Early returns
+//     let _first_number = first.parse::<i32>()?;
+//     let _second_number = second.parse::<i32>()?;
+//     Ok(_first_number + _second_number)
+// }
+
+use std::fmt;
+type Result<T> = std::result::Result<T, DoubleErr>;
+
+#[derive(Debug, Clone)]
+struct DoubleErr;
+
+impl fmt::Display for DoubleErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Invalid first item")
+    }
 }
 
-fn double_first(vec: Vec<&str>) -> i32 {
-    let first = vec.first().unwrap();
-    2 * first.parse::<i32>().unwrap()
+fn double_first(vec: Vec<&str>) -> Result<i32> {
+    vec.first()
+        .ok_or(DoubleErr)
+        .and_then(|s| s.parse::<i32>().map_err(|_| DoubleErr).map(|i| 2 * i))
 }
 
 pub fn errors() {
@@ -96,7 +109,7 @@ pub fn errors() {
     let empty = vec![];
     let strings = vec!["tofu", "93", "18"];
 
-    println!("The first doubled is {}", double_first(numbers));
-    println!("The first doubled is {}", double_first(empty));
-    println!("The first doubled is {}", double_first(strings));
+    print!("{:?}", double_first(numbers));
+    print!("{:?}", double_first(empty));
+    print!("{:?}", double_first(strings));
 }
