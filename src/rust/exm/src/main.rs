@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::wait;
+use stdlibs::filesystem;
 
 fn main() {
-    wait();
+    filesystem();
 }
