@@ -1,5 +1,7 @@
 use std::{
-    io, path,
+    fs::{File, read_to_string},
+    io::{self, BufRead},
+    path::{self, Path},
     sync::mpsc::{Receiver, Sender},
 };
 
@@ -67,6 +69,19 @@ cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 ";
 
+// naive approach
+fn read_lines_nv(filename: &str) -> Vec<String> {
+    read_to_string(filename).unwrap().lines().map(String::from).collect()
+}
+
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<std::fs::File>>>
+where
+    P: AsRef<Path>,
+{
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
+}
+
 pub fn fileio() {
     use std::fs::File;
     use std::io::prelude::*;
@@ -83,5 +98,11 @@ pub fn fileio() {
     match file.write_all(LOREM_IPSUM.as_bytes()) {
         Ok(_) => print!("wrote into: {}", display),
         Err(why) => panic!("couldn't write {}: {}", display, why),
+    }
+
+    if let Ok(lines) = read_lines("./hosts.txt") {
+        for line in lines.map_while(Result::ok) {
+            println!("{}", line)
+        }
     }
 }
