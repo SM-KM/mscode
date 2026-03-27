@@ -58,6 +58,15 @@ pub fn channels() {
 
 pub fn path() {}
 
+static LOREM_IPSUM: &str =
+    "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+";
+
 pub fn fileio() {
     use std::fs::File;
     use std::io::prelude::*;
@@ -66,14 +75,13 @@ pub fn fileio() {
     let path = Path::new("hello.txt");
     let display = path.display();
 
-    let mut file = match File::open(&path) {
+    let mut file = match File::create(&path) {
         Ok(file) => file,
-        Err(why) => panic!("could not open the file: {}", why),
+        Err(why) => panic!("could not create the file: {}", why),
     };
 
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Ok(_) => print!("{} contains:\n{}", display, s),
-        Err(why) => panic!("couldn't read {}: {}", display, why),
+    match file.write(LOREM_IPSUM.as_bytes()) {
+        Ok(_) => print!("wrote into: {}", display),
+        Err(why) => panic!("couldn't write {}: {}", display, why),
     }
 }
