@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::stdlib;
+use stdlibs::channels;
 
 fn main() {
-    stdlib();
+    channels();
 }
