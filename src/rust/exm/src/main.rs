@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::channels;
+use stdlibs::path;
 
 fn main() {
-    channels();
+    path();
 }

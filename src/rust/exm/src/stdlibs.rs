@@ -1,4 +1,7 @@
-use std::sync::mpsc::{Receiver, Sender};
+use std::{
+    io, path,
+    sync::mpsc::{Receiver, Sender},
+};
 
 // threads
 const NTHREADS: u32 = 10;
@@ -51,4 +54,26 @@ pub fn channels() {
     }
 
     println!("{:?}", ids);
+}
+
+pub fn path() {}
+
+pub fn fileio() {
+    use std::fs::File;
+    use std::io::prelude::*;
+    use std::path::Path;
+
+    let path = Path::new("hello.txt");
+    let display = path.display();
+
+    let mut file = match File::open(&path) {
+        Ok(file) => file,
+        Err(why) => panic!("could not open the file: {}", why),
+    };
+
+    let mut s = String::new();
+    match file.read_to_string(&mut s) {
+        Ok(_) => print!("{} contains:\n{}", display, s),
+        Err(why) => panic!("couldn't read {}: {}", display, why),
+    }
 }
