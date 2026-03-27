@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::child_process;
+use stdlibs::pipes;
 
 fn main() {
-    child_process();
+    pipes();
 }
