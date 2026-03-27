@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::path;
+use stdlibs::fileio;
 
 fn main() {
-    path();
+    fileio();
 }
