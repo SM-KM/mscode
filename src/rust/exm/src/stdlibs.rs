@@ -142,3 +142,9 @@ pub fn pipes() {
         Err(why) => panic!("coudl not read: {}", why),
     }
 }
+
+pub fn wait() {
+    let mut child = Command::new("sleep").arg("5").spawn().unwrap();
+    let _result = child.wait().unwrap();
+    println!("readched end");
+}

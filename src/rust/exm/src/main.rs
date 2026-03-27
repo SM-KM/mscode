@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 mod stdlibs;
-use stdlibs::pipes;
+use stdlibs::wait;
 
 fn main() {
-    pipes();
+    wait();
 }
