@@ -86,7 +86,9 @@ enum Fruit {
 //     Ok(_first_number + _second_number)
 // }
 
+use std::error;
 use std::fmt;
+
 type Result<T> = std::result::Result<T, DoubleErr>;
 
 #[derive(Debug, Clone)]
@@ -103,6 +105,9 @@ fn double_first(vec: Vec<&str>) -> Result<i32> {
         .ok_or(DoubleErr)
         .and_then(|s| s.parse::<i32>().map_err(|_| DoubleErr).map(|i| 2 * i))
 }
+
+// Boxing errors
+// type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 pub fn errors() {
     let numbers = vec!["42", "93", "18"];
