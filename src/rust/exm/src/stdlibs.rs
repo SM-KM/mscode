@@ -176,3 +176,16 @@ pub fn prog_args() {
     let args: Vec<String> = env::args().collect();
     println!("args: {:?}", &args[1..]);
 }
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct Complex {
+    re: f32,
+    im: f32,
+}
+
+#[cfg(target_family = "unix")]
+#[link(name = "m")]
+unsafe extern "C" {
+    fn ccosf(z: Complex) -> Complex;
+}
