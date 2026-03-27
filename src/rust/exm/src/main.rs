@@ -1,7 +1,7 @@
 #![allow(dead_code)]
-mod errors;
-use errors::errors;
+mod stdlibs;
+use stdlibs::stdlib;
 
 fn main() {
-    errors();
+    stdlib();
 }
