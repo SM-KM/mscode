@@ -1,7 +1,8 @@
 use std::{
     fs::{File, read_to_string},
-    io::{self, BufRead},
-    path::{self, Path},
+    io::{self, BufRead, Read, Write},
+    path::Path,
+    process::{Command, Stdio},
     sync::mpsc::{Receiver, Sender},
 };
 
@@ -119,5 +120,25 @@ pub fn child_process() {
     } else {
         let s = String::from_utf8_lossy(&output.stderr);
         print!("rustc failed: {}", s);
+    }
+}
+
+static PANGRAM: &'static str = "the quick brown fox jumps over the lazy dog\n";
+pub fn pipes() {
+    let mut cmd = Command::new("wc");
+    let process = match cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn() {
+        Ok(process) => process,
+        Err(why) => panic!("could not spawn: {}", why),
+    };
+
+    match process.stdin.unwrap().write_all(PANGRAM.as_bytes()) {
+        Ok(_) => println!("send to wc"),
+        Err(why) => panic!("could not write to wc: {}", why),
+    }
+
+    let mut s = String::new();
+    match process.stdout.unwrap().read_to_string(&mut s) {
+        Ok(res) => println!("wc responded with: {}", res),
+        Err(why) => panic!("coudl not read: {}", why),
     }
 }
