@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, read_to_string},
+    fs::{File, OpenOptions, read_to_string},
     io::{self, BufRead, Read, Write},
     path::Path,
     process::{Command, Stdio},
@@ -148,3 +148,25 @@ pub fn wait() {
     let _result = child.wait().unwrap();
     println!("readched end");
 }
+
+fn cat(path: &Path) -> io::Result<String> {
+    let mut f = File::open(path)?;
+    let mut s = String::new();
+
+    f.read_to_string(&mut s)?;
+    Ok(s)
+}
+
+fn echo(s: &str, path: &Path) -> io::Result<()> {
+    let mut f = File::create(path)?;
+    f.write_all(s.as_bytes())
+}
+
+fn touch(path: &Path) -> io::Result<()> {
+    match OpenOptions::new().create(true).write(true).open(path) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn filesystem() {}
