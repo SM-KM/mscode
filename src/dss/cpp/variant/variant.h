@@ -2,10 +2,42 @@
 #define VARIANT_H
 
 #include <initializer_list>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 #include <variant>
 
 namespace dss {
+
+template <typename... types>
+class variant;
+
+inline constexpr std::size_t variant_npos = static_cast<std::size_t>(-1);
+
+// variant alternative, cause variant size only works for variant
+template <typename V>
+struct variant_size;
+template <typename... Ts>
+struct variant_size<variant<Ts...>>
+    : std::integral_constant<std::size_t, sizeof...(Ts)> {};
+template <typename V>
+inline constexpr std::size_t variant_size_v = variant_size<V>::value;
+
+// variant_alternative
+template <std::size_t I, typename V>
+struct variant_alternative;
+template <std::size_t I, typename... Ts>
+struct variant_alternative<I, variant<Ts...>> {
+  static_assert(I < sizeof...(Ts), "variant index out of bounds");
+  using type = std::tuple_element<I, std::tuple<Ts...>>;
+};
+
+template <std::size_t I, typename V>
+struct variant_alternative<I, const V> {
+  using type = std::add_const_t<typename variant_alternative<I, V>::type>;
+};
+template <std::size_t I, typename V>
+using variant_alternative_t = typename variant_alternative<I, V>::type;
 
 template <typename... types>
 class variant {
