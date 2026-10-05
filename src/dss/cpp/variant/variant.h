@@ -1,7 +1,9 @@
 #ifndef VARIANT_H
 #define VARIANT_H
 
+#include <algorithm>
 #include <initializer_list>
+#include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -38,6 +40,89 @@ struct variant_alternative<I, const V> {
 };
 template <std::size_t I, typename V>
 using variant_alternative_t = typename variant_alternative<I, V>::type;
+
+namespace detail {
+// allow me to check how many times T appears in Ts and where with the
+// index_of_v
+template <typename T, typename... Ts>
+inline constexpr std::size_t count_of_v =
+    (static_cast<std::size_t>(std::is_same_v<T, Ts>) + ... + 0);
+
+template <typename T, typename... Ts>
+inline constexpr std::size_t index_of_v = [] {
+  constexpr bool match[] = {std::is_same_v<T, Ts>...};
+  // WARN: why would do pre-increment be a difference over post increment
+  for (std::size_t i = 0; i < sizeof...(Ts); ++i)
+    if (match[i]) return i;
+  return variant_npos;
+}();
+
+// converting constructor / assignment: which alternative does T select?
+// one imaginary F(ti) per alternative overload resolution picks the winner
+// narrowing conversions are rejected like in the standard
+template <typename Ti>
+struct arr {
+  Ti x[1];
+};
+template <typename Ti, typename U>
+concept non_narrowing = requires { arr<Ti>{{std::declval<U>()}}; };
+template <std::size_t I, typename Ti, typename U>
+struct overload_leaf {
+  static std::integral_constant<std::size_t, I> f(Ti)
+    requires non_narrowing<Ti, U>;
+};
+template <typename U, typename Seq, typename... Ts>
+struct overload_set;
+template <typename U, std::size_t... Is, typename... Ts>
+struct overload_set<U, std::index_sequence<Is...>, Ts...>
+    : overload_leaf<Is, Ts, U>... {
+  using overload_leaf<Is, Ts, U>::f...;
+};
+
+template <typename T, typename... Ts>
+concept has_match = requires {
+  overload_set<T, std::index_sequence_for<Ts...>, Ts...>::f(std::declval<T>());
+};
+template <typename T, typename... Ts>
+inline constexpr std::size_t selected_index_v =
+    decltype(overload_set<T, std::index_sequence_for<Ts...>, Ts...>::f(
+        std::declval<T>()))::value;
+
+template <typename T>
+struct is_in_place_tag : std::false_type {};
+template <typename T>
+struct is_in_place_tag<std::in_place_type_t<T>> : std::true_type {};
+template <std::size_t I>
+struct is_in_place_tag<std::in_place_index_t<I>> : std::true_type {};
+
+// runtime index -> compile time index (f gets a std::integral_constant)
+template <typename F, std::size_t... Is>
+constexpr void dispatch(std::size_t idx, F&& f, std::index_sequence<Is...>) {
+  (void)((idx == Is ? (f(std::integral_constant<std::size_t, Is>{}), true)
+                    : false) ||
+         ...);
+
+  // the only one that looks inside the storage, no index check, keeps
+  // constness and value category of the variant passed
+}
+
+struct variant_access {
+  template <std::size_t I, typename V>
+  static constexpr auto&& get_unchecked(V&& v) noexcept {
+    using T = variant_alternative<I, std::remove_cvref_t<V>>;
+    using Q = std::conditional_t<std::is_const_v<std::remove_reference_t<V>>,
+                                 const T, T>;
+
+    Q* p = std::launder(reinterpret_cast<Q*>(v.m_storage));
+    if constexpr (std::is_lvalue_reference_v<V>) {
+      return *p;
+    } else {
+      return std::move(*p);
+    }
+  };
+};
+
+}; // namespace detail
 
 template <typename... types>
 class variant {
