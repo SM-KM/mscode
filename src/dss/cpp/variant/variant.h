@@ -259,7 +259,28 @@ class variant {
   }
 
   // swap
-  constexpr void swap(variant& rhs) noexcept;
+  constexpr void swap(variant& rhs) noexcept(
+      ((std::is_nothrow_move_constructible_v<types> &&
+        std::is_nothrow_swappable_v<types>) &&
+       ...)) {
+    if (m_index == variant_npos && rhs.m_index == variant_npos) return;
+    if (m_index == rhs.m_index) {
+      detail::dispatch(
+          m_index,
+          [&](auto I) {
+            constexpr std::size_t i = decltype(I)::value;
+            using std::swap;
+            swap(detail::variant_access::get_unchecked<i>(*this),
+                 detail::variant_access::get_unchecked<i>(rhs));
+          },
+          index_seq{});
+    } else {
+      // all the different alternatives go through alternatives
+      variant tmp{std::move(rhs)};
+      rhs = std::move(*this);
+      *this = std::move(tmp);
+    }
+  }
 
   // construct alternative I in the storage, we must be valueless before. the
   // index is set after the construction, so a throw leaves us valueless
