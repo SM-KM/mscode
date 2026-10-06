@@ -423,48 +423,95 @@ constexpr R visit_impl(Vis&& vis, V0&& v0, Vs&&... vs) {
 }; // namespace detail
 
 template <class R, class Visitor, class... Variants>
-constexpr R visit(Visitor&& vis, Variants&&... vars);
+constexpr R visit(Visitor&& vis, Variants&&... vars) {
+  return detail::visit_impl<R>(std::forward<Visitor>(vis),
+                               std::forward<Variants>(vars)...);
+}
+template <class T, class... Types>
+constexpr bool holds_alternative(const std::variant<Types...>& v) noexcept {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly in one variant");
+  return v.index() == detail::index_of_v<T, Types...>;
+}
+
+// std::get(std::variant) throws bad_variant_access
+template <std::size_t I, class... Types>
+constexpr variant_alternative_t<I, variant<Types...>>& get(
+    variant<Types...>& v) {
+  if (v.index() != I) throw std::bad_variant_access{};
+  return detail::variant_access::get_unchecked<I>(v);
+}
+template <std::size_t I, class... Types>
+constexpr variant_alternative_t<I, variant<Types...>>&& get(
+    variant<Types...>&& v) {
+  if (v.index() != I) throw std::bad_variant_access{};
+  return detail::variant_access::get_unchecked<I>(std::move(v));
+}
+template <std::size_t I, class... Types>
+constexpr const variant_alternative_t<I, variant<Types...>>& get(
+    const variant<Types...>& v) {
+  if (v.index() != I) throw std::bad_variant_access{};
+  return detail::variant_access::get_unchecked<I>(v);
+}
+template <std::size_t I, class... Types>
+constexpr const variant_alternative_t<I, variant<Types...>>&& get(
+    const variant<Types...>&& v) {
+  if (v.index() != I) throw std::bad_variant_access{};
+  return detail::variant_access::get_unchecked<I>(std::move(v));
+}
 
 template <class T, class... Types>
-constexpr bool holds_alternative(const std::variant<Types...>& v) noexcept;
+constexpr T& get(variant<Types...>& v) {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly once in the variant");
+  return dss::get<detail::index_of_v<T, Types...>>(v);
+}
+template <class T, class... Types>
+constexpr T&& get(variant<Types...>&& v) {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly once in the variant");
+  return dss::get<detail::index_of_v<T, Types...>>(std::move(v));
+}
+template <class T, class... Types>
+constexpr const T& get(const variant<Types...>& v) {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly once in the variant");
+  return dss::get<detail::index_of_v<T, Types...>>(v);
+}
+template <class T, class... Types>
+constexpr const T&& get(const variant<Types...>&& v) {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly once in the variant");
+  return dss::get<detail::index_of_v<T, Types...>>(std::move(v));
+}
 
-// std::get(std::variant)
+// get_if: nullptr instead of throwing
 template <std::size_t I, class... Types>
-constexpr std::variant_alternative_t<I, std::variant<Types...>>& get(
-    std::variant<Types...>& v);
+constexpr std::add_pointer_t<variant_alternative_t<I, variant<Types...>>>
+get_if(variant<Types...>* pv) noexcept {
+  if (pv == nullptr || pv->index() != I) return nullptr;
+  return std::addressof(detail::variant_access::get_unchecked<I>(*pv));
+}
 template <std::size_t I, class... Types>
-constexpr std::variant_alternative_t<I, std::variant<Types...>>&& get(
-    std::variant<Types...>&& v);
-template <std::size_t I, class... Types>
-constexpr const std::variant_alternative_t<I, std::variant<Types...>>& get(
-    const std::variant<Types...>& v);
-template <std::size_t I, class... Types>
-constexpr const std::variant_alternative_t<I, std::variant<Types...>>&& get(
-    const std::variant<Types...>&& v);
+constexpr std::add_pointer_t<const variant_alternative_t<I, variant<Types...>>>
+get_if(const variant<Types...>* pv) noexcept {
+  if (pv == nullptr || pv->index() != I) return nullptr;
+  return std::addressof(detail::variant_access::get_unchecked<I>(*pv));
+}
 
 template <class T, class... Types>
-constexpr T& get(std::variant<Types...>& v);
-template <class T, class... Types>
-constexpr T&& get(std::variant<Types...>&& v);
-template <class T, class... Types>
-constexpr const T& get(const std::variant<Types...>& v);
-template <class T, class... Types>
-constexpr const T&& get(const std::variant<Types...>&& v);
-
-template <std::size_t I, class... Types>
-constexpr std::add_pointer_t<
-    std::variant_alternative_t<I, std::variant<Types...>>>
-get_if(std::variant<Types...>* pv) noexcept;
-template <std::size_t I, class... Types>
-constexpr std::add_pointer_t<
-    const std::variant_alternative_t<I, std::variant<Types...>>>
-get_if(const std::variant<Types...>* pv) noexcept;
-
-template <class T, class... Types>
-constexpr std::add_pointer_t<T> get_if(std::variant<Types...>* pv) noexcept;
+constexpr std::add_pointer_t<T> get_if(variant<Types...>* pv) noexcept {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly once in the variant");
+  return dss::get_if<detail::index_of_v<T, Types...>>(pv);
+}
 template <class T, class... Types>
 constexpr std::add_pointer_t<const T> get_if(
-    const std::variant<Types...>* pv) noexcept;
+    const variant<Types...>* pv) noexcept {
+  static_assert(detail::count_of_v<T, Types...> == 1,
+                "T must appear exactly once in the variant");
+  return dss::get_if<detail::index_of_v<T, Types...>>(pv);
+}
 
 } // namespace dss
 
