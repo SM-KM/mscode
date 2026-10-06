@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <initializer_list>
+#include <memory>
 #include <new>
 #include <tuple>
 #include <type_traits>
@@ -126,30 +127,100 @@ struct variant_access {
 
 template <typename... types>
 class variant {
-  constexpr variant() noexcept;
-  constexpr variant(const variant& other);
-  constexpr variant(variant&& other) noexcept;
+  template <std::size_t I>
+  using alt_t = std::tuple_element_t<I, std::tuple<types...>>;
+  using index_seq = std::index_sequence_for<types...>;
+  friend struct detail::variant_access;
 
+ public:
+  constexpr variant() noexcept(
+      std::is_nothrow_default_constructible_v<alt_t<0>>) {
+    construct<0>();
+  };
+
+  // move and copy constructors -> if other is valueless so are we, else
+  // construct the alternatives other is holding
+  constexpr variant(const variant& other) {
+    detail::dispatch(
+        other.m_index,
+        [&](auto I) {
+          constexpr std::size_t i = decltype(I)::value;
+          this->template construct<i>(
+              detail::variant_access::get_unchecked<i>(other));
+        },
+        index_seq{});
+  };
+
+  constexpr variant(variant&& other) noexcept(
+      (std::is_nothrow_move_constructible_v<types> && ...)) {
+    detail::dispatch(
+        other.m_index,
+        [&](auto I) {
+          constexpr std::size_t i = decltype(I)::value;
+          this->template construct<i>(
+              detail::variant_access::get_unchecked<i>(std::move(other)));
+        },
+        index_seq{});
+  };
+
+  // T picks the alternative by overload resolution (constrained so it does)
+  // not steal the copy / move constructors or the in_place ones
   template <typename T>
-  constexpr variant(T&& t) noexcept;
+    requires(!std::is_same_v<std::remove_cvref_t<T>, variant> &&
+             !detail::is_in_place_tag<std::remove_cvref_t<T>>::value &&
+             detail::has_match<T, types...>)
+  constexpr variant(T&& t) noexcept(
+      std::is_nothrow_constructible_v<
+          alt_t<detail::selected_index_v<T, types...>>, T>) {
+    construct<detail::selected_index_v<T, types...>>(std::forward<T>(t));
+  };
 
   template <typename T, typename... Args>
-  constexpr explicit variant(std::in_place_type_t<T>, Args&&... args);
+  constexpr explicit variant(std::in_place_type_t<T>, Args&&... args) {
+    static_assert(detail::count_of_v<T, types...> == 1,
+                  "T must appear exactly once in the variant");
+    construct<detail::index_of_v<T, types...>>(std::forward<Args>(args)...);
+  }
   template <typename T, typename U, typename... Args>
   constexpr explicit variant(std::in_place_type_t<T>,
-                             std::initializer_list<U> il, Args&&... args);
-
+                             std::initializer_list<U> il, Args&&... args) {
+    static_assert(detail::count_of_v<T, types...> == 1,
+                  "T must appear exactly once in the variant");
+    construct<detail::index_of_v<T, types...>>(il, std::forward<Args>(args)...);
+  }
   template <std::size_t I, class... Args>
-  constexpr explicit variant(std::in_place_index_t<I>, Args&&... args);
+  constexpr explicit variant(std::in_place_index_t<I>, Args&&... args) {
+    construct<I>(std::forward<Args>(args)...);
+  }
 
   template <std::size_t I, class U, class... Args>
   constexpr explicit variant(std::in_place_index_t<I>,
-                             std::initializer_list<U> il, Args&&... args);
+                             std::initializer_list<U> il, Args&&... args) {
+    construct<I>(std::forward<Args>(args)...);
+  }
+  constexpr ~variant() { reset(); };
 
-  constexpr ~variant();
+  template <typename T>
+    requires(!std::is_same_v<std::remove_cvref_t<T>, variant> &&
+             detail::has_match<T, types...>)
+  constexpr variant& operator=(T&& t) noexcept(
+      std::is_nothrow_assignable_v<alt_t<detail::selected_index_v<T, types...>>,
+                                   T> &&
+      std::is_nothrow_constructible_v<
+          alt_t<detail::selected_index_v<T, types...>>, T>) {
+    constexpr std::size_t j = detail::selected_index_v<T, types...>;
+    using Tj = alt_t<j>;
 
-  template <class T>
-  constexpr variant& operator=(T&& t) noexcept;
+    if (m_index == j) {
+      detail::variant_access::get_unchecked<j>(*this) = std::forward<T>(t);
+    } else if constexpr (std::is_nothrow_constructible_v<Tj, T> ||
+                         !std::is_nothrow_move_constructible_v<Tj>) {
+      emplace<j>(std::forward<T>(t));
+    } else {
+      emplace<j>(Tj(std::forward<T>(t)));
+    }
+    return *this;
+  }
 
   constexpr std::size_t index() const noexcept;
   constexpr bool valueless_by_exception() const noexcept;
@@ -170,6 +241,31 @@ class variant {
 
   // swap
   constexpr void swap(variant& rhs) noexcept;
+
+  // construct alternative I in the storage, we must be valueless before. the
+  // index is set after the construction, so a throw leaves us valueless
+  template <std::size_t I, typename... Args>
+  constexpr void construct(Args&&... args) {
+    std::construct_at(reinterpret_cast<alt_t<I>*>(m_storage),
+                      std::forward<Args>(args)...);
+  }
+
+ private:
+  // destroy whenever we hold and become valueless
+  constexpr void reset() noexcept {
+    if (m_index == variant_npos) return;
+    detail::dispatch(
+        m_index,
+        [&](auto I) {
+          constexpr std::size_t i = decltype(I)::value;
+          std::destroy_at(
+              std::addressof(detail::variant_access::get_unchecked<i>(*this)));
+        },
+        index_seq{});
+  }
+
+  alignas(types...) unsigned char m_storage[std::max({sizeof(types)...})];
+  std::size_t m_index{variant_npos};
 };
 
 // Organize so that it can work with my variant
