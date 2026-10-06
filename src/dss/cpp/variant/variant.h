@@ -222,22 +222,41 @@ class variant {
     return *this;
   }
 
-  constexpr std::size_t index() const noexcept;
-  constexpr bool valueless_by_exception() const noexcept;
+  constexpr std::size_t index() const noexcept { return m_index; };
+  constexpr bool valueless_by_exception() const noexcept {
+    return m_index == variant_npos;
+  }
 
-  // emplace
+  // emplace destroys the current value first, so if the construction throws
+  // the variant is left valueless
   template <class T, class... Args>
-  constexpr T& emplace(Args&&... args);
-
+  constexpr T& emplace(Args&&... args) {
+    static_assert(detail::count_of_v<T, types...>,
+                  "T must appear in exactly once in the variant");
+    return emplace<detail::index_of_v<T, types...>>(
+        std::forward<Args>(args)...);
+  }
   template <class T, class U, class... Args>
-  constexpr T& emplace(std::initializer_list<U> il, Args&&... args);
-
+  constexpr T& emplace(std::initializer_list<U> il, Args&&... args) {
+    static_assert(detail::count_of_v<T, types...> == 1,
+                  "T must appear exactly once in the variant");
+    return emplace<detail::index_of_v<T, types...>>(
+        il, std::forward<Args>(args)...);
+  }
   template <std::size_t I, class... Args>
-  constexpr std::variant_alternative_t<I, variant>& emplace(Args&&... args);
+  constexpr variant_alternative_t<I, variant>& emplace(Args&&... args) {
+    reset();
+    construct<I>(std::forward<Args>(args)...);
+    return detail::variant_access::get_unchecked<I>(*this);
+  }
 
   template <std::size_t I, class U, class... Args>
-  constexpr std::variant_alternative_t<I, variant>& emplace(
-      std::initializer_list<U> il, Args&&... args);
+  constexpr variant_alternative_t<I, variant>& emplace(
+      std::initializer_list<U> il, Args&&... args) {
+    reset();
+    construct<I>(il, std::forward<Args>(args)...);
+    return detail::variant_access::get_unchecked<I>(*this);
+  }
 
   // swap
   constexpr void swap(variant& rhs) noexcept;
