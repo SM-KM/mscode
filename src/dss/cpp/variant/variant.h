@@ -513,6 +513,29 @@ constexpr std::add_pointer_t<const T> get_if(
   return dss::get_if<detail::index_of_v<T, Types...>>(pv);
 }
 
+template <typename... Types>
+constexpr bool operator==(const variant<Types...>& v,
+                          const variant<Types...>& w) {
+  if (v.index() != w.index()) return false;
+  if (v.valueless_by_exception()) return true;
+  bool result = true;
+  detail::dispatch(
+      v.index(),
+      [&](auto I) {
+        constexpr std::size_t i = decltype(I)::value;
+        result = detail::variant_access::get_unchecked<i>(v) ==
+                 detail::variant_access::get_unchecked<i>(w);
+      },
+      std::index_sequence_for<Types...>{});
+  return result;
+};
+
+template <typename... Types>
+constexpr void swap(variant<Types...>& lhs,
+                    variant<Types...>& rhs) noexcept(noexcept(lhs.swap(rhs))) {
+  lhs.swap(rhs);
+}
+
 } // namespace dss
 
 #endif // VARIANT_H
