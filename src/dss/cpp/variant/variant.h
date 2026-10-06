@@ -2,6 +2,8 @@
 #define VARIANT_H
 
 #include <algorithm>
+#include <compare>
+#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <new>
@@ -355,11 +357,32 @@ class variant {
   std::size_t m_index{variant_npos};
 };
 
-// Organize so that it can work with my variant
+// WARN: Organize so that it can work with my variant
 template <class... Types>
 constexpr std::common_comparison_category_t<
     std::compare_three_way_result_t<Types>...>
-operator<=>(const std::variant<Types...>& v, const std::variant<Types...>& w);
+operator<=>(const std::variant<Types...>& v, const std::variant<Types...>& w) {
+  using result_t = std::common_comparison_category_t<
+      std::compare_three_way_result_t<Types>...>;
+
+  // valueless is less than everything, then compare by index, then by value
+  if (v.valueless_by_exception() && w.valueless_by_exception())
+    return std::strong_ordering::equal;
+  if (v.valueless_by_exception()) return std::strong_ordering::less;
+  if (v.valueless_by_exception()) return std::strong_ordering::greater;
+  if (v.index() != w.index()) return v.index() <=> w.index();
+
+  result_t result = std::strong_ordering::equal;
+  detail::dispatch(
+      v.index(),
+      [&](auto I) {
+        constexpr std::size_t i = decltype(I)::value;
+        result = detail::variant_access::get_unchecked<i>(v) <=>
+                 detail::variant_access::get_unchecked<i>(w);
+      },
+      std::index_sequence_for<Types...>{});
+  return result;
+}
 
 template <class R, class Visitor, class... Variants>
 constexpr R visit(Visitor&& vis, Variants&&... vars);
