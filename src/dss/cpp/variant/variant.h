@@ -222,6 +222,53 @@ class variant {
     return *this;
   }
 
+  constexpr variant& operator=(const variant& rhs) {
+    if (this == &rhs) return *this;
+    if (rhs.m_index == variant_npos) {
+      reset();
+      return *this;
+    }
+    detail::dispatch(
+        rhs.m_index,
+        [&](auto I) {
+          constexpr std::size_t i = decltype(I)::value;
+          using Ti = alt_t<i>;
+          const Ti& src = detail::variant_access::get_unchecked<i>(rhs);
+          if (m_index == i)
+            detail::variant_access::get_unchecked<i>(*this) = src;
+          else if constexpr (std::is_nothrow_copy_constructible_v<Ti> ||
+                             !std::is_nothrow_move_constructible_v<Ti>)
+            this->template emplace<i>(src);
+          else
+            this->template emplace<i>(Ti(src));
+        },
+        index_seq{});
+    return *this;
+  }
+
+  constexpr variant& operator=(variant&& rhs) noexcept(
+      ((std::is_nothrow_move_constructible_v<types> &&
+        std::is_nothrow_move_assignable_v<types>) &&
+       ...)) {
+    if (this == &rhs) return *this;
+    if (rhs.m_index == variant_npos) {
+      reset();
+      return *this;
+    }
+    detail::dispatch(
+        rhs.m_index,
+        [&](auto I) {
+          constexpr std::size_t i = decltype(I)::value;
+          auto&& src = detail::variant_access::get_unchecked<i>(std::move(rhs));
+          if (m_index == i)
+            detail::variant_access::get_unchecked<i>(*this) = std::move(src);
+          else
+            this->template emplace<i>(std::move(src));
+        },
+        index_seq{});
+    return *this;
+  }
+
   constexpr std::size_t index() const noexcept { return m_index; };
   constexpr bool valueless_by_exception() const noexcept {
     return m_index == variant_npos;
