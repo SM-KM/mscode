@@ -384,6 +384,44 @@ operator<=>(const std::variant<Types...>& v, const std::variant<Types...>& w) {
   return result;
 }
 
+namespace detail {
+template <std::size_t I, typename R, typename Vis, typename Var>
+constexpr R visit_thunk(Vis&& vis, Var&& var) {
+  return std::invoke(std::forward<Vis>(vis),
+                     variant_access::get_unchecked<I>(std::forward<Var>(var)));
+}
+
+template <typename R, typename Vis, typename Var, std::size_t... Is>
+constexpr R visit_one(Vis&& vis, Var&& var, std::index_sequence<Is...>) {
+  if (var.valueless_by_exception()) throw std::bad_variant_access{};
+  using fn_t = R (*)(Vis&&, Var&&);
+  constexpr fn_t table[] = {&visit_thunk<Is, R, Vis, Var>...};
+  const std::size_t i = var.index();
+  return table[i](std::forward<Vis>(vis), std::forward<Var>(var));
+}
+
+template <typename R, typename Vis, typename V0, typename... Vs>
+constexpr R visit_impl(Vis&& vis, V0&& v0, Vs&&... vs) {
+  using seq = std::make_index_sequence<variant_size_v<std::remove_cvref_t<V0>>>;
+  if constexpr (sizeof...(Vs) == 0) {
+    return visit_one<R>(std::forward<Vis>(vis), std::forward<V0>(v0), seq{});
+  } else {
+    return visit_one<R>(
+        [&](auto&& a) -> R {
+          return visit_impl<R>(
+              [&](auto&&... rest) -> R {
+                return std::invoke(std::forward<Vis>(vis),
+                                   std::forward<decltype(a)>(a),
+                                   std::forward<decltype(rest)>(rest)...);
+              },
+              std::forward<Vs>(vs)...);
+        },
+        std::forward<V0>(v0), seq{});
+  }
+}
+
+}; // namespace detail
+
 template <class R, class Visitor, class... Variants>
 constexpr R visit(Visitor&& vis, Variants&&... vars);
 
