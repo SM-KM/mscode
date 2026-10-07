@@ -1,27 +1,48 @@
 #ifndef MUTEX_H
 #define MUTEX_H
 
+#include <pthread.h>
+
 #include <chrono>
 #include <mutex>
+#include <system_error>
+#include <utility>
 
-namespace dss
-{
+namespace dss {
 
-class mutex
-{
-public:
-  constexpr mutex() noexcept;
+template <typename... Lockables>
+void lock(Lockables&... lockables);
+
+namespace detail {
+template <typename Tuple, typename F, std::size_t... Is>
+void for_index(Tuple& t, std::size_t idx, F&& f, std::index_sequence<Is...>) {
+  (void)((idx == Is ? (f(std::get<Is>(t)), true) : false) || ...);
+};
+}; // namespace detail
+
+class mutex {
+ public:
+  constexpr mutex() noexcept {};
   mutex(const mutex&) = delete;
-  ~mutex();
+  ~mutex() { pthread_mutex_destroy(&m_handle); };
 
-  void lock();
-  void unlock();
-  [[nodiscard]] bool try_lock();
+  void lock() {
+    int e = pthread_mutex_lock(&m_handle);
+    if (e != 0) throw std::system_error(e, std::generic_category());
+  };
+  void unlock() { pthread_mutex_unlock(&m_handle); };
+  [[nodiscard]] bool try_lock() {
+    return pthread_mutex_trylock(&m_handle) == 0;
+  };
+
+  mutex& operator=(const mutex&) = delete;
+
+ private:
+  pthread_mutex_t m_handle = PTHREAD_MUTEX_INITIALIZER;
 };
 
-class timed_mutex
-{
-public:
+class timed_mutex {
+ public:
   timed_mutex();
   timed_mutex(const timed_mutex&) = delete;
   ~timed_mutex();
@@ -30,20 +51,19 @@ public:
   [[nodiscard]] bool try_lock();
 
   template <typename Rep, typename Period>
-  [[nodiscard]] bool
-  try_lock_for(const std::chrono::duration<Rep, Period>& timeout_duration);
+  [[nodiscard]] bool try_lock_for(
+      const std::chrono::duration<Rep, Period>& timeout_duration);
 
   template <typename Clock, typename Duration>
-  [[nodiscard]] bool
-  try_lock_for(const std::chrono::time_point<Clock, Duration>& timeout_time);
+  [[nodiscard]] bool try_lock_for(
+      const std::chrono::time_point<Clock, Duration>& timeout_time);
 
   void unlock();
 };
 
 template <typename Mutex>
-class lock_guard
-{
-public:
+class lock_guard {
+ public:
   using mutex_type = Mutex;
 
   explicit lock_guard(mutex_type& m);
@@ -52,11 +72,10 @@ public:
 };
 
 template <typename Mutex>
-class unique_lock
-{
+class unique_lock {
   using mutex_type = Mutex;
 
-public:
+ public:
   unique_lock() noexcept;
   unique_lock(unique_lock&& lock) noexcept;
   explicit unique_lock(mutex_type& m);
@@ -82,34 +101,33 @@ public:
   [[nodiscard]] bool try_lock();
 
   template <typename Rep, typename Period>
-  [[nodiscard]] bool
-  try_lock_for(std::chrono::duration<Rep, Period>& timeout_duration);
+  [[nodiscard]] bool try_lock_for(
+      std::chrono::duration<Rep, Period>& timeout_duration);
 
   template <typename Clock, typename Duration>
-  [[nodiscard]] bool
-  try_lock_until(std::chrono::duration<Clock, Duration>& timeout_duration);
+  [[nodiscard]] bool try_lock_until(
+      std::chrono::duration<Clock, Duration>& timeout_duration);
 
   void unlock();
 
   void swap(unique_lock& other) noexcept;
-  mutex_type *release() noexcept;
-  mutex_type *mutex() const noexcept;
+  mutex_type* release() noexcept;
+  mutex_type* mutex() const noexcept;
 
   [[nodiscard]] bool owns_lock() const noexcept;
   explicit operator bool() const noexcept;
 };
 
 template <typename... MutexTypes>
-class scoped_lock
-{
-  explicit scoped_lock(MutexTypes&...m);
-  scoped_lock(std::adopt_lock_t t, MutexTypes&...m);
+class scoped_lock {
+  explicit scoped_lock(MutexTypes&... m);
+  scoped_lock(std::adopt_lock_t t, MutexTypes&... m);
   scoped_lock(const scoped_lock&) = delete;
   ~scoped_lock();
 };
 
 template <typename... Lockables>
-void lock(Lockables&...lockables) {};
+void lock(Lockables&... lockables) {};
 
 } // namespace dss
 
