@@ -71,9 +71,24 @@ class timed_mutex {
     return got;
   }
 
+  template <typename Clock, typename Duration>
+  [[nodiscard]] bool try_lock_until(
+      const std::chrono::time_point<Clock, Duration>& timeout_time);
   template <typename Rep, typename Period>
   [[nodiscard]] bool try_lock_for(
-      const std::chrono::duration<Rep, Period>& timeout_duration);
+      const std::chrono::duration<Rep, Period>& timeout_duration) {
+    // a relative time is converted to an absolute time on a steady clock
+    using clock = std::chrono::steady_clock;
+    auto now = clock::now();
+
+    // comparing the long double first, converting a huge duration to the
+    // clock duration is the thing that would overflow
+    using ld = std::chrono::duration<long double>;
+    if (static_cast<ld>(timeout_duration) >=
+        static_cast<ld>((clock::time_point::max() - now))) {
+      return try_lock_until(clock::time_point::max() - now);
+    }
+  }
 
   template <typename Clock, typename Duration>
   [[nodiscard]] bool try_lock_for(
