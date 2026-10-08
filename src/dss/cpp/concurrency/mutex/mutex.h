@@ -4,6 +4,7 @@
 #include <pthread.h>
 
 #include <chrono>
+#include <condition_variable>
 #include <mutex>
 #include <system_error>
 #include <utility>
@@ -43,11 +44,25 @@ class mutex {
 
 class timed_mutex {
  public:
-  timed_mutex();
+  timed_mutex() = default;
   timed_mutex(const timed_mutex&) = delete;
-  ~timed_mutex();
+  ~timed_mutex() {};
 
-  void lock();
+  void lock() {
+    m_mutex.lock();
+    try {
+      while (m_locked) cv.wait(m_mutex);
+    } catch (...) {
+      // WARN: specify the catch, and use an specific throw
+      // and dont let only this ambig...
+      m_mutex.unlock();
+      throw;
+    }
+
+    m_locked = true;
+    m_mutex.unlock();
+  }
+
   [[nodiscard]] bool try_lock();
 
   template <typename Rep, typename Period>
@@ -59,6 +74,11 @@ class timed_mutex {
       const std::chrono::time_point<Clock, Duration>& timeout_time);
 
   void unlock();
+
+ private:
+  mutex m_mutex;
+  std::condition_variable_any cv;
+  bool m_locked{false};
 };
 
 template <typename Mutex>
