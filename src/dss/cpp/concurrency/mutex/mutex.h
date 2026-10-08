@@ -71,9 +71,6 @@ class timed_mutex {
     return got;
   }
 
-  template <typename Clock, typename Duration>
-  [[nodiscard]] bool try_lock_until(
-      const std::chrono::time_point<Clock, Duration>& timeout_time);
   template <typename Rep, typename Period>
   [[nodiscard]] bool try_lock_for(
       const std::chrono::duration<Rep, Period>& timeout_duration) {
@@ -84,17 +81,29 @@ class timed_mutex {
     // comparing the long double first, converting a huge duration to the
     // clock duration is the thing that would overflow
     using ld = std::chrono::duration<long double>;
-    if (static_cast<ld>(timeout_duration) >=
-        static_cast<ld>((clock::time_point::max() - now))) {
-      return try_lock_until(clock::time_point::max() - now);
-    }
+    if (ld(timeout_duration) >= ld(clock::time_point::max() - now))
+      return try_lock_until(clock::time_point::max());
+    return try_lock_until(now +
+                          std::chrono::ceil<clock::duration>(timeout_duration));
   }
+
+  template <typename Clock, typename Duration>
+  [[nodiscard]] bool try_lock_until(
+      const std::chrono::time_point<Clock, Duration>& timeout_duration) {}
 
   template <typename Clock, typename Duration>
   [[nodiscard]] bool try_lock_for(
       const std::chrono::time_point<Clock, Duration>& timeout_time);
 
-  void unlock();
+  void unlock() {
+    m_mutex.lock();
+    m_locked = false;
+
+    // notify while we still hold the mtx, so that a thread sees the
+    // lock free and destroys the timed_mutex cannot kill the cv
+    cv.notify_one();
+    m_mutex.unlock();
+  }
 
  private:
   mutex m_mutex;
@@ -147,7 +156,7 @@ class unique_lock {
 
   template <typename Clock, typename Duration>
   [[nodiscard]] bool try_lock_until(
-      std::chrono::duration<Clock, Duration>& timeout_duration);
+      std::chrono::time_point<Clock, Duration>& timeout_duration);
 
   void unlock();
 
