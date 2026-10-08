@@ -63,7 +63,13 @@ class timed_mutex {
     m_mutex.unlock();
   }
 
-  [[nodiscard]] bool try_lock();
+  [[nodiscard]] bool try_lock() {
+    m_mutex.lock();
+    bool got = !m_locked;
+    if (got) m_locked = true;
+    m_mutex.unlock();
+    return got;
+  }
 
   template <typename Rep, typename Period>
   [[nodiscard]] bool try_lock_for(
