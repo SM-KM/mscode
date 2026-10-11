@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <atomic>
 #include <memory>
+#include <utility>
 namespace dss {
 
 namespace detail {
@@ -16,7 +18,7 @@ struct retired_header {
   retired_header& operator=(const retired_header&) noexcept { return *this; };
 
   const void* object{nullptr};
-  void (*reclaim)(retired_header){nullptr};
+  void (*reclaim)(retired_header*){nullptr};
   retired_header* next{nullptr};
 };
 
@@ -67,6 +69,84 @@ inline bool is_protected(const void* p) noexcept {
     if (r->ptr.load(std::memory_order_acquire) == p) return true;
   return false;
 }
+
+struct retire_list {
+  retired_header* head{nullptr};
+  std::size_t count{0};
+  bool scanning{false};
+
+  void push(retired_header* n) noexcept {
+    n->next = head;
+    head = n;
+    ++count;
+  }
+
+  // scan when we have about twice as many retired objects as hazards, then
+  // at most half survive, so the cost of a scan is amortised over the retires
+  std::size_t threshold() const noexcept {
+    return std::max<std::size_t>(
+        16, 2 * global_domain().record_count.load(std::memory_order_relaxed));
+  }
+
+  void scan() noexcept {
+    scanning = true;
+    retired_header* o =
+        global_domain().orphans.exchange(nullptr, std::memory_order_acquire);
+    while (o) {
+      retired_header* nx = o->next;
+      push(o);
+      o = nx;
+    }
+
+    // pairs with the fence in try_protect: either the protecting thread sees
+    // that the object was already removed (and will not use it), or we see
+    // its hazard here. This is what makes the whole scheme correct
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    retired_header* list = std::exchange(head, nullptr);
+    count = 0;
+    retired_header* keep = nullptr;
+
+    while (list) {
+      retired_header* n = list;
+      list = n->next;
+      if (is_protected(n->object)) {
+        n->next = keep;
+        keep = n;
+      } else {
+        n->reclaim(n);
+      }
+    }
+
+    while (keep) {
+      retired_header* nx = keep->next;
+      push(keep);
+      keep = nx;
+    }
+    scanning = false;
+  };
+
+  void retire(retired_header* n) noexcept {
+    push(n);
+    if (!scanning && count >= threshold()) scan();
+  }
+
+  ~retire_list() {
+    if (!head) return;
+    scan();
+    if (!head) return;
+    retired_header* tail = head;
+    while (tail->next) tail = tail->next;
+    domain& d = global_domain();
+    tail->next = d.orphans.load(std::memory_order_relaxed);
+
+    while (d.orphans.compare_exchange_weak(tail->next, head,
+                                           std::memory_order_release,
+                                           std::memory_order::relaxed)) {
+    }
+    head = nullptr;
+    count = 0;
+  };
+};
 
 }; // namespace detail
 
