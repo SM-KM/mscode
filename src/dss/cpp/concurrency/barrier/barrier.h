@@ -6,23 +6,20 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace dss
-{
+namespace dss {
 // barrier is non copiable nor movable
 template <typename CompletionFunction>
   requires std::move_constructible<CompletionFunction> &&
            std::assignable_from<CompletionFunction, CompletionFunction>
-class barrier
-{
-public:
-  class arrival_token final
-  {
-  public:
+class barrier {
+ public:
+  class arrival_token final {
+   public:
     arrival_token(arrival_token&&) = default;
     arrival_token& operator=(arrival_token&&) = default;
     ~arrival_token() = default;
 
-  private:
+   private:
     friend class barrier;
   };
 
