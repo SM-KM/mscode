@@ -26,7 +26,14 @@ class latch {
     return m_counter.load(std::memory_order_acquire) == 0;
   };
 
-  void wait() const;
+  /// block until the counter is 0, atomic::wait only returns when the
+  /// value changed from the one we pass, so we reload and check in a loop
+  /// it can also wake up random
+  void wait() const {
+    for (std::ptrdiff_t c = m_counter.load(std::memory_order_acquire); c != 0;
+         c = m_counter.load(std::memory_order_acquire))
+      m_counter.wait(c, std::memory_order_acquire);
+  };
   void arrive_and_wait(std::ptrdiff_t n = 1);
 
  private:
