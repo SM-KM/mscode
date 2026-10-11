@@ -193,16 +193,33 @@ class unique_lock {
   // TODO: chrono support with concepts
 
   // Locking strategies
-  void Lock();
-  [[nodiscard]] bool try_lock();
+  void Lock() {
+    check_can_lock();
+    m_mutex->lock();
+    m_owns = true;
+  };
+
+  [[nodiscard]] bool try_lock() {
+    check_can_lock();
+    m_owns = m_mutex->try_lock();
+    return m_owns;
+  };
 
   template <typename Rep, typename Period>
   [[nodiscard]] bool try_lock_for(
-      std::chrono::duration<Rep, Period>& timeout_duration);
+      const std::chrono::duration<Rep, Period>& timeout_duration) {
+    check_can_lock();
+    m_owns = m_mutex->try_lock_for(timeout_duration);
+    return m_owns;
+  }
 
   template <typename Clock, typename Duration>
   [[nodiscard]] bool try_lock_until(
-      std::chrono::time_point<Clock, Duration>& timeout_duration);
+      const std::chrono::time_point<Clock, Duration>& timeout_duration) {
+    check_can_lock();
+    m_owns = m_mutex->try_lock_until(timeout_duration);
+    return m_owns;
+  };
 
   void unlock();
 
