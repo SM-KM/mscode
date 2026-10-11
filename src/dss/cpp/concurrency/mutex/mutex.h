@@ -170,13 +170,25 @@ class unique_lock {
 
   template <typename Rep, typename Period>
   unique_lock(mutex_type& m,
-              const std::chrono::duration<Rep, Period>& timout_duration);
+              const std::chrono::duration<Rep, Period>& timeout_duration)
+      : m_mutex{&m}, m_owns{m.try_lock_for(timeout_duration)} {};
   template <class Clock, class Duration>
   unique_lock(mutex_type& m,
-              const std::chrono::time_point<Clock, Duration>& timeout_time);
+              const std::chrono::time_point<Clock, Duration>& timeout_time)
+      : m_mutex{&m}, m_owns{m.try_lock_until(timeout_time)} {};
 
-  ~unique_lock();
-  unique_lock& operator=(unique_lock&& other);
+  ~unique_lock() {
+    if (m_owns) m_mutex->unlock();
+  };
+  unique_lock& operator=(unique_lock&& other) {
+    if (this == &other) return *this;
+    if (m_owns) m_mutex->unlock();
+    m_mutex = other.m_mutex;
+    m_owns = other.m_owns;
+    other.m_mutex = nullptr;
+    other.m_owns = false;
+    return *this;
+  }
 
   // TODO: chrono support with concepts
 
