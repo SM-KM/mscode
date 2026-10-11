@@ -20,6 +20,19 @@ struct retired_header {
   retired_header* next{nullptr};
 };
 
+struct domain {
+  std::atomic<hp_record*> records{nullptr};
+  std::atomic<std::size_t> record_count{0};
+  std::atomic<retired_header*> orphans{nullptr};
+};
+
+/// constant initialized and trivially destructible, so no init order problems
+/// and nothing is destroyed at exit under the feet of a late thread
+inline domain& global_domain() noexcept {
+  static domain d;
+  return d;
+}
+
 }; // namespace detail
 
 template <typename T, typename D = std::default_delete<T>>
