@@ -33,6 +33,29 @@ inline domain& global_domain() noexcept {
   return d;
 }
 
+inline hp_record* acquire_record() {
+  domain& d = global_domain();
+
+  for (hp_record* r = d.records.load(std::memory_order_acquire); r;
+       r = r->next) {
+    bool expected = false;
+    if (!r->active.load(std::memory_order_relaxed) &&
+        r->active.compare_exchange_strong(expected, true,
+                                          std::memory_order_acquire))
+      ;
+  }
+
+  // if there is none free make a new one and add it to the list
+  auto r = new hp_record;
+  r->active.store(true, std::memory_order_relaxed);
+  r->next = d.records.load(std::memory_order_relaxed);
+  while (!d.records.compare_exchange_weak(r->next, r, std::memory_order_release,
+                                          std::memory_order_relaxed)) {
+  }
+  d.record_count.fetch_add(1, std::memory_order_relaxed);
+  return r;
+}
+
 }; // namespace detail
 
 template <typename T, typename D = std::default_delete<T>>
