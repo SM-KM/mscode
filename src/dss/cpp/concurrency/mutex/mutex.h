@@ -132,9 +132,17 @@ class lock_guard {
  public:
   using mutex_type = Mutex;
 
-  explicit lock_guard(mutex_type& m);
-  lock_guard(mutex_type& m, std::adopt_lock_t t);
+  explicit lock_guard(mutex_type& m) : m_mutex{m} { m_mutex.lock(); };
+
+  lock_guard(mutex_type& m, [[maybe_unused]] std::adopt_lock_t t)
+      : m_mutex{m} {};
   lock_guard(const lock_guard&) = delete;
+
+  ~lock_guard() { m_mutex.unlock(); };
+  lock_guard& operator=(const lock_guard&) = delete;
+
+ private:
+  mutex_type& m_mutex;
 };
 
 template <typename Mutex>
