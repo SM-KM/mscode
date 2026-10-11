@@ -150,13 +150,23 @@ class unique_lock {
   using mutex_type = Mutex;
 
  public:
-  unique_lock() noexcept;
-  unique_lock(unique_lock&& lock) noexcept;
-  explicit unique_lock(mutex_type& m);
+  unique_lock() noexcept = default;
+  unique_lock(unique_lock&& lock) noexcept
+      : m_mutex{lock}, m_owns{lock.m_owns} {
+    lock.m_mutex = nullptr;
+    lock.m_owns = false;
+  };
+  explicit unique_lock(mutex_type& m) : m_mutex{m} {
+    m_mutex->lock();
+    m_owns = true;
+  };
 
-  unique_lock(mutex_type& m, std::defer_lock_t t) noexcept;
-  unique_lock(mutex_type& m, std::try_to_lock_t t);
-  unique_lock(mutex_type& m, std::adopt_lock_t t);
+  unique_lock(mutex_type& m, [[maybe_unused]] std::defer_lock_t t) noexcept
+      : m_mutex{&m} {};
+  unique_lock(mutex_type& m, [[maybe_unused]] std::try_to_lock_t t)
+      : m_mutex{&m}, m_owns{m.try_lock()} {};
+  unique_lock(mutex_type& m, [[maybe_unused]] std::adopt_lock_t t)
+      : m_mutex{&m}, m_owns{true} {};
 
   template <typename Rep, typename Period>
   unique_lock(mutex_type& m,
@@ -190,6 +200,19 @@ class unique_lock {
 
   [[nodiscard]] bool owns_lock() const noexcept;
   explicit operator bool() const noexcept;
+
+ private:
+  void check_can_lock() const {
+    if (m_mutex == nullptr)
+      throw std::system_error(
+          std::make_error_code(std::errc::operation_not_permitted));
+    if (m_owns)
+      throw std::system_error(
+          std::make_error_code(std::errc::resource_deadlock_would_occur));
+  }
+
+  mutex_type* m_mutex{nullptr};
+  bool m_owns{false};
 };
 
 template <typename... MutexTypes>
