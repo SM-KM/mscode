@@ -61,6 +61,13 @@ inline void release_record(hp_record* r) noexcept {
   r->active.store(false, std::memory_order_release);
 }
 
+inline bool is_protected(const void* p) noexcept {
+  for (hp_record* r = global_domain().records.load(std::memory_order_acquire);
+       r; r = r->next)
+    if (r->ptr.load(std::memory_order_acquire) == p) return true;
+  return false;
+}
+
 }; // namespace detail
 
 template <typename T, typename D = std::default_delete<T>>
