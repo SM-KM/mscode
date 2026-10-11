@@ -9,6 +9,17 @@ struct alignas(64) hp_record {
   hp_record* next{nullptr};
 };
 
+/// what an object needs to be in a retired list
+struct retired_header {
+  retired_header() noexcept = default;
+  retired_header(const retired_header&) noexcept {};
+  retired_header& operator=(const retired_header&) noexcept { return *this; };
+
+  const void* object{nullptr};
+  void (*reclaim)(retired_header){nullptr};
+  retired_header* next{nullptr};
+};
+
 }; // namespace detail
 
 template <typename T, typename D = std::default_delete<T>>
