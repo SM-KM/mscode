@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <cstddef>
 #include <mutex>
 #include <system_error>
 #include <tuple>
@@ -276,8 +277,55 @@ class scoped_lock {
   std::tuple<MutexTypes&...> m_mutexes;
 };
 
+// locks every lockable without deadlocking, no matter the order other thread
+// use. block on one, try to lock the rest, if one of them fails release
+// everything and start again blocking on the one that failed
 template <typename... Lockables>
-void lock(Lockables&... lockables) {};
+void lock(Lockables&... lockables) {
+  constexpr std::size_t N = sizeof...(Lockables);
+  if constexpr (N == 0) {
+  } else if constexpr (N == 1) {
+    (lockables.lock(), ...);
+  } else {
+    auto refs = std::tie(lockables...);
+    constexpr auto seq = std::index_sequence_for<Lockables...>{};
+
+    auto do_lock = [&](std::size_t i) {
+      detail::for_index(refs, i, [](auto& l) { l.lock(); }, seq);
+    };
+    auto do_unlock = [&](std::size_t i) {
+      detail::for_index(refs, i, [](auto& l) { l.unlock(); }, seq);
+    };
+    auto do_try = [&](std::size_t i) {
+      bool ok = false;
+      detail::for_index(refs, i, [&](auto& l) { ok = l.try_lock(); }, seq);
+      return ok;
+    };
+
+    std::size_t first = 0;
+    for (;;) {
+      do_lock(first);
+      std::size_t k = 1;
+      try {
+        for (; k < N; ++k)
+          if (!do_try((first + k) % N)) break;
+      } catch (...) {
+        for (std::size_t j = k; j-- > 0;) do_unlock((first + j) % N);
+        throw;
+      }
+
+      if (k == N) return;
+
+      for (std::size_t j = k; j-- > 0;) do_unlock((first + j) % N);
+      first = (first + k) % N;
+    }
+  }
+};
+
+template <typename Mutex>
+void swap(unique_lock<Mutex>& lhs, unique_lock<Mutex>& rhs) noexcept {
+  lhs.swap(rhs);
+};
 
 } // namespace dss
 
