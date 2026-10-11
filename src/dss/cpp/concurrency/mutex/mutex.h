@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <system_error>
+#include <tuple>
 #include <utility>
 
 namespace dss {
@@ -261,10 +262,18 @@ class unique_lock {
 
 template <typename... MutexTypes>
 class scoped_lock {
-  explicit scoped_lock(MutexTypes&... m);
-  scoped_lock(std::adopt_lock_t t, MutexTypes&... m);
+ public:
+  explicit scoped_lock(MutexTypes&... m) : m_mutexes{m...} { dss::lock(m...); };
+  scoped_lock(std::adopt_lock_t t, MutexTypes&... m) : m_mutexes{m...} {};
   scoped_lock(const scoped_lock&) = delete;
-  ~scoped_lock();
+  ~scoped_lock() {
+    std::apply([](MutexTypes&... m) { (m.unlock(), ...); }, m_mutexes);
+  };
+
+  scoped_lock& operator=(const scoped_lock&) = delete;
+
+ private:
+  std::tuple<MutexTypes&...> m_mutexes;
 };
 
 template <typename... Lockables>
