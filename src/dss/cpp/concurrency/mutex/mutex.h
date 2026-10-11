@@ -89,7 +89,21 @@ class timed_mutex {
 
   template <typename Clock, typename Duration>
   [[nodiscard]] bool try_lock_until(
-      const std::chrono::time_point<Clock, Duration>& timeout_duration) {}
+      const std::chrono::time_point<Clock, Duration>& timeout_duration) {
+    m_mutex.lock();
+    bool got = false;
+    try {
+      got = cv.wait_until(m_mutex, timeout_duration,
+                          [this] { return !m_locked; });
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
+
+    if (got) m_locked = true;
+    m_mutex.unlock();
+    return got;
+  }
 
   template <typename Clock, typename Duration>
   [[nodiscard]] bool try_lock_for(
@@ -104,6 +118,8 @@ class timed_mutex {
     cv.notify_one();
     m_mutex.unlock();
   }
+
+  timed_mutex& operator=(const timed_mutex&) = delete;
 
  private:
   mutex m_mutex;
