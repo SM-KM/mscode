@@ -205,7 +205,13 @@ class hazard_pointer {
   /// loads src and protects the value, returns the pointer that is now safe
   /// to dereference, it must not ve empty
   template <typename T>
-  T* protect(const std::atomic<T*>& src) noexcept;
+  T* protect(const std::atomic<T*>& src) noexcept {
+    T* p = src.load(std::memory_order_relaxed);
+    while (!try_protect(p, src)) {
+    }
+    return p;
+  };
+
   template <class T>
   bool try_protect(T*& ptr, const std::atomic<T*>& src) noexcept;
   template <class T>
