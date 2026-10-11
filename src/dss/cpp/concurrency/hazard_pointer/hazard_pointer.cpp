@@ -2,6 +2,15 @@
 #include <memory>
 namespace dss {
 
+namespace detail {
+struct alignas(64) hp_record {
+  std::atomic<const void*> ptr{nullptr};
+  std::atomic<bool> active{false};
+  hp_record* next{nullptr};
+};
+
+}; // namespace detail
+
 template <typename T, typename D = std::default_delete<T>>
 class hazard_pointer_obj_base {
  public:
