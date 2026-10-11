@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <atomic>
 #include <memory>
-#include <thread>
 #include <utility>
 namespace dss {
 
@@ -157,9 +156,15 @@ inline retire_list& local_retire_list() noexcept {
 }; // namespace detail
 
 template <typename T, typename D = std::default_delete<T>>
-class hazard_pointer_obj_base {
+class hazard_pointer_obj_base : private detail::retired_header {
  public:
-  void retire(D d = D()) noexcept;
+  void retire(D d = D()) noexcept {
+    deleter = std::move(d);
+    T* obj = static_cast<T*>(this);
+    object = static_cast<const void*>(obj);
+    reclaim = &reclaim_fn;
+    detail::local_retire_list().retire(this);
+  };
 
  protected:
   hazard_pointer_obj_base() = default;
@@ -170,6 +175,12 @@ class hazard_pointer_obj_base {
   ~hazard_pointer_obj_base() = default;
 
  private:
+  static void reclaim_fn(detail::retired_header* h) {
+    auto* self = static_cast<hazard_pointer_obj_base*>(h);
+    T* obj = static_cast<T*>(self);
+    D d = std::move(self->deleter);
+    d(obj);
+  }
   D deleter;
 };
 
