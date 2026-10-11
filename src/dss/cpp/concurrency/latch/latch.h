@@ -41,6 +41,8 @@ class latch {
     wait();
   };
 
+  latch& operator=(const latch&) = delete;
+
  private:
   /// Returns the maximum value of the internal counter supported by the
   /// implementation.
