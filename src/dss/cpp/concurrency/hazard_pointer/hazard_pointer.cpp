@@ -187,11 +187,23 @@ class hazard_pointer_obj_base : private detail::retired_header {
 class hazard_pointer {
  public:
   hazard_pointer() noexcept = default;
-  hazard_pointer(hazard_pointer&&) noexcept;
-  hazard_pointer& operator=(const hazard_pointer&) noexcept;
-  ~hazard_pointer();
+  hazard_pointer(hazard_pointer&& other) noexcept
+      : m_rec{std::exchange(other.m_rec, nullptr)} {};
+  hazard_pointer& operator=(hazard_pointer&& other) noexcept {
+    if (this != &other) {
+      if (m_rec) detail::release_record(m_rec);
+      m_rec = std::exchange(other.m_rec, nullptr);
+    }
+    return *this;
+  };
+  ~hazard_pointer() {
+    if (m_rec) detail::release_record(m_rec);
+  };
 
-  bool empty() const noexcept;
+  bool empty() const noexcept { return m_rec == nullptr; };
+
+  /// loads src and protects the value, returns the pointer that is now safe
+  /// to dereference, it must not ve empty
   template <typename T>
   T* protect(const std::atomic<T*>& src) noexcept;
   template <class T>
