@@ -247,6 +247,15 @@ class hazard_pointer {
 inline hazard_pointer make_hazard_pointer() {
   return hazard_pointer(detail::acquire_record());
 }
-void swap(hazard_pointer&, hazard_pointer&) noexcept;
+inline void swap(hazard_pointer& lhs, hazard_pointer& rhs) noexcept {
+  lhs.swap(rhs);
+};
+
+/// scan the retired objects of the calling thread right now. Handy for
+/// tests and for shutdown, normally the threshold in retire() decides
+/// when to scan
+inline void reclaim_retired() noexcept {
+  detail::local_retire_list().scan();
+};
 
 }; // namespace dss
