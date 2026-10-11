@@ -56,6 +56,11 @@ inline hp_record* acquire_record() {
   return r;
 }
 
+inline void release_record(hp_record* r) noexcept {
+  r->ptr.store(nullptr, std::memory_order_release);
+  r->active.store(false, std::memory_order_release);
+}
+
 }; // namespace detail
 
 template <typename T, typename D = std::default_delete<T>>
