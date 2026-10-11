@@ -212,8 +212,23 @@ class hazard_pointer {
     return p;
   };
 
+  /// publish ptr as hazard, then check src still holds it. if not
+  /// ptr is updated with the new value and false is returned
   template <class T>
-  bool try_protect(T*& ptr, const std::atomic<T*>& src) noexcept;
+  bool try_protect(T*& ptr, const std::atomic<T*>& src) noexcept {
+    T* p = ptr;
+    reset_protection(p);
+
+    // hazard_pointer has to be visible before we re-read src
+    // store -> load ordering, a plain release/acquire is not enough
+    // for this
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    ptr = src.load(std::memory_order_acquire);
+    if (p == ptr) return true;
+    reset_protection();
+    return false;
+  };
+
   template <class T>
   void reset_protection(const T* ptr) noexcept;
   void reset_protection(std::nullptr_t = nullptr) noexcept;
