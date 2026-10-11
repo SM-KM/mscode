@@ -230,9 +230,13 @@ class hazard_pointer {
   };
 
   template <class T>
-  void reset_protection(const T* ptr) noexcept;
-  void reset_protection(std::nullptr_t = nullptr) noexcept;
-  void swap(hazard_pointer&) noexcept;
+  void reset_protection(const T* ptr) noexcept {
+    m_rec->ptr.store(static_cast<const void*>(ptr), std::memory_order_release);
+  };
+  void reset_protection(std::nullptr_t = nullptr) noexcept {
+    m_rec->ptr.store(nullptr, std::memory_order_release);
+  };
+  void swap(hazard_pointer& other) noexcept { std::swap(m_rec, other.m_rec); };
 
  private:
   friend hazard_pointer make_hazard_pointer();
