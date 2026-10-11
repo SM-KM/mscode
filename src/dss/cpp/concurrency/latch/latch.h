@@ -34,7 +34,12 @@ class latch {
          c = m_counter.load(std::memory_order_acquire))
       m_counter.wait(c, std::memory_order_acquire);
   };
-  void arrive_and_wait(std::ptrdiff_t n = 1);
+
+  /// count_down(n) and then wait
+  void arrive_and_wait(std::ptrdiff_t n = 1) {
+    count_down(n);
+    wait();
+  };
 
  private:
   /// Returns the maximum value of the internal counter supported by the
