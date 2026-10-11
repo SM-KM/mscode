@@ -221,14 +221,29 @@ class unique_lock {
     return m_owns;
   };
 
-  void unlock();
+  void unlock() {
+    if (!m_owns) {
+      throw std::system_error(
+          std::make_error_code(std::errc::operation_not_permitted));
+    }
+    m_mutex->unlock();
+    m_owns = false;
+  };
 
-  void swap(unique_lock& other) noexcept;
-  mutex_type* release() noexcept;
-  mutex_type* mutex() const noexcept;
+  void swap(unique_lock& other) noexcept {
+    std::swap(m_mutex, other.m_mutex);
+    std::swap(m_owns, other.m_owns);
+  };
+  mutex_type* release() noexcept {
+    mutex_type* m = m_mutex;
+    m_mutex = nullptr;
+    m_owns = false;
+    return m;
+  };
+  mutex_type* mutex() const noexcept { return m_mutex; };
 
-  [[nodiscard]] bool owns_lock() const noexcept;
-  explicit operator bool() const noexcept;
+  [[nodiscard]] bool owns_lock() const noexcept { return m_owns; };
+  explicit operator bool() const noexcept { return m_owns; };
 
  private:
   void check_can_lock() const {
