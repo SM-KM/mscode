@@ -21,9 +21,11 @@ class latch {
     if (m_counter.fetch_sub(n, std::memory_order_release) == n)
       m_counter.notify_all();
   };
-
   /// true if the counter is 0, never blocks
-  bool try_wait() const noexcept;
+  bool try_wait() const noexcept {
+    return m_counter.load(std::memory_order_acquire) == 0;
+  };
+
   void wait() const;
   void arrive_and_wait(std::ptrdiff_t n = 1);
 
