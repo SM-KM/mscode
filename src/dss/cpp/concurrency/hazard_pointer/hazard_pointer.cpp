@@ -186,7 +186,7 @@ class hazard_pointer_obj_base : private detail::retired_header {
 
 class hazard_pointer {
  public:
-  hazard_pointer() noexcept;
+  hazard_pointer() noexcept = default;
   hazard_pointer(hazard_pointer&&) noexcept;
   hazard_pointer& operator=(const hazard_pointer&) noexcept;
   ~hazard_pointer();
@@ -200,9 +200,16 @@ class hazard_pointer {
   void reset_protection(const T* ptr) noexcept;
   void reset_protection(std::nullptr_t = nullptr) noexcept;
   void swap(hazard_pointer&) noexcept;
+
+ private:
+  friend hazard_pointer make_hazard_pointer();
+  explicit hazard_pointer(detail::hp_record* r) noexcept : m_rec{r} {};
+  detail::hp_record* m_rec{nullptr};
 };
 
-hazard_pointer make_hazard_pointer();
+inline hazard_pointer make_hazard_pointer() {
+  return hazard_pointer(detail::acquire_record());
+}
 void swap(hazard_pointer&, hazard_pointer&) noexcept;
 
 }; // namespace dss
