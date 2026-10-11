@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <atomic>
 #include <memory>
+#include <thread>
 #include <utility>
 namespace dss {
 
@@ -147,6 +148,11 @@ struct retire_list {
     count = 0;
   };
 };
+
+inline retire_list& local_retire_list() noexcept {
+  thread_local retire_list list;
+  return list;
+}
 
 }; // namespace detail
 
