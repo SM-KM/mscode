@@ -59,6 +59,29 @@ class stop_source {
     if (m_state) m_state->sources.fetch_sub(1, std::memory_order_acq_rel);
   }
 
+  [[nodiscard]] bool request_stop() noexcept {
+    if (!m_state) return false;
+    return !m_state->stopped.exchange(true, std::memory_order_acq_rel);
+  }
+
+  void swap(dss::stop_source& other) noexcept { m_state.swap(other.m_state); }
+  dss::stop_source& operator=(const dss::stop_source& other) noexcept {
+    stop_source tmp(other);
+    swap(tmp);
+    return *this;
+  }
+  dss::stop_source& operator=(dss::stop_source&& other) noexcept {
+    stop_source tmp(std::move(other));
+    swap(tmp);
+    return *this;
+  }
+  [[nodiscard]] bool stop_requested() const noexcept {
+    return m_state && m_state->stopped.load(std::memory_order_acquire);
+  }
+  [[nodiscard]] bool stop_possible() const noexcept {
+    return m_state != nullptr;
+  }
+
  private:
   std::shared_ptr<detail::stop_state> m_state;
 };
