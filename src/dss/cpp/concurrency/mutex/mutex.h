@@ -40,6 +40,9 @@ class mutex {
 
   mutex& operator=(const mutex&) = delete;
 
+  using native_handle_type = pthread_mutex_t*;
+  native_handle_type native_handle() noexcept { return &m_handle; }
+
  private:
   pthread_mutex_t m_handle = PTHREAD_MUTEX_INITIALIZER;
 };
