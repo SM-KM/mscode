@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 
+#include <algorithm>
 #include <cerrno>
 #include <chrono>
 #include <system_error>
@@ -38,14 +39,20 @@ class condition_variable {
     while (!stop_waiting()) wait(lock);
   };
 
+  /// relative timeouts are turned into and absolute deadline on the steady
+  /// clock, clamped so a huge duration cannot overflow
   template <typename Rep, typename Period>
   dss::cv_status wait_for(dss::unique_lock<dss::mutex>& lock,
-                          const std::chrono::duration<Rep, Period> rel_time);
+                          const std::chrono::duration<Rep, Period> rel_time) {
+    return wait_until(lock, deadline_after(rel_time));
+  };
 
   template <typename Rep, typename Period, typename Predicate>
   [[nodiscard]] bool wait_for(dss::unique_lock<dss::mutex>& lock,
                               const std::chrono::duration<Rep, Period> rel_time,
-                              Predicate stop_waiting);
+                              Predicate stop_waiting) {
+    return wait_until(lock, deadline_after(rel_time), std::move(stop_waiting));
+  };
 
   template <typename Clock, typename Duration>
   dss::cv_status wait_until(
