@@ -86,7 +86,13 @@ class condition_variable {
   [[nodiscard]] bool wait_until(
       dss::unique_lock<dss::mutex>& lock,
       const std::chrono::time_point<Clock, Duration> rel_time,
-      Predicate stop_waiting);
+      Predicate stop_waiting) {
+    while (!stop_waiting()) {
+      if (wait_until(lock, rel_time) == dss::cv_status::timeout)
+        return stop_waiting();
+    }
+    return true;
+  };
 
   condition_variable& operator=(const condition_variable&) = delete;
 
