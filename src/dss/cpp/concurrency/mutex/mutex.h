@@ -247,6 +247,9 @@ class unique_lock {
   [[nodiscard]] bool owns_lock() const noexcept { return m_owns; };
   explicit operator bool() const noexcept { return m_owns; };
 
+  using native_handle_type = pthread_mutex_t*;
+  native_handle_type native_handle() noexcept { return &m_handle; }
+
  private:
   void check_can_lock() const {
     if (m_mutex == nullptr)
@@ -257,6 +260,7 @@ class unique_lock {
           std::make_error_code(std::errc::resource_deadlock_would_occur));
   }
 
+  pthread_mutex_t m_handle = PTHREAD_MUTEX_INITIALIZER;
   mutex_type* m_mutex{nullptr};
   bool m_owns{false};
 };
