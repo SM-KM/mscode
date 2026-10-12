@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 namespace dss {
 
@@ -123,6 +124,15 @@ constexpr auto operator<=>(const array<T, N>& lhs, const array<T, N>& rhs) {
   return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(),
                                                 rhs.begin(), rhs.end());
 };
+
+template <typename T, typename... U>
+  requires(std::is_same_v<T, U> && ...)
+array(T, U...) -> array<T, 1 + sizeof...(U)>;
+template <typename T, std::size_t N>
+constexpr void swap(array<T, N>& lhs,
+                    array<T, N>& rhs) noexcept(noexcept(lhs.swap(rhs))) {
+  lhs.swap(rhs);
+}
 
 template <std::size_t I, class T, std::size_t N>
 constexpr T& get(array<T, N>& a) noexcept {
