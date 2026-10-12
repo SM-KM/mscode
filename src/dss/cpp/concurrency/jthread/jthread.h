@@ -3,8 +3,11 @@
 
 #include <algorithm>
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <thread>
+#include <type_traits>
+#include <utility>
 namespace dss {
 
 namespace detail {
@@ -82,6 +85,13 @@ class stop_source {
     return m_state != nullptr;
   }
 
+  [[nodiscard]] stop_token get_token() const noexcept {
+    return stop_token(m_state);
+  }
+  friend bool operator==(const stop_source& a, const stop_source& b) noexcept {
+    return a.m_state == b.m_state;
+  }
+
  private:
   std::shared_ptr<detail::stop_state> m_state;
 };
@@ -90,10 +100,29 @@ class jthread {
  public:
   using id = std::thread::id;
 
-  jthread() noexcept;
-  jthread(jthread&& other) noexcept;
+  jthread() noexcept : m_stop{dss::nonstopstate_t{}} {};
+  jthread(jthread&& other) noexcept
+      : m_thread{std::move(other.m_thread)}, m_stop{std::move(other.m_stop)} {};
+
+  /// Runs f(args...) in a new thread, if f can also take a stop_token as
+  /// first argument is called with the token on this jthread
   template <typename Function, typename... Args>
-  explicit jthread(Function&& f, Args&&... args);
+  explicit jthread(Function&& f, Args&&... args) {
+    if constexpr (std::is_invocable_v<std::decay_t<Function>, stop_token,
+                                      std::decay_t<Args>...>) {
+      /// std::thread decay copies everything including the token
+      m_thread = std::thread{[](auto fn, stop_token token, auto... a) {
+                               std::invoke(std::move(fn), std::move(token),
+                                           std::move(a)...);
+                             },
+                             std::forward<Function>(f), m_stop.get_token(),
+                             std::forward<Args>(args)...};
+    } else {
+      m_thread =
+          std::thread{std::forward<Function>(f), std::forward<Args>(args)...};
+    }
+  };
+
   jthread(const jthread&) = delete;
   ~jthread();
 
@@ -107,27 +136,10 @@ class jthread {
   void detatch();
 
   void swap(dss::jthread& other) noexcept;
-};
 
-struct nostopstate_t {
-  explicit nostopstate_t() = default;
-};
-
-class stop_source {
- public:
-  stop_source();
-  explicit stop_source(dss::nostopstate_t nss) noexcept;
-  stop_source(const stop_source& other) noexcept;
-  stop_source(stop_source&& other) noexcept;
-  ~stop_source();
-
-  std::stop_source& operator=(const std::stop_source& other) noexcept;
-  std::stop_source& operator=(std::stop_source&& other) noexcept;
-
-  [[nodiscard]] bool request_stop() noexcept;
-  void swap(const dss::stop_source& other) noexcept;
-  [[nodiscard]] bool stop_requested() const noexcept;
-  [[nodiscard]] bool stop_possible() const noexcept;
+ private:
+  std::thread m_thread;
+  stop_source m_stop;
 };
 
 } // namespace dss
