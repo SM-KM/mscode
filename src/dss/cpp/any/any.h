@@ -7,13 +7,35 @@
 #include <typeinfo>
 #include <utility>
 
-namespace dss
-{
+namespace dss {
+class any;
+
+namespace detail {
+union any_storage {
+  void* ptr;
+  alignas(void*) unsigned char buf[sizeof(void*) * 3];
+};
+
+// Type erasure -> any does not know the type it holds, it knows a "vtable", a
+// table of function pointers that were instantiated for that type (one
+// table per type, shared by all the anys holding it):
+//   type()    -> typeid of the value
+//   get()     -> address of the value
+//   destroy() -> destructor
+//   copy()    -> copy construct into another storage
+//   move()    -> move into another storage and destroy the source
+struct any_vtable {
+  const std::type_info& (*type)() noexcept;
+  void* (*get)(const any_storage&) noexcept;
+  void (*destroy)(any_storage&) noexcept;
+  void (*copy)(const any_storage& src, any_storage* dst);
+  void (*move)(any_storage& src, any_storage& dst) noexcept;
+};
+}; // namespace detail
 
 // Any is not a templated class is an implementation from C++17,
 // that allows to hold any time
-class any
-{
+class any {
   constexpr any() noexcept;
   any(const any& other);
   any(const any&& other) noexcept;
@@ -23,11 +45,11 @@ class any
   any(ValueType&& value);
 
   template <typename ValueType, class... Args>
-  explicit any(std::in_place_type_t<ValueType>, Args&&...args);
+  explicit any(std::in_place_type_t<ValueType>, Args&&... args);
 
   template <typename ValueType, typename U, typename... Args>
   explicit any(std::in_place_type_t<ValueType>, std::initializer_list<U> il,
-               Args&&...args);
+               Args&&... args);
 
   any& operator=(const any& rhs);
   any& operator=(any&& rhs) noexcept;
@@ -36,9 +58,9 @@ class any
 
   // Most operations on std::any decays the valuetype
   template <typename ValueType, typename... Args>
-  std::decay_t<ValueType>& emplace(Args&&...args);
+  std::decay_t<ValueType>& emplace(Args&&... args);
   template <typename ValueType, typename U, typename... Args>
-  std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&...args);
+  std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&... args);
 
   // Destroy the contained object
   void reset() noexcept;
@@ -51,8 +73,7 @@ class any
 };
 
 // bad_any_cast
-class bad_any_cast : std::bad_cast
-{
+class bad_any_cast : std::bad_cast {
   bad_any_cast() noexcept;
   bad_any_cast(const bad_any_cast& other) noexcept;
 };
@@ -67,10 +88,10 @@ template <typename T>
 T any_cast(any&& operand);
 
 template <typename T>
-const T *any_cast(const any *operand) noexcept;
+const T* any_cast(const any* operand) noexcept;
 
 template <typename T>
-T *any_cast(any *operand) noexcept;
+T* any_cast(any* operand) noexcept;
 
 // make_any
 template <typename T, typename... Args>

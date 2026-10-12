@@ -3,18 +3,15 @@
 
 #include <utility>
 
-namespace dss
-{
+namespace dss {
 
-struct nullopt_t
-{
+struct nullopt_t {
   constexpr explicit nullopt_t(int) {}
 };
 
 template <typename T>
-class optional
-{
-public:
+class optional {
+ public:
   using value_type = T;
 
   constexpr optional() noexcept;
@@ -29,11 +26,11 @@ public:
   constexpr optional(optional<U>&& other);
 
   template <class... Args>
-  constexpr explicit optional(std::in_place_t, Args&&...args);
+  constexpr explicit optional(std::in_place_t, Args&&... args);
 
   template <class U, class... Args>
   constexpr explicit optional(std::in_place_t, std::initializer_list<U> ilist,
-                              Args&&...args);
+                              Args&&... args);
 
   template <class U = T>
   constexpr optional(U&& value);
@@ -41,8 +38,8 @@ public:
   constexpr ~optional();
 
   // operators
-  constexpr const T *operator->() const noexcept;
-  constexpr T *operator->() noexcept;
+  constexpr const T* operator->() const noexcept;
+  constexpr T* operator->() noexcept;
   constexpr const T& operator*() const& noexcept;
   constexpr T& operator*() & noexcept;
   constexpr const T&& operator*() const&& noexcept;
@@ -63,19 +60,19 @@ public:
 
   // emplaceing the object on op
   template <class... Args>
-  constexpr T& emplace(Args&&...args);
+  constexpr T& emplace(Args&&... args);
   template <class U, class... Args>
-  constexpr T& emplace(std::initializer_list<U> ilist, Args&&...args);
+  constexpr T& emplace(std::initializer_list<U> ilist, Args&&... args);
 };
 
 // make optional
 template <class T>
 constexpr dss::optional<std::decay_t<T>> make_optional(T&& value);
 template <class T, class... Args>
-constexpr dss::optional<T> make_optional(Args&&...args);
+constexpr dss::optional<T> make_optional(Args&&... args);
 template <class T, class U, class... Args>
 constexpr dss::optional<T> make_optional(std::initializer_list<U> il,
-                                         Args&&...args);
+                                         Args&&... args);
 
 } // namespace dss
 

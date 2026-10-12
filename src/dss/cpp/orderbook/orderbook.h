@@ -71,7 +71,6 @@ class order {
           "Order ({}) cannot be filled for more than its remaining quantity",
           get_order_id()));
     }
-
     remaining_quantity_ -= quantity;
   }
 
