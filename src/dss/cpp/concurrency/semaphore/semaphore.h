@@ -33,7 +33,11 @@ class counting_semaphore {
       m_cv.notify_all();
   }
 
-  void acquire();
+  void acquire() {
+    dss::unique_lock<dss::mutex> lock{m_mutex};
+    m_cv.wait(lock, [this] { return m_count > 0; });
+    --m_count;
+  };
   [[nodiscard]] bool try_acquire() noexcept;
 
   template <class Rep, class Period>
