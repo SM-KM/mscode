@@ -5,6 +5,7 @@
 #include <atomic>
 #include <concepts>
 #include <cstddef>
+#include <limits>
 
 namespace dss {
 // barrier is non copiable nor movable
@@ -67,10 +68,18 @@ class barrier {
       m_phase.wait(arrival.m_phase, std::memory_order_acquire);
   };
 
-  void arrive_and_wait();
-  void arrive_and_drop();
+  void arrive_and_wait() { wait(arrive()); };
+  void arrive_and_drop() {
+    // before arriving, the thread completing the phase has to see it
+    m_expected.fetch_sub(1, std::memory_order_relaxed);
+    (void)arrive();
+  };
 
-  static constexpr std::ptrdiff_t max() noexcept;
+  static constexpr std::ptrdiff_t max() noexcept {
+    return std::numeric_limits<std::ptrdiff_t>::max();
+  };
+
+  barrier& operator=(const barrier&) = delete;
 
  private:
   std::atomic<std::ptrdiff_t> m_expected;
