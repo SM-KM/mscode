@@ -45,12 +45,24 @@ class counting_semaphore {
     return true;
   };
 
-  template <class Rep, class Period>
-  bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time);
+  template <typename Rep, typename Period>
+  bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) {
+    dss::unique_lock<dss::mutex> lock{m_mutex};
+    if (!m_cv.wait_for(lock, rel_time, [this] { return m_count > 0; }))
+      return false;
+    --m_count;
+    return true;
+  };
 
   template <class Clock, class Duration>
   [[nodiscard]] bool try_acquire_until(
-      const std::chrono::time_point<Clock, Duration>& abs_time);
+      const std::chrono::time_point<Clock, Duration>& abs_time) {
+    dss::unique_lock<dss::mutex> lock{m_mutex};
+    if (!m_cv.wait_until(lock, abs_time, [this] { return m_count > 0; }))
+      return false;
+    --m_count;
+    return true;
+  };
 
   constexpr std::ptrdiff_t max() noexcept;
 
