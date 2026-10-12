@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <iterator>
 #include <stdexcept>
+#include <tuple>
 #include <type_traits>
 
 namespace dss {
@@ -137,5 +138,14 @@ constexpr const T&& get(const array<T, N>&& a) noexcept {
 }
 
 } // namespace dss
+
+template <typename T, std::size_t N>
+struct std::tuple_size<dss::array<T, N>>
+    : std::integral_constant<std::size_t, N> {};
+template <std::size_t I, typename T, std::size_t N>
+struct std::tuple_element<I, dss::array<T, N>> {
+  static_assert(I < N, "array index out of bounds");
+  using type = T;
+};
 
 #endif // ARRAY_H
