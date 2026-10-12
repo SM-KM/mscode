@@ -19,12 +19,24 @@ class condition_variable {
   condition_variable(const condition_variable&) = delete;
   ~condition_variable() { pthread_cond_destroy(&m_cond); };
 
-  void notify_one() noexcept;
-  void notify_all() noexcept;
+  /// wakes up one of the waiting threads if any
+  void notify_one() noexcept { pthread_cond_signal(&m_cond); };
+  /// wakes up all the waiting threads
+  void notify_all() noexcept { pthread_cond_broadcast(&m_cond); };
 
-  void wait(dss::unique_lock<dss::mutex>& lock);
+  /// atomically unlocks the mutex and blocks, when it returns the mutex
+  /// is locked again.
+  void wait(dss::unique_lock<dss::mutex>& lock) {
+    check_lock(lock);
+    int e = pthread_cond_wait(&m_cond, lock.mutex()->native_handle());
+    if (e != 0) throw std::system_error(e, std::generic_category());
+  };
+
+  /// protects against spurious wakeups and lost notifications
   template <typename Predicate>
-  void wait(dss::unique_lock<dss::mutex>& lock, Predicate stop_waiting);
+  void wait(dss::unique_lock<dss::mutex>& lock, Predicate stop_waiting) {
+    while (!stop_waiting()) wait(lock);
+  };
 
   template <typename Rep, typename Period>
   dss::cv_status wait_for(dss::unique_lock<dss::mutex>& lock,
