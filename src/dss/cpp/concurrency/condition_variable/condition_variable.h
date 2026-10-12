@@ -57,13 +57,38 @@ class condition_variable {
   template <typename Clock, typename Duration>
   dss::cv_status wait_until(
       dss::unique_lock<dss::mutex>& lock,
-      const std::chrono::time_point<Clock, Duration> rel_time);
+      const std::chrono::time_point<Clock, Duration> rel_time) {
+    check_lock(lock);
+    using sys = std::chrono::system_clock;
+    const auto clock_now = Clock::now();
+    const auto sys_now = sys::now();
+    sys::time_point sys_deadline;
+
+    if (rel_time <= clock_now) {
+      sys_deadline = sys_now;
+    } else {
+      /// compare as long double first, converting an enormous duration to the
+      /// system clock one is what dould overflow
+      using ld = std::chrono::duration<long double>;
+      if (ld(rel_time - clock_now) >= ld(sys::time_point::max() - sys_now))
+        sys_deadline = sys::time_point::max();
+      else
+        sys_deadline =
+            sys_now + std::chrono::ceil<sys::duration>(rel_time - clock_now);
+    }
+
+    timed_wait(lock, sys_deadline);
+    return Clock::now() < rel_time ? dss::cv_status::no_timeout
+                                   : dss::cv_status::timeout;
+  };
 
   template <typename Clock, typename Duration, typename Predicate>
   [[nodiscard]] bool wait_until(
       dss::unique_lock<dss::mutex>& lock,
       const std::chrono::time_point<Clock, Duration> rel_time,
       Predicate stop_waiting);
+
+  condition_variable& operator=(const condition_variable&) = delete;
 
  private:
   // acording to the standard it says that the caller must own the lock,
