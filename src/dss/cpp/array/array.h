@@ -30,7 +30,7 @@ class array {
   using const_reference = const value_type&;
   using pointer = value_type*;
   using const_pointer = const pointer;
-  using iterator = std::contiguous_iterator_tag;
+  using iterator = value_type*;
   using const_iterator = const iterator;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = const reverse_iterator;
@@ -77,18 +77,27 @@ class array {
   };
 
   // iterators
-  constexpr iterator begin() noexcept;
-  constexpr const_iterator begin() const noexcept;
-  constexpr const_iterator cbegin() const noexcept;
-  constexpr iterator end() noexcept;
-  constexpr const_iterator end() const noexcept;
-  constexpr const_iterator cend() const noexcept;
-  constexpr iterator rbegin() noexcept;
-  constexpr const_iterator rbegin() const noexcept;
-  constexpr const_iterator crbegin() const noexcept;
-  constexpr iterator rend() noexcept;
-  constexpr const_iterator rend() const noexcept;
-  constexpr const_iterator crend() const noexcept;
+  constexpr iterator begin() noexcept { return data(); };
+  constexpr const_iterator begin() const noexcept { return data(); };
+  constexpr const_iterator cbegin() const noexcept { return data(); };
+  constexpr iterator end() noexcept { return data() + N; };
+  constexpr const_iterator end() const noexcept { return data() + N; };
+  constexpr const_iterator cend() const noexcept { return data() + N; };
+
+  constexpr iterator rbegin() noexcept { return reverse_iterator{end()}; };
+  constexpr const_iterator rbegin() const noexcept {
+    return const_reverse_iterator{end()};
+  };
+  constexpr const_iterator crbegin() const noexcept {
+    return const_reverse_iterator(end());
+  };
+  constexpr iterator rend() noexcept { return reverse_iterator{begin()}; };
+  constexpr const_iterator rend() const noexcept {
+    return const_reverse_iterator{begin()};
+  };
+  constexpr const_iterator crend() const noexcept {
+    return const_reverse_iterator{begin()};
+  };
 
   [[nodiscard]] constexpr bool empty() const noexcept;
   [[nodiscard]] constexpr size_type size() const noexcept;
