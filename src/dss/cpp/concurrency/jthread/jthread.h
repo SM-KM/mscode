@@ -124,9 +124,27 @@ class jthread {
   };
 
   jthread(const jthread&) = delete;
-  ~jthread();
 
-  jthread& operator=(jthread&& other) noexcept;
+  /// A joinable thread asks the thread to stop and it
+  /// waits for it
+  ~jthread() {
+    if (joinable()) {
+      request_stop();
+      join();
+    }
+  };
+
+  jthread& operator=(jthread&& other) noexcept {
+    if (this != &other) {
+      if (joinable()) {
+        request_stop();
+        join();
+      }
+      m_thread = std::move(other.m_thread);
+      m_stop = std::move(other.m_stop);
+    }
+    return *this;
+  };
 
   [[nodiscard]] bool joinable() const noexcept;
   [[nodiscard]] dss::jthread::id get_id() const noexcept;
@@ -136,6 +154,7 @@ class jthread {
   void detatch();
 
   void swap(dss::jthread& other) noexcept;
+  bool request_stop() noexcept { return m_stop.request_stop(); };
 
  private:
   std::thread m_thread;
