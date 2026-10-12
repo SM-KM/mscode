@@ -41,9 +41,9 @@ class barrier {
   barrier(const barrier&) = delete;
   ~barrier() {};
 
-  // counts n arrivals in the current phase without blocking. if it was
-  // the last one the completion function runs here, in this thread
-  // precondition: 0 < n <= arrivals missing in this phase
+  /// counts n arrivals in the current phase without blocking. if it was
+  /// the last one the completion function runs here, in this thread
+  /// precondition: 0 < n <= arrivals missing in this phase
   [[nodiscard]] arrival_token arrive(std::ptrdiff_t n = 1) {
     const std::size_t phase = m_phase.load(std::memory_order_acquire);
 
@@ -60,7 +60,12 @@ class barrier {
     return arrival_token{phase};
   };
 
-  void wait(arrival_token&& arrival) const;
+  /// blocks until the phase of the token is completed, loops because
+  /// atomic::wait can wake up spuriously
+  void wait(arrival_token&& arrival) const {
+    while (m_phase.load(std::memory_order_acquire) == arrival.m_phase)
+      m_phase.wait(arrival.m_phase, std::memory_order_acquire);
+  };
 
   void arrive_and_wait();
   void arrive_and_drop();
