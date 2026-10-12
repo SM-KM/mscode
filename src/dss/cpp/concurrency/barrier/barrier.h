@@ -8,7 +8,6 @@
 #include <limits>
 
 namespace dss {
-// barrier is non copiable nor movable
 
 namespace detail {
 struct empty_completion {
@@ -23,6 +22,7 @@ class barrier {
  public:
   class arrival_token final {
    public:
+    // barrier is non copiable nor movable
     arrival_token(arrival_token&&) = default;
     arrival_token& operator=(arrival_token&&) = default;
     ~arrival_token() = default;
@@ -78,7 +78,6 @@ class barrier {
   static constexpr std::ptrdiff_t max() noexcept {
     return std::numeric_limits<std::ptrdiff_t>::max();
   };
-
   barrier& operator=(const barrier&) = delete;
 
  private:
