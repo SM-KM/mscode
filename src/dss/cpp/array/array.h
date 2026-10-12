@@ -125,6 +125,19 @@ constexpr auto operator<=>(const array<T, N>& lhs, const array<T, N>& rhs) {
                                                 rhs.begin(), rhs.end());
 };
 
+namespace detail {
+template <typename T, std::size_t N, std::size_t... I>
+constexpr array<std::remove_cv_t<T>, N> to_array_copy(
+    T (&a)[N], std::index_sequence<I...>) {
+  return {{a[I]}...};
+}
+template <typename T, std::size_t N, std::size_t... I>
+constexpr array<std::remove_cv_t<T>, N> to_array_move(
+    T (&&a)[N], std::index_sequence<I...>) {
+  return {{std::move(a[I])...}};
+}
+}; // namespace detail
+
 template <typename T, typename... U>
   requires(std::is_same_v<T, U> && ...)
 array(T, U...) -> array<T, 1 + sizeof...(U)>;
