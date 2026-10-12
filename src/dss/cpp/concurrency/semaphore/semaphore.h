@@ -64,7 +64,8 @@ class counting_semaphore {
     return true;
   };
 
-  constexpr std::ptrdiff_t max() noexcept;
+  constexpr std::ptrdiff_t max() noexcept { return LeastMaxValue; };
+  counting_semaphore& operator=(const counting_semaphore&) = delete;
 
  private:
   dss::mutex m_mutex;
