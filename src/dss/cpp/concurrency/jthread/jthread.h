@@ -1,8 +1,41 @@
 #ifndef JTHREAD_H
 #define JTHREAD_H
 
+#include <algorithm>
+#include <atomic>
+#include <memory>
 #include <thread>
 namespace dss {
+
+namespace detail {
+struct stop_state {
+  std::atomic<bool> stopped{false};
+  std::atomic<std::size_t> sources{0};
+};
+}; // namespace detail
+
+class stop_source;
+class stop_token {
+ public:
+  stop_token() noexcept = default;
+
+  [[nodiscard]] bool stop_requested() const noexcept {
+    return m_state && m_state->stopped.load(std::memory_order_acquire);
+  };
+
+  [[nodiscard]] bool stop_possible() const noexcept {
+    return m_state && (m_state->stopped.load(std::memory_order_acquire) ||
+                       m_state->sources.load(std::memory_order_acquire) > 0);
+  };
+
+  void swap(stop_token& other) noexcept { m_state.swap(other.m_state); };
+
+ private:
+  friend class stop_source;
+  explicit stop_token(std::shared_ptr<detail::stop_state> s) noexcept
+      : m_state{std::move(s)} {}
+  std::shared_ptr<detail::stop_state> m_state;
+};
 
 class jthread {
  public:
