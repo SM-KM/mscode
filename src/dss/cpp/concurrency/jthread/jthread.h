@@ -146,14 +146,27 @@ class jthread {
     return *this;
   };
 
-  [[nodiscard]] bool joinable() const noexcept;
-  [[nodiscard]] dss::jthread::id get_id() const noexcept;
-  [[nodiscard]] static unsigned int harware_concurrency() noexcept;
+  [[nodiscard]] bool joinable() const noexcept { return m_thread.joinable(); };
+  [[nodiscard]] dss::jthread::id get_id() const noexcept {
+    return m_thread.get_id();
+  };
+  [[nodiscard]] static unsigned int harware_concurrency() noexcept {
+    return std::thread::hardware_concurrency();
+  };
 
-  void join();
-  void detatch();
+  void join() { m_thread.join(); };
+  void detatch() { m_thread.detach(); };
 
-  void swap(dss::jthread& other) noexcept;
+  void swap(dss::jthread& other) noexcept {
+    m_thread.swap(other.m_thread);
+    m_stop.swap(other.m_stop);
+  };
+
+  [[nodiscard]] stop_source get_stop_source() noexcept { return m_stop; };
+  [[nodiscard]] stop_token get_stop_token() const noexcept {
+    return m_stop.get_token();
+  }
+
   bool request_stop() noexcept { return m_stop.request_stop(); };
 
  private:
