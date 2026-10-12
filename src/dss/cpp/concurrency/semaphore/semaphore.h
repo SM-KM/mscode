@@ -38,7 +38,12 @@ class counting_semaphore {
     m_cv.wait(lock, [this] { return m_count > 0; });
     --m_count;
   };
-  [[nodiscard]] bool try_acquire() noexcept;
+  [[nodiscard]] bool try_acquire() noexcept {
+    dss::unique_lock<dss::mutex> lock{m_mutex};
+    if (m_count <= 0) return false;
+    --m_count;
+    return true;
+  };
 
   template <class Rep, class Period>
   bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time);
