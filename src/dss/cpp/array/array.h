@@ -1,6 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <stdexcept>
@@ -99,15 +100,14 @@ class array {
     return const_reverse_iterator{begin()};
   };
 
-  [[nodiscard]] constexpr bool empty() const noexcept;
-  [[nodiscard]] constexpr size_type size() const noexcept;
-  constexpr size_type max_size() const noexcept;
-  void swap(array& other) noexcept(std::is_nothrow_swappable_v<T>);
-  void fill(const T& value);
+  [[nodiscard]] constexpr bool empty() const noexcept { return N == 0; };
+  [[nodiscard]] constexpr size_type size() const noexcept { return N; };
+  constexpr size_type max_size() const noexcept { return N; };
 
-  // template <typename U, std::size_t S>
-  // constexpr bool operator<=>(const std::array<T, N>& lhs,
-  //                            const std::array<T, N>& rhs);
+  void swap(array& other) noexcept(std::is_nothrow_swappable_v<T>) {
+    std::swap_ranges(begin(), end(), other.begin());
+  };
+  void fill(const T& value) { std::fill_n(begin(), N, value); };
 };
 
 template <typename T, std::size_t N>
