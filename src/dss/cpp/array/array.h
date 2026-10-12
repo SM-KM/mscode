@@ -5,8 +5,22 @@
 #include <iterator>
 #include <type_traits>
 
-template <class T, size_t N>
-struct array {
+namespace dss {
+
+namespace detail {
+template <typename T, std::size_t N>
+struct array_storage {
+  using type = T[N];
+};
+
+template <typename T>
+struct array_storage<T, 0> {
+  struct type {};
+};
+} // namespace detail
+
+template <typename T, size_t N>
+class array {
   using value_type = T;
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
@@ -62,9 +76,10 @@ struct array {
   //                            const std::array<T, N>& rhs);
 };
 
-template <class T, std::size_t N>
+template <typename T, std::size_t N>
 constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&a)[N]);
-template <class T, std::size_t N>
+template <typename T, std::size_t N>
 constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&&a)[N]);
+} // namespace dss
 
 #endif // ARRAY_H
