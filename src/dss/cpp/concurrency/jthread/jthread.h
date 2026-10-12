@@ -174,6 +174,16 @@ class jthread {
   stop_source m_stop;
 };
 
+inline void swap(stop_source& a, stop_source& b) noexcept {
+  a.swap(b);
+}
+inline void swap(stop_token& a, stop_token& b) noexcept {
+  a.swap(b);
+}
+inline void swap(jthread& a, jthread& b) noexcept {
+  a.swap(b);
+}
+
 } // namespace dss
 
 #endif // JTHREAD_H
