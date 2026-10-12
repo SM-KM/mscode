@@ -37,6 +37,32 @@ class stop_token {
   std::shared_ptr<detail::stop_state> m_state;
 };
 
+struct nonstopstate_t {
+  explicit nonstopstate_t() = default;
+};
+
+class stop_source {
+ public:
+  stop_source() : m_state{std::make_shared<detail::stop_state>()} {
+    m_state->sources.store(1, std::memory_order_relaxed);
+  };
+
+  explicit stop_source([[maybe_unused]] dss::nonstopstate_t nss) noexcept {};
+  stop_source(const stop_source& other) noexcept : m_state(other.m_state) {
+    if (m_state) m_state->sources.fetch_add(1, std::memory_order_relaxed);
+  }
+
+  stop_source(stop_source&& other) noexcept
+      : m_state(std::move(other.m_state)) {}
+
+  ~stop_source() {
+    if (m_state) m_state->sources.fetch_sub(1, std::memory_order_acq_rel);
+  }
+
+ private:
+  std::shared_ptr<detail::stop_state> m_state;
+};
+
 class jthread {
  public:
   using id = std::thread::id;
