@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <iterator>
+#include <stdexcept>
 #include <type_traits>
 
 namespace dss {
@@ -21,6 +22,7 @@ struct array_storage<T, 0> {
 
 template <typename T, size_t N>
 class array {
+ public:
   using value_type = T;
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
@@ -33,16 +35,27 @@ class array {
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = const reverse_iterator;
 
+  typename detail::array_storage<T, N>::type m_elems;
+
   // constructor - destructor and operator = are normally implicitly declared
   // inside the standard library
-  constexpr array();
-  constexpr ~array();
+  constexpr array() = default;
+  constexpr ~array() = default;
   void operator=(const array&) = default;
 
-  constexpr reference at(size_type pos);
-  constexpr const_reference at(size_type pos) const;
-  constexpr reference operator[](size_type pos);
-  constexpr const_reference operator[](size_type pos) const;
+  constexpr reference at(size_type pos) {
+    if (pos >= N) throw std::out_of_range("dss::array::at");
+    return data()[pos];
+  };
+  constexpr const_reference at(size_type pos) const {
+    if (pos >= N) throw std::out_of_range("dss::array::at");
+    return data()[pos];
+  };
+
+  constexpr reference operator[](size_type pos) { return data()[pos]; };
+  constexpr const_reference operator[](size_type pos) const {
+    return data()[pos];
+  };
 
   constexpr reference front();
   constexpr const_reference front() const;
