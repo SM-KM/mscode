@@ -2,6 +2,7 @@
 #define ARRAY_H
 
 #include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <iterator>
 #include <stdexcept>
@@ -115,6 +116,13 @@ template <typename T, std::size_t N>
 constexpr bool operator==(const array<T, N>& lhs, const array<T, N>& rhs) {
   return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
+
+template <typename T, std::size_t N>
+  requires std::three_way_comparable<T>
+constexpr auto operator<=>(const array<T, N>& lhs, const array<T, N>& rhs) {
+  return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(),
+                                                rhs.begin(), rhs.end());
+};
 
 template <std::size_t I, class T, std::size_t N>
 constexpr T& get(array<T, N>& a) noexcept {
