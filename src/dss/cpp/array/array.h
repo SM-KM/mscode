@@ -111,9 +111,31 @@ class array {
 };
 
 template <typename T, std::size_t N>
-constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&a)[N]);
-template <typename T, std::size_t N>
-constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&&a)[N]);
+constexpr bool operator==(const array<T, N>& lhs, const array<T, N>& rhs) {
+  return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+template <std::size_t I, class T, std::size_t N>
+constexpr T& get(array<T, N>& a) noexcept {
+  static_assert(I < N, "array index out of bounds");
+  return a.m_elems[I];
+}
+template <std::size_t I, class T, std::size_t N>
+constexpr const T& get(const array<T, N>& a) noexcept {
+  static_assert(I < N, "array index out of bounds");
+  return a.m_elems[I];
+}
+template <std::size_t I, class T, std::size_t N>
+constexpr T&& get(array<T, N>&& a) noexcept {
+  static_assert(I < N, "array index out of bounds");
+  return std::move(a.m_elems[I]);
+}
+template <std::size_t I, class T, std::size_t N>
+constexpr const T&& get(const array<T, N>&& a) noexcept {
+  static_assert(I < N, "array index out of bounds");
+  return std::move(a.m_elems[I]);
+}
+
 } // namespace dss
 
 #endif // ARRAY_H
