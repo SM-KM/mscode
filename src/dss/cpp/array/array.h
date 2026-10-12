@@ -57,12 +57,24 @@ class array {
     return data()[pos];
   };
 
-  constexpr reference front();
-  constexpr const_reference front() const;
-  constexpr reference back();
-  constexpr const_reference back() const;
-  constexpr T* data() noexcept;
-  constexpr const T* data() const;
+  constexpr reference front() { return data()[0]; };
+  constexpr const_reference front() const { return data()[0]; };
+  constexpr reference back() { return data()[N - 1]; };
+  constexpr const_reference back() const { return data()[N - 1]; };
+  constexpr T* data() noexcept {
+    if constexpr (N == 0) {
+      return nullptr;
+    } else {
+      return m_elems;
+    }
+  };
+  constexpr const T* data() const noexcept {
+    if constexpr (N == 0) {
+      return nullptr;
+    } else {
+      return m_elems;
+    }
+  };
 
   // iterators
   constexpr iterator begin() noexcept;
