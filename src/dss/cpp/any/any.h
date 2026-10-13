@@ -100,6 +100,15 @@ struct is_in_place_type : std::false_type {};
 template <typename T>
 struct is_in_place_type<std::in_place_type_t<T>> : std::true_type {};
 
+/// what converting constructor / assignment
+template <typename ValueType>
+inline constexpr bool any_accepts =
+    !std::is_same_v<std::decay_t<ValueType>, any> &&
+    !is_in_place_type<std::decay_t<ValueType>>::value &&
+    std::is_copy_constructible_v<std::decay_t<ValueType>> &&
+    std::is_constructible_v<std::decay_t<ValueType>, ValueType>;
+struct any_access;
+
 }; // namespace detail
 
 // Any is not a templated class is an implementation from C++17,
