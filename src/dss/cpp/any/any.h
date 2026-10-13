@@ -95,6 +95,11 @@ struct any_manager<T, false> {
   }
 };
 
+template <typename T>
+struct is_in_place_type : std::false_type {};
+template <typename T>
+struct is_in_place_type<std::in_place_type_t<T>> : std::true_type {};
+
 }; // namespace detail
 
 // Any is not a templated class is an implementation from C++17,
