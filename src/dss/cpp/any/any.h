@@ -182,12 +182,34 @@ class any {
   };
 
   template <typename ValueType, typename U, typename... Args>
-  std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&... args);
+    requires(std::is_copy_constructible_v<std::decay_t<ValueType>> &&
+             std::is_constructible_v<std::decay_t<ValueType>,
+                                     std::initializer_list<U>&, Args...>)
+  std::decay_t<ValueType>& emplace(std::initializer_list<U> il,
+                                   Args&&... args) {
+    using T = std::decay_t<ValueType>;
+    reset();
+    T& value = detail::any_manager<T>::create(m_storage, il,
+                                              std::forward<Args>(args)...);
+    m_vtable = detail::any_manager<T>::vtable();
+    return value;
+  }
 
   // Destroy the contained object
-  void reset() noexcept;
+  void reset() noexcept {
+    if (m_vtable) {
+      m_vtable->destroy(m_storage);
+      m_vtable = nullptr;
+    }
+  };
 
-  void swap(any& other) noexcept;
+  void swap(any& other) noexcept {
+    if (this == &other) return;
+    any tmp;
+    tmp.take(other);
+    other.take(*this);
+    take(tmp);
+  }
   bool has_value() const noexcept;
 
   // std::type_info describes the information of the type stored if any
