@@ -168,8 +168,19 @@ class any {
   };
 
   // Most operations on std::any decays the valuetype
+  // destroys the current value first, if the construction throws we are empty
   template <typename ValueType, typename... Args>
-  std::decay_t<ValueType>& emplace(Args&&... args);
+    requires(std::is_copy_constructible_v<std::decay_t<ValueType>> &&
+             std::is_constructible_v<std::decay_t<ValueType>, Args...>)
+  std::decay_t<ValueType>& emplace(Args&&... args) {
+    using T = std::decay_t<ValueType>;
+    reset();
+    T& value =
+        detail::any_manager<T>::create(m_storage, std::forward<Args>(args)...);
+    m_vtable = detail::any_manager<T>::vtable();
+    return value;
+  };
+
   template <typename ValueType, typename U, typename... Args>
   std::decay_t<ValueType>& emplace(std::initializer_list<U> il, Args&&... args);
 
