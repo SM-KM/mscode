@@ -3,6 +3,7 @@
 
 #include <any>
 #include <initializer_list>
+#include <new>
 #include <type_traits>
 #include <typeinfo>
 #include <utility>
@@ -40,8 +41,26 @@ inline constexpr bool any_is_small =
 template <typename T, bool Small = any_is_small<T>>
 struct any_manager;
 
+/// The value is inside the any instance
 template <typename T>
-struct any_manager<T, true> {};
+struct any_manager<T, true> {
+  static T* ptr(const any_storage& s) noexcept {
+    return std::launder(
+        reinterpret_cast<T*>(const_cast<unsigned char*>(s.buf)));
+  };
+
+  template <typename... Args>
+  static T& create(any_storage& s, Args&&... args) {
+    return *::new (static_cast<void*>(s.buf)) T(std::forward<Args>(args)...);
+  }
+  static const std::type_info& type() noexcept { return typeid(T); };
+  static void* get(const any_storage& s) noexcept { return ptr(s); };
+  static void destroy(any_storage& s) noexcept { ptr(s)->T(); };
+  static void copy(const any_storage& src, any_storage& dst) {
+    ::new (static_cast<void*>(dst.buf)) T(*ptr(src));
+  }
+  static void move(any_storage& src, any_storage& dst) noexcept {}
+};
 
 }; // namespace detail
 
