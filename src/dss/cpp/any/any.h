@@ -202,7 +202,6 @@ class any {
       m_vtable = nullptr;
     }
   };
-
   void swap(any& other) noexcept {
     if (this == &other) return;
     any tmp;
@@ -210,10 +209,12 @@ class any {
     other.take(*this);
     take(tmp);
   }
-  bool has_value() const noexcept;
+  bool has_value() const noexcept { return m_vtable != nullptr; };
 
   // std::type_info describes the information of the type stored if any
-  const std::type_info& type() const noexcept;
+  const std::type_info& type() const noexcept {
+    return m_vtable ? m_vtable->type() : typeid(void);
+  };
 
  private:
   friend struct detail::any_access;
