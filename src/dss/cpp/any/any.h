@@ -29,7 +29,7 @@ struct any_vtable {
   const std::type_info& (*type)() noexcept;
   void* (*get)(const any_storage&) noexcept;
   void (*destroy)(any_storage&) noexcept;
-  void (*copy)(const any_storage& src, any_storage* dst);
+  void (*copy)(const any_storage& src, any_storage& dst);
   void (*move)(any_storage& src, any_storage& dst) noexcept;
 };
 
@@ -59,7 +59,40 @@ struct any_manager<T, true> {
   static void copy(const any_storage& src, any_storage& dst) {
     ::new (static_cast<void*>(dst.buf)) T(*ptr(src));
   }
-  static void move(any_storage& src, any_storage& dst) noexcept {}
+  static void move(any_storage& src, any_storage& dst) noexcept {
+    ::new (static_cast<void*>(dst.buf)) T(std::move(*ptr(src)));
+    ptr(src)->T();
+  }
+  static const any_vtable* vtable() noexcept {
+    static constexpr any_vtable vt{&type, &get, &destroy, &copy, &move};
+    return &vt;
+  }
+};
+
+template <typename T>
+struct any_manager<T, false> {
+  static T* ptr(const any_storage& s) noexcept {
+    return static_cast<T*>(s.ptr);
+  }
+  template <typename... Args>
+  static T& create(any_storage& s, Args&&... args) {
+    s.ptr = new T(std::forward<Args>(args)...);
+    return *ptr(s);
+  }
+  static const std::type_info& type() noexcept { return typeid(T); }
+  static void* get(const any_storage& s) noexcept { return s.ptr; }
+  static void destroy(any_storage& s) noexcept { delete ptr(s); }
+  static void copy(const any_storage& src, any_storage& dst) {
+    dst.ptr = new T(*ptr(src));
+  }
+  static void move(any_storage& src, any_storage& dst) noexcept {
+    dst.ptr = src.ptr; // just the pointer changes owner
+    src.ptr = nullptr;
+  }
+  static const any_vtable* vtable() noexcept {
+    static constexpr any_vtable vt{&type, &get, &destroy, &copy, &move};
+    return &vt;
+  }
 };
 
 }; // namespace detail
