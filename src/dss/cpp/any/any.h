@@ -114,13 +114,21 @@ struct any_access;
 // Any is not a templated class is an implementation from C++17,
 // that allows to hold any time
 class any {
-  constexpr any() noexcept;
-  any(const any& other);
-  any(const any&& other) noexcept;
-  ~any();
+  constexpr any() noexcept {};
+  any(const any& other) {
+    if (other.m_vtable) {
+      other.m_vtable->copy(other.m_storage, m_storage);
+      m_vtable = other.m_vtable;
+    }
+  };
+  any(any&& other) noexcept { take(other); };
+  ~any() { reset(); };
 
   template <typename ValueType>
-  any(ValueType&& value);
+    requires detail::any_accepts<ValueType>
+  any(ValueType&& value) {
+    emplace<std::decay_t<ValueType>>(std::forward<ValueType>(value));
+  };
 
   template <typename ValueType, class... Args>
   explicit any(std::in_place_type_t<ValueType>, Args&&... args);
@@ -148,6 +156,19 @@ class any {
 
   // std::type_info describes the information of the type stored if any
   const std::type_info& type() const noexcept;
+
+ private:
+  friend struct detail::any_access;
+  void take(any& src) noexcept {
+    if (src.m_vtable) {
+      src.m_vtable->move(src.m_storage, m_storage);
+      m_vtable = src.m_vtable;
+      src.m_vtable = nullptr;
+    }
+  }
+
+  const detail::any_vtable* m_vtable{nullptr};
+  detail::any_storage m_storage{};
 };
 
 // bad_any_cast
