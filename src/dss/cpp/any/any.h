@@ -139,13 +139,33 @@ class any {
   }
 
   template <typename ValueType, typename U, typename... Args>
-  explicit any(std::in_place_type_t<ValueType>, std::initializer_list<U> il,
-               Args&&... args);
+    requires(std::is_copy_constructible_v<std::decay_t<ValueType>> &&
+             std::is_constructible_v<std::decay_t<ValueType>,
+                                     std::initializer_list<U>&, Args...>)
+  explicit any([[maybe_unused]] std::in_place_type_t<ValueType>,
+               std::initializer_list<U> il, Args&&... args) {
+    emplace<std::decay_t<ValueType>>(il, std::forward<Args>(args)...);
+  }
 
-  any& operator=(const any& rhs);
-  any& operator=(any&& rhs) noexcept;
+  any& operator=(const any& rhs) {
+    any tmp{rhs};
+    swap(tmp);
+    return *this;
+  };
+  any& operator=(any&& rhs) noexcept {
+    if (this != &rhs) {
+      reset();
+      take(rhs);
+    }
+    return *this;
+  };
   template <typename ValueType>
-  any& operator=(ValueType&& rhs);
+    requires detail::any_accepts<ValueType>
+  any& operator=(ValueType&& rhs) {
+    any tmp{std::forward<ValueType>(rhs)};
+    swap(tmp);
+    return *this;
+  };
 
   // Most operations on std::any decays the valuetype
   template <typename ValueType, typename... Args>
