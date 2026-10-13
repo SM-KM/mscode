@@ -131,7 +131,12 @@ class any {
   };
 
   template <typename ValueType, class... Args>
-  explicit any(std::in_place_type_t<ValueType>, Args&&... args);
+    requires(std::is_copy_constructible_v<std::decay_t<ValueType>> &&
+             std::is_constructible_v<std::decay_t<ValueType>, Args...>)
+  explicit any([[maybe_unused]] std::in_place_type_t<ValueType>,
+               Args&&... args) {
+    emplace<std::decay_t<ValueType>>(std::forward<Args>(args)...);
+  }
 
   template <typename ValueType, typename U, typename... Args>
   explicit any(std::in_place_type_t<ValueType>, std::initializer_list<U> il,
