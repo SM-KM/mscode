@@ -31,6 +31,18 @@ struct any_vtable {
   void (*copy)(const any_storage& src, any_storage* dst);
   void (*move)(any_storage& src, any_storage& dst) noexcept;
 };
+
+template <typename T>
+inline constexpr bool any_is_small =
+    sizeof(T) <= sizeof(any_storage) && alignof(T) <= alignof(any_storage) &&
+    std::is_nothrow_move_constructible_v<T>;
+
+template <typename T, bool Small = any_is_small<T>>
+struct any_manager;
+
+template <typename T>
+struct any_manager<T, true> {};
+
 }; // namespace detail
 
 // Any is not a templated class is an implementation from C++17,
