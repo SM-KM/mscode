@@ -266,10 +266,14 @@ template <typename T>
 T any_cast(any&& operand);
 
 template <typename T>
-const T* any_cast(const any* operand) noexcept;
+const T* any_cast(const any* operand) noexcept {
+  return detail::any_access::get<T>(operand);
+}
 
 template <typename T>
-T* any_cast(any* operand) noexcept;
+T* any_cast(any* operand) noexcept {
+  return detail::any_access::get<T>(operand);
+}
 
 // make_any
 template <typename T, typename... Args>
