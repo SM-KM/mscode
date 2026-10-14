@@ -1,6 +1,7 @@
 #ifndef PAIR_H
 #define PAIR_H
 
+#include <tuple>
 #include <type_traits>
 #include <utility>
 namespace dss {
@@ -31,11 +32,13 @@ constexpr decltype(auto) pair_get(P&& p) {
   return get<I>(std::forward<P>(p));
 }
 
-}; // namespace detail
+template <typename P>
+concept tuple_like_2 = requires {
+  std::tuple_size<std::remove_cvref_t<P>>::value &&
+      (std::tuple_size<std::remove_cvref_t<P>>::value == 2);
+};
 
-template <typename U1, typename U2>
-concept pairlike =
-    std::is_constructible_v<U1, U1> && std::is_constructible_v<U2, U2>;
+}; // namespace detail
 
 template <typename T1, typename T2>
 struct pair {
