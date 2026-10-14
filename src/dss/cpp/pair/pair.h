@@ -5,6 +5,18 @@
 #include <utility>
 namespace dss {
 
+template <typename T1, typename T2>
+struct pair;
+
+namespace detail {
+
+template <typename T>
+struct is_dss_pair : std::false_type {};
+template <typename T1, typename T2>
+struct is_dss_pair<pair<T1, T2>> : std::true_type {};
+
+}; // namespace detail
+
 template <typename U1, typename U2>
 concept pairlike =
     std::is_constructible_v<U1, U1> && std::is_constructible_v<U2, U2>;
