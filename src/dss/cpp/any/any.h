@@ -231,9 +231,10 @@ class any {
 };
 
 // bad_any_cast
-class bad_any_cast : std::bad_cast {
-  bad_any_cast() noexcept;
-  bad_any_cast(const bad_any_cast& other) noexcept;
+class bad_any_cast : public std::bad_cast {
+  bad_any_cast() noexcept {};
+  bad_any_cast(const bad_any_cast& other) noexcept = default;
+  const char* what() const noexcept override { return "bad any cast"; };
 };
 // any_cast
 template <typename T>
