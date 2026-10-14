@@ -24,6 +24,13 @@ template <typename T>
 struct is_implicitly_default_constructible<
     T, std::void_t<decltype(implicit_default_test<T>({}))>> : std::true_type {};
 
+/// get<I> on anything tuple like (std::tuple, std::array, std::pair)
+template <std::size_t I, typename P>
+constexpr decltype(auto) pair_get(P&& p) {
+  using std::get;
+  return get<I>(std::forward<P>(p));
+}
+
 }; // namespace detail
 
 template <typename U1, typename U2>
