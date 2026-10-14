@@ -114,6 +114,7 @@ struct any_access;
 // Any is not a templated class is an implementation from C++17,
 // that allows to hold any time
 class any {
+ public:
   constexpr any() noexcept {};
   any(const any& other) {
     if (other.m_vtable) {
@@ -272,10 +273,18 @@ T* any_cast(any* operand) noexcept;
 
 // make_any
 template <typename T, typename... Args>
-std::any make_any(Args... args);
+dss::any make_any(Args&&... args) {
+  return dss::any(std::in_place_type<T>, std::forward<Args>(args)...);
+}
 
 template <typename T, typename U, typename... Args>
-std::any make_any(std::initializer_list<U> il, Args... args);
+dss::any make_any(std::initializer_list<U> il, Args&&... args) {
+  return dss::any(std::in_place_type<T>, il, std::forward<Args>(args)...);
+}
+
+inline void swap(any& lhs, any& rhs) noexcept {
+  lhs.swap(rhs);
+}
 
 } // namespace dss
 
