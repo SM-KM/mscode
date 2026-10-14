@@ -236,6 +236,24 @@ class bad_any_cast : public std::bad_cast {
   bad_any_cast(const bad_any_cast& other) noexcept = default;
   const char* what() const noexcept override { return "bad any cast"; };
 };
+
+namespace detail {
+struct any_access {
+  template <typename T>
+  static T* get(any* a) noexcept {
+    if (a && a->m_vtable && a->m_vtable->type() == typeid(T))
+      return static_cast<T*>(a->m_vtable->get(a->m_storage));
+    return nullptr;
+  };
+  template <typename T>
+  static const T* get(const any* a) noexcept {
+    if (a && a->m_vtable && a->m_vtable->type() == typeid(T))
+      return static_cast<const T*>(a->m_vtable->get(a->m_storage));
+    return nullptr;
+  }
+};
+}; // namespace detail
+
 // any_cast
 template <typename T>
 T any_cast(const any& operand);
