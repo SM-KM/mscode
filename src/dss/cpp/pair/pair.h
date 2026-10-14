@@ -15,6 +15,15 @@ struct is_dss_pair : std::false_type {};
 template <typename T1, typename T2>
 struct is_dss_pair<pair<T1, T2>> : std::true_type {};
 
+/// The explicit of the default constructor depends on T x = {} compiling
+template <typename T>
+void implicit_default_test(const T&);
+template <typename T, typename = void>
+struct is_implicitly_default_constructible : std::false_type {};
+template <typename T>
+struct is_implicitly_default_constructible<
+    T, std::void_t<decltype(implicit_default_test<T>({}))>> : std::true_type {};
+
 }; // namespace detail
 
 template <typename U1, typename U2>
