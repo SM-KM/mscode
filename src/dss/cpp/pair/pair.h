@@ -40,6 +40,15 @@ concept tuple_like_2 = requires {
 
 }; // namespace detail
 
+template <typename P, typename U1, typename U2>
+concept pairlike =
+    !detail::is_dss_pair<std::remove_cvref<P>>::value &&
+    detail::tuple_like_2<P> &&
+    std::is_constructible_v<U1,
+                            decltype(detail::pair_get<0>(std::declval<P>()))> &&
+    std::is_constructible_v<U1,
+                            decltype(detail::pair_get<1>(std::declval<P>()))>;
+
 template <typename T1, typename T2>
 struct pair {
   using first_type = T1;
@@ -63,8 +72,8 @@ struct pair {
   template <class U1, class U2>
   constexpr pair(const pair<U1, U2>&& p);
 
-  template <pairlike<T1> P>
-  constexpr pair(P&& u);
+  // template <pairlike<T1> P>
+  // constexpr pair(P&& u);
 
   template <class... Args1, class... Args2>
   constexpr pair(std::piecewise_construct_t, std::tuple<Args1...> first_args,
