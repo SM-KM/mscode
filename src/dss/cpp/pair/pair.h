@@ -106,7 +106,7 @@ struct pair {
   pair(pair&& p) = default;
 
  private:
-  /// the piecewise operators need the indices of both tuples
+  /// the piecewise constructor need the indices of both tuples
   template <typename... Args1, typename... Args2, std::size_t... I1,
             std::size_t... I2>
   constexpr pair(std::piecewise_construct_t, std::tuple<Args1...>& a,
