@@ -1,6 +1,7 @@
 #ifndef PAIR_H
 #define PAIR_H
 
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -83,9 +84,10 @@ struct pair {
     requires(std::is_constructible_v<T1, U1&> &&
              std::is_constructible_v<T2, U2&>)
   constexpr explicit(!(std::is_convertible_v<U1&, T1> &&
-                       std::is_convertible_v<U2&, T2>)) pair(pair<U1, U2>& p);
+                       std::is_convertible_v<U2&, T2>)) pair(pair<U1, U2>& p)
+      : first{p.first}, second{p.second} {};
 
-  template <class U1, class U2>
+  template <typename U1, typename U2>
   constexpr pair(const pair<U1, U2>& p);
 
   template <class U1, class U2>
@@ -102,6 +104,16 @@ struct pair {
 
   pair(const pair& p) = default;
   pair(pair&& p) = default;
+
+ private:
+  /// the piecewise operators need the indices of both tuples
+  template <typename... Args1, typename... Args2, std::size_t... I1,
+            std::size_t... I2>
+  constexpr pair(std::piecewise_construct_t, std::tuple<Args1...>& a,
+                 std::tuple<Args2...>& b, std::index_sequence<I1...>,
+                 std::index_sequence<I2...>)
+      : first{std::forward<Args1>(std::get<I1>(a))...},
+        second{std::forward<Args2>(std::get<I2>(b))...} {};
 };
 } // namespace dss
 #endif // PAIR_H
