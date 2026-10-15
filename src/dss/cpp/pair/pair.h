@@ -73,8 +73,11 @@ struct pair {
              std::is_copy_constructible_v<T2>)
       : first{x}, second{y} {};
 
-  template <class U1 = T1, class U2 = T2>
-  constexpr pair(U1&& x, U2&& y);
+  template <typename U1 = T1, typename U2 = T2>
+    requires(std::is_constructible_v<T1, U1> && std::is_constructible_v<T2, U2>)
+  constexpr explicit(!(std::is_constructible_v<U1, T1> &&
+                       std::is_constructible_v<U2, T2>)) pair(U1&& x, U2&& y)
+      : first{std::forward<U1>(x)}, second{std::forward<U2>(y)} {};
 
   template <class U1, class U2>
   constexpr pair(pair<U1, U2>& p);
