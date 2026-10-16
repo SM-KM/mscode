@@ -1,4 +1,4 @@
-pub mod vector {
+pub mod Vec {
     use core::marker::PhantomData;
     use core::ptr::NonNull;
 
@@ -6,5 +6,9 @@ pub mod vector {
     pub struct RawVec<T> {
         ptr: NonNull<T>,
         cap: usize,
+    }
+    pub struct Vec<T> {
+        buf: RawVec<T>,
+        len: usize,
     }
 }
