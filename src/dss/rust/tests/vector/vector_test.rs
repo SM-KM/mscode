@@ -1,1 +1,1 @@
-use stdr::collections::vector::Vec;
+use stdr::collections::vector::vec;
