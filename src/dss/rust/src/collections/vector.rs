@@ -1,4 +1,6 @@
-pub mod Vec {
+#![allow(unused, dead_code)]
+
+pub mod vec {
     use core::marker::PhantomData;
     use core::ptr::NonNull;
 
@@ -10,5 +12,12 @@ pub mod Vec {
     pub struct Vec<T> {
         buf: RawVec<T>,
         len: usize,
+    }
+
+    pub struct IntoIter<T> {
+        buf: NonNull<T>,
+        cap: usize,
+        ptr: *const T,
+        end: *const T,
     }
 }
