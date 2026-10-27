@@ -5,6 +5,10 @@ pub mod vec {
     use core::ptr::NonNull;
 
     use core::cmp;
+    use std::{
+        alloc::{Layout, dealloc},
+        mem,
+    };
 
     /// error for capacity overflow
     fn capacity_overflow() -> ! { panic!("capacity overflow") }
@@ -34,8 +38,13 @@ pub mod vec {
     unsafe impl<T: Send> Send for RawVec<T> {}
     unsafe impl<T: Sync> Sync for RawVec<T> {}
     unsafe impl<T: Send> Send for IntoIter<T> {}
+    unsafe impl<T: Sync> Sync for IntoIter<T> {}
+    unsafe impl<T: Send> Send for Drain<'_, T> {}
+    unsafe impl<T: Sync> Sync for Drain<'_, T> {}
 
     impl<T> RawVec<T> {
+        const IS_ZST: bool = mem::size_of::<T>() == 0;
+
         pub const fn new() -> Self;
         pub fn with_capacity(cap: usize) -> Self;
         pub fn ptr(&self) -> *mut T;
@@ -47,7 +56,14 @@ pub mod vec {
     }
 
     impl<T> Drop for RawVec<T> {
-        fn drop(&mut self) {}
+        fn drop(&mut self) {
+            if !Self::IS_ZST && self.cap != 0 {
+                unsafe {
+                    let layout = Layout::array::<T>(self.cap).unwrap();
+                    dealloc(self.ptr.as_ptr() as *mut u8, layout);
+                }
+            }
+        }
     }
     impl<T> Vec<T> {
         pub const fn new() -> Self;
