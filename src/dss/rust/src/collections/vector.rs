@@ -4,16 +4,17 @@ pub mod vec {
     use core::marker::PhantomData;
     use core::ptr::NonNull;
 
+    use core::cmp;
+
+    /// error for capacity overflow
+    fn capacity_overflow() -> ! { panic!("capacity overflow") }
+
     /// the buffer pointer + capacity, knows how to grow,
-    /// and owns the allocations
-    pub struct RawVec<T> {
-        ptr: NonNull<T>,
-        cap: usize,
-    }
-    pub struct Vec<T> {
-        buf: RawVec<T>,
-        len: usize,
-    }
+    /// and owns the allocations 
+    #[rustfmt::skip]
+    pub struct RawVec<T> { ptr: NonNull<T>, cap: usize }
+    #[rustfmt::skip]
+    pub struct Vec<T> { buf: RawVec<T>, len: usize }
 
     pub struct IntoIter<T> {
         buf: NonNull<T>,
@@ -21,6 +22,10 @@ pub mod vec {
         ptr: *const T,
         end: *const T,
     }
+
+    unsafe impl<T: Send> Send for RawVec<T> {}
+    unsafe impl<T: Sync> Sync for RawVec<T> {}
+    unsafe impl<T: Send> Send for IntoIter<T> {}
 
     impl<T> RawVec<T> {
         pub const fn new() -> Self;
@@ -36,8 +41,10 @@ pub mod vec {
     impl<T> Drop for RawVec<T> {
         fn drop(&mut self) {}
     }
-
     impl<T> vec<T> {
         pub const fn new() -> Self;
+        pub fn with_capacity(capacity: usize) -> Self;
+        pub unsafe fn from_raw_parts(ptr: *mut T, length: usize, capacity: usize) -> Self;
+        pub fn capacity(&self) -> usize;
     }
 }
