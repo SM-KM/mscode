@@ -21,6 +21,14 @@ pub mod vec {
         cap: usize,
         ptr: *const T,
         end: *const T,
+        _marker: PhantomData<T>,
+    }
+
+    pub struct Drain<'a, T> {
+        tail_start: usize,
+        tail_len: usize,
+        iter: core::slice::Iter<'a, T>,
+        vec: NonNull<Vec<T>>,
     }
 
     unsafe impl<T: Send> Send for RawVec<T> {}
@@ -41,7 +49,7 @@ pub mod vec {
     impl<T> Drop for RawVec<T> {
         fn drop(&mut self) {}
     }
-    impl<T> vec<T> {
+    impl<T> Vec<T> {
         pub const fn new() -> Self;
         pub fn with_capacity(capacity: usize) -> Self;
         pub unsafe fn from_raw_parts(ptr: *mut T, length: usize, capacity: usize) -> Self;
