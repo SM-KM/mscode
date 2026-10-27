@@ -6,7 +6,7 @@ pub mod vec {
 
     use core::cmp;
     use std::{
-        alloc::{Layout, dealloc},
+        alloc::{Layout, alloc, dealloc, handle_alloc_error},
         mem,
     };
 
@@ -64,7 +64,18 @@ pub mod vec {
             }
         }
 
-        pub fn with_capacity(cap: usize) -> Self;
+        pub fn with_capacity(cap: usize) -> Self {
+            if Self::IS_ZST || cap == 0 {
+                return Self::new();
+            }
+            let layout = Layout::array::<T>(cap).unwrap_or_else(|_| capacity_overflow());
+            let p = unsafe { alloc(layout) } as *mut T;
+            match NonNull::new(p) {
+                Some(ptr) => RawVec { ptr, cap },
+                None => handle_alloc_error(layout),
+            }
+        }
+
         pub fn ptr(&self) -> *mut T;
         pub fn capacity(&self) -> usize;
         fn grow_amortized(&mut self, len: usize, additional: usize);
@@ -84,7 +95,7 @@ pub mod vec {
         }
     }
     impl<T> Vec<T> {
-        pub const fn new() -> Self;
+        pub const fn new() -> Self { Vec { buf: RawVec::new(), len: 0 } }
         pub fn with_capacity(capacity: usize) -> Self;
         pub unsafe fn from_raw_parts(ptr: *mut T, length: usize, capacity: usize) -> Self;
         pub fn capacity(&self) -> usize;
