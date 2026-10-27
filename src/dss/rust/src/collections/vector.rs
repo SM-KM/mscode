@@ -100,7 +100,35 @@ pub mod vec {
             }
         }
 
-        pub fn shrink_to_fit(&mut self, cap: usize);
+        pub fn shrink_to_fit(&mut self, cap: usize) {
+            assert!(cap <= self.cap, "Tried to shrink to a larger capacity");
+            // if the new capacity is the same as the current capacity theres
+            // nothing to shrink, or if is usize::MAX
+            if Self::IS_ZST || cap == self.cap {
+                return;
+            }
+
+            let old_layout = Layout::array::<T>(self.cap).unwrap();
+            if cap == 0 {
+                unsafe { dealloc(self.ptr.as_ptr() as *mut u8, old_layout) }
+
+                // just making sure the state inside the vec does not remains
+                // broken or undefined after dealloc
+                self.ptr = NonNull::dangling();
+                self.cap = 0;
+                return;
+            }
+
+            let new_layout = Layout::array::<T>(cap).unwrap();
+            let p = unsafe { realloc(self.ptr.as_ptr() as *mut u8, old_layout, new_layout.size()) };
+            match NonNull::new(p as *mut T) {
+                Some(p) => {
+                    self.ptr = p;
+                    self.cap = cap;
+                }
+                None => handle_alloc_error(new_layout),
+            };
+        }
 
         // Helper methods
         fn finish_grow(&mut self, new_cap: usize) {
