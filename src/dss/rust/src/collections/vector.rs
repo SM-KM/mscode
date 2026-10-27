@@ -6,7 +6,7 @@ pub mod vec {
 
     use core::cmp;
     use std::{
-        alloc::{Layout, alloc, dealloc, handle_alloc_error},
+        alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
         mem,
     };
 
@@ -76,12 +76,44 @@ pub mod vec {
             }
         }
 
-        pub fn ptr(&self) -> *mut T;
-        pub fn capacity(&self) -> usize;
-        fn grow_amortized(&mut self, len: usize, additional: usize);
-        pub fn grow_one(&mut self);
-        pub fn reserve(&mut self, len: usize, additional: usize);
+        pub fn ptr(&self) -> *mut T { self.ptr.as_ptr() }
+        pub fn capacity(&self) -> usize { self.cap }
+
+        fn grow_amortized(&mut self, len: usize, additional: usize) {
+            /// A ZST alaready has capacity usize::MAX, so getting here
+            /// means overflow
+            if Self::IS_ZST {
+                capacity_overflow()
+            }
+            let required = len.checked_add(additional).unwrap_or_else(|| capacity_overflow());
+            let cap = cmp::max(self.cap * 2, required);
+            let cap = cmp::max(Self::MIN_NON_ZERO_CAP, cap);
+            self.finish_grow(cap);
+        }
+
+        pub fn grow_one(&mut self) { self.grow_amortized(self.cap, 1); }
+        pub fn reserve(&mut self, len: usize, additional: usize) {
+            /// if len > cap (it can never happen) but this will still triggers
+            /// growth to happen
+            if self.cap.wrapping_sub(len) < additional {
+                self.grow_amortized(len, additional);
+            }
+        }
+
         pub fn shrink_to_fit(&mut self, cap: usize);
+
+        // Helper methods
+        fn finish_grow(&mut self, new_cap: usize) {
+            let new_layout = Layout::array::<T>(new_cap).unwrap_or_else(|_| capacity_overflow());
+            let p = unsafe {
+                if self.cap == 0 {
+                    alloc(new_layout);
+                } else {
+                    let old_layout = Layout::array::<T>(self.cap).unwrap();
+                    realloc(self.ptr.as_ptr() as *mut u8, old_layout, new_layout.size());
+                }
+            };
+        }
     }
 
     impl<T> Drop for RawVec<T> {
