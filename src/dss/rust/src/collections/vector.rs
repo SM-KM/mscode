@@ -44,8 +44,26 @@ pub mod vec {
 
     impl<T> RawVec<T> {
         const IS_ZST: bool = mem::size_of::<T>() == 0;
+        const MIN_NON_ZERO_CAP: usize = if mem::size_of::<T>() == 1 {
+            8
+        } else if mem::size_of::<T>() <= 1024 {
+            4
+        } else {
+            1
+        };
 
-        pub const fn new() -> Self;
+        /// ZSTs never allocate, so they have "infinite" capacity.
+        pub const fn new() -> Self {
+            RawVec {
+                ptr: NonNull::dangling(),
+                cap: if Self::IS_ZST {
+                    usize::MAX
+                } else {
+                    0
+                },
+            }
+        }
+
         pub fn with_capacity(cap: usize) -> Self;
         pub fn ptr(&self) -> *mut T;
         pub fn capacity(&self) -> usize;
