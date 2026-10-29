@@ -154,10 +154,24 @@ pub mod vec {
             }
         }
     }
+
     impl<T> Vec<T> {
         pub const fn new() -> Self { Vec { buf: RawVec::new(), len: 0 } }
-        pub fn with_capacity(capacity: usize) -> Self;
-        pub unsafe fn from_raw_parts(ptr: *mut T, length: usize, capacity: usize) -> Self;
+        pub fn with_capacity(capacity: usize) -> Self { Vec { buf: RawVec::with_capacity(capacity), len: 0 } }
+        pub unsafe fn from_raw_parts(ptr: *mut T, length: usize, capacity: usize) -> Self {
+            Vec {
+                buf: RawVec {
+                    ptr: unsafe { NonNull::new_unchecked(ptr) },
+                    cap: if RawVec::<T>::IS_ZST {
+                        usize::MAX
+                    } else {
+                        capacity
+                    },
+                },
+                len: length,
+            }
+        }
+
         pub fn capacity(&self) -> usize;
     }
 }
