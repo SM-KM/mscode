@@ -95,20 +95,40 @@ struct pair {
       pair(const pair<U1, U2>& p)
       : first{p.first}, second{p.second} {}
 
-  template <class U1, class U2>
-  constexpr pair(pair<U1, U2>&& p);
+  template <typename U1, typename U2>
+    requires(std::is_constructible_v<T1, U1> && std::is_constructible_v<T2, U2>)
+  constexpr explicit(!(std::is_constructible_v<U1, T1> &&
+                       std::is_constructible_v<U2, T2>)) pair(pair<U1, U2>&& p)
+      : first{std::forward<U1>(p.first)}, second{std::forward<U2>(p.second)} {}
+
   template <class U1, class U2>
   constexpr pair(const pair<U1, U2>&& p);
 
+  /// Converting from tuple like 2
   // template <pairlike<T1> P>
   // constexpr pair(P&& u);
 
   template <class... Args1, class... Args2>
+    requires(std::is_constructible_v<T1, Args1...> &&
+             std::is_constructible_v<T2, Args2...>)
   constexpr pair(std::piecewise_construct_t, std::tuple<Args1...> first_args,
-                 std::tuple<Args2...> second_args);
+                 std::tuple<Args2...> second_args)
+      : pair(std::piecewise_construct, first_args, second_args,
+             std::index_sequence_for<Args1...>{},
+             std::index_sequence_for<Args2...>{}) {}
 
   pair(const pair& p) = default;
   pair(pair&& p) = default;
+
+  /// declaring a move constructor deletes the implicit copy assignment
+  /// so all assignment operators have to be provided
+  constexpr pair& operator=(const pair& p)
+    requires(std::is_copy_assignable_v<T1> && std::is_copy_assignable_v<T2>)
+  {
+    first = p.first;
+    second = p.second;
+    return *this;
+  }
 
  private:
   /// the piecewise constructor need the indices of both tuples
