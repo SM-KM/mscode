@@ -130,6 +130,33 @@ struct pair {
     return *this;
   }
 
+  constexpr pair& operator=(pair&& p) noexcept(
+      std::is_nothrow_move_assignable_v<T1> &&
+      std::is_nothrow_move_assignable_v<T2>)
+    requires(std::is_move_assignable_v<T1> && std::is_move_assignable_v<T2>)
+  {
+    first = std::forward<T1>(p.first);
+    second = std::forward<T2>(p.second);
+    return *this;
+  }
+
+  template <typename U1, typename U2>
+    requires(std::is_assignable_v<T1&, const U1&> &&
+             std::is_assignable_v<T2&, const U2&>)
+  constexpr pair& operator=(const pair<U1, U2>& p) {
+    first = p.first;
+    second = p.second;
+    return *this;
+  }
+
+  template <typename U1, typename U2>
+    requires(std::is_assignable_v<T1&, U1> && std::is_assignable_v<T2&, U2>)
+  constexpr pair& operator=(pair<U1, U2>&& p) {
+    first = std::forward<U1>(p.first);
+    second = std::forward<U2>(p.second);
+    return *this;
+  }
+
  private:
   /// the piecewise constructor need the indices of both tuples
   template <typename... Args1, typename... Args2, std::size_t... I1,
