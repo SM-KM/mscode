@@ -157,6 +157,15 @@ struct pair {
     return *this;
   }
 
+  constexpr void swap(pair& other) noexcept(std::is_nothrow_swappable_v<T1> &&
+                                            std::is_nothrow_swappable_v<T2>)
+    requires(std::is_swappable_v<T1> && std::is_swappable_v<T2>)
+  {
+    using std::swap;
+    swap(first, other.first);
+    swap(second, other.second);
+  }
+
  private:
   /// the piecewise constructor need the indices of both tuples
   template <typename... Args1, typename... Args2, std::size_t... I1,
