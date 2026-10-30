@@ -176,5 +176,9 @@ struct pair {
       : first{std::forward<Args1>(std::get<I1>(a))...},
         second{std::forward<Args2>(std::get<I2>(b))...} {};
 };
+
+template <typename T1, typename T2>
+pair(T1, T2) -> pair<T1, T2>;
+
 } // namespace dss
 #endif // PAIR_H
