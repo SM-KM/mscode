@@ -88,7 +88,12 @@ struct pair {
       : first{p.first}, second{p.second} {};
 
   template <typename U1, typename U2>
-  constexpr pair(const pair<U1, U2>& p);
+    requires(std::is_constructible_v<T1, const U1&> &&
+             std::is_constructible_v<const U2&, T2>)
+  constexpr explicit(!(std::is_constructible_v<const U1&, T1> &&
+                       std::is_constructible_v<const U2&, T2>))
+      pair(const pair<U1, U2>& p)
+      : first{p.first}, second{p.second} {}
 
   template <class U1, class U2>
   constexpr pair(pair<U1, U2>&& p);
