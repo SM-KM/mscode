@@ -191,5 +191,13 @@ pub mod vec {
             }
             self.len += 1;
         }
+        pub fn pop(&mut self) -> Option<T> {
+            if self.len == 0 {
+                None
+            } else {
+                self.len -= 1;
+                unsafe { Some(ptr::read(self.buf.ptr().add(self.len))) }
+            }
+        }
     }
 }
