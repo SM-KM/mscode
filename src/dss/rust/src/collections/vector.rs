@@ -7,7 +7,7 @@ pub mod vec {
     use core::cmp;
     use std::{
         alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
-        mem,
+        mem, ptr,
     };
 
     /// error for capacity overflow
@@ -176,10 +176,20 @@ pub mod vec {
         pub fn len(&self) -> usize { self.len }
         pub fn is_empty(&self) -> bool { self.len == 0 }
         pub fn reserve(&mut self, additional: usize) { self.buf.reserve(self.len, additional); }
+
         pub fn shrink_to_fit(&mut self) {
             if self.capacity() > self.len {
                 self.buf.shrink_to_fit(self.len);
             }
+        }
+        pub fn push(&mut self, value: T) {
+            if self.len == self.buf.capacity() {
+                self.buf.grow_one();
+            }
+            unsafe {
+                ptr::write(self.buf.ptr().add(self.len), value);
+            }
+            self.len += 1;
         }
     }
 }
