@@ -176,5 +176,10 @@ pub mod vec {
         pub fn len(&self) -> usize { self.len }
         pub fn is_empty(&self) -> bool { self.len == 0 }
         pub fn reserve(&mut self, additional: usize) { self.buf.reserve(self.len, additional); }
+        pub fn shrink_to_fit(&mut self) {
+            if self.capacity() > self.len {
+                self.buf.shrink_to_fit(self.len);
+            }
+        }
     }
 }
