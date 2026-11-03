@@ -172,6 +172,9 @@ pub mod vec {
             }
         }
 
-        pub fn capacity(&self) -> usize;
+        pub fn capacity(&self) -> usize { self.buf.capacity() }
+        pub fn len(&self) -> usize { self.len }
+        pub fn is_empty(&self) -> bool { self.len == 0 }
+        pub fn reserve(&mut self, additional: usize) { self.buf.reserve(self.len, additional); }
     }
 }
