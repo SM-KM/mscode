@@ -257,5 +257,17 @@ pub mod vec {
             self.len += n;
             other.len = 0;
         }
+
+        pub fn split_off(&mut self, at: usize) -> Vec<T> {
+            assert!(at <= self.len, "`at` split index (is {at}) should be <= len (is {})", self.len);
+            let other_len = self.len - at;
+            let mut other = Vec::with_capacity(other_len);
+            unsafe {
+                self.len = at;
+                ptr::copy_nonoverlapping(self.buf.ptr().add(at), other.buf.ptr(), other_len);
+            }
+            other.len = other_len;
+            other
+        }
     }
 }
