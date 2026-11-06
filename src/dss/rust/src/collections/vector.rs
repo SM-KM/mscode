@@ -398,5 +398,7 @@ pub mod vec {
                 Drain { tail_start: end, tail_len: len - end, iter: slice.iter(), vec: NonNull::from(&mut *self) }
             }
         }
+
+        pub fn as_slice(&self) -> &[T] { unsafe { slice::from_raw_parts(self.buf.ptr(), self.len) } }
     }
 }
