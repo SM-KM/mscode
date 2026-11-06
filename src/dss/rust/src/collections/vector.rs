@@ -33,12 +33,6 @@ pub mod vec {
         _marker: PhantomData<T>,
     }
 
-    impl<T> Iterator for IntoIter<T> {
-        type Item = T;
-        fn next(&mut self) -> Option<Self::Item> { todo!() }
-    }
-    impl<T> IntoIter<T> {}
-
     pub struct Drain<'a, T> {
         tail_start: usize,
         tail_len: usize,
@@ -485,6 +479,37 @@ pub mod vec {
             for x in iter {
                 self.push(x);
             }
+        }
+    }
+
+    // IntoIter
+    impl<T> Iterator for IntoIter<T> {
+        type Item = T;
+        fn next(&mut self) -> Option<T> {
+            if self.ptr == self.end {
+                return None;
+            }
+            unsafe {
+                if RawVec::<T>::IS_ZST {
+                    // Pointer arithmetic is meaningless for ZSTs; `end` is used as a counter.
+                    self.end = (self.end as *const u8).wrapping_sub(1) as *const T;
+                    Some(ptr::read(NonNull::<T>::dangling().as_ptr()))
+                } else {
+                    let old = self.ptr;
+                    self.ptr = self.ptr.add(1);
+                    Some(ptr::read(old))
+                }
+            }
+        }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            let size = mem::size_of::<T>();
+            let len = if size == 0 {
+                self.end as usize - self.ptr as usize
+            } else {
+                (self.end as usize - self.ptr as usize) / size
+            };
+            (len, Some(len))
         }
     }
 }
