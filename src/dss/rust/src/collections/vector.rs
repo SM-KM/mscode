@@ -213,5 +213,16 @@ pub mod vec {
             }
             self.len = len + 1;
         }
+
+        pub fn remove(&mut self, index: usize) -> T {
+            let len = self.len;
+            unsafe {
+                let p = self.buf.ptr().add(index);
+                let value = ptr::read(p);
+                ptr::copy(p.add(1), p, len - index - 1);
+                self.len = len - 1;
+                value
+            }
+        }
     }
 }
