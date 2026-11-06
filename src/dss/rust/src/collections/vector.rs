@@ -464,4 +464,16 @@ pub mod vec {
             }
         }
     }
+
+    impl<T> FromIterator<T> for Vec<T> {
+        fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+            let iter = iter.into_iter();
+            let (lower, _) = iter.size_hint();
+            let mut v = Vec::with_capacity(lower);
+            for x in iter {
+                v.push(x);
+            }
+            v
+        }
+    }
 }
