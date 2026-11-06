@@ -236,5 +236,15 @@ pub mod vec {
                 value
             }
         }
+
+        pub fn truncate(&mut self, len: usize) {
+            if len >= self.len {
+                return;
+            }
+            unsafe {
+                let remaining = self.len - len;
+                let tail = ptr::slice_from_raw_parts_mut(self.buf.ptr().add(len), remaining);
+            }
+        }
     }
 }
