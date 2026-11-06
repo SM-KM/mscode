@@ -269,5 +269,21 @@ pub mod vec {
             other.len = other_len;
             other
         }
+
+        pub fn resize(&mut self, new_len: usize, value: T)
+        where
+            T: Clone,
+        {
+            if new_len > self.len {
+                let n = new_len - self.len;
+                self.reserve(n);
+                for _ in 1..n {
+                    self.push(value.clone());
+                }
+                self.push(value);
+            } else {
+                self.truncate(new_len);
+            }
+        }
     }
 }
