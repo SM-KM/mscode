@@ -400,5 +400,6 @@ pub mod vec {
         }
 
         pub fn as_slice(&self) -> &[T] { unsafe { slice::from_raw_parts(self.buf.ptr(), self.len) } }
+        pub fn as_mut_slice(&mut self) -> &mut [T] { unsafe { slice::from_raw_parts_mut(self.buf.ptr(), self.len) } }
     }
 }
