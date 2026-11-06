@@ -285,5 +285,15 @@ pub mod vec {
                 self.truncate(new_len);
             }
         }
+
+        pub fn extend_from_slice(&mut self, other: &[T])
+        where
+            T: Clone,
+        {
+            self.reserve(other.len());
+            for x in other {
+                self.push(x.clone());
+            }
+        }
     }
 }
