@@ -401,5 +401,9 @@ pub mod vec {
 
         pub fn as_slice(&self) -> &[T] { unsafe { slice::from_raw_parts(self.buf.ptr(), self.len) } }
         pub fn as_mut_slice(&mut self) -> &mut [T] { unsafe { slice::from_raw_parts_mut(self.buf.ptr(), self.len) } }
+
+        /// `new_len <= capacity` and the first `new_len` elements
+        /// must be initialized.
+        pub unsafe fn set_len(&mut self, new_len: usize) { self.len = new_len; }
     }
 }
