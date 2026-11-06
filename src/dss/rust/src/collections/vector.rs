@@ -425,4 +425,14 @@ pub mod vec {
             }
         }
     }
+
+    impl<T: Clone> Clone for Vec<T> {
+        fn clone(&self) -> Self {
+            let mut v = Vec::with_capacity(self.len);
+            for x in self.iter() {
+                v.push(x.clone());
+            }
+            v
+        }
+    }
 }
