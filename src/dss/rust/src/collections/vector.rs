@@ -476,4 +476,15 @@ pub mod vec {
             v
         }
     }
+
+    impl<T> Extend<T> for Vec<T> {
+        fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+            let iter = iter.into_iter();
+            let (lower, _) = iter.size_hint();
+            self.reserve(lower);
+            for x in iter {
+                self.push(x);
+            }
+        }
+    }
 }
