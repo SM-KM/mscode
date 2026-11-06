@@ -5,6 +5,7 @@ pub mod vec {
     use core::{marker::PhantomData, slice};
 
     use core::cmp;
+    use std::mem::ManuallyDrop;
     use std::ops::{Deref, DerefMut};
     use std::{
         alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
@@ -31,6 +32,12 @@ pub mod vec {
         end: *const T,
         _marker: PhantomData<T>,
     }
+
+    impl<T> Iterator for IntoIter<T> {
+        type Item = T;
+        fn next(&mut self) -> Option<Self::Item> { todo!() }
+    }
+    impl<T> IntoIter<T> {}
 
     pub struct Drain<'a, T> {
         tail_start: usize,
@@ -435,8 +442,26 @@ pub mod vec {
             v
         }
     }
-
     impl<T> Default for Vec<T> {
         fn default() -> Self { Vec::new() }
+    }
+
+    impl<T> IntoIterator for Vec<T> {
+        type Item = T;
+        type IntoIter = IntoIter<T>;
+        fn into_iter(self) -> IntoIter<T> {
+            let me = ManuallyDrop::new(self);
+            let ptr = me.buf.ptr();
+            let cap = me.buf.capacity();
+            let len = me.len;
+            unsafe {
+                let end = if RawVec::<T>::IS_ZST {
+                    (ptr as *const u8).wrapping_add(len) as *const T
+                } else {
+                    ptr.add(len) as *const T
+                };
+                IntoIter { buf: NonNull::new_unchecked(ptr), cap, ptr: ptr as *const T, end, _marker: PhantomData }
+            }
+        }
     }
 }
