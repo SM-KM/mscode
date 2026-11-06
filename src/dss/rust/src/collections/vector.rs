@@ -246,5 +246,16 @@ pub mod vec {
                 let tail = ptr::slice_from_raw_parts_mut(self.buf.ptr().add(len), remaining);
             }
         }
+
+        pub fn clear(&mut self) { self.truncate(0); }
+        pub fn append(&mut self, other: &mut Vec<T>) {
+            let n = other.len;
+            self.reserve(n);
+            unsafe {
+                ptr::copy_nonoverlapping(other.buf.ptr(), self.buf.ptr(), n);
+            }
+            self.len += n;
+            other.len = 0;
+        }
     }
 }
