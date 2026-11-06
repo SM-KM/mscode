@@ -435,4 +435,8 @@ pub mod vec {
             v
         }
     }
+
+    impl<T> Default for Vec<T> {
+        fn default() -> Self { Vec::new() }
+    }
 }
