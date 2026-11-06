@@ -5,6 +5,7 @@ pub mod vec {
     use core::{marker::PhantomData, slice};
 
     use core::cmp;
+    use std::ops::Deref;
     use std::{
         alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
         env::current_exe,
@@ -405,5 +406,10 @@ pub mod vec {
         /// `new_len <= capacity` and the first `new_len` elements
         /// must be initialized.
         pub unsafe fn set_len(&mut self, new_len: usize) { self.len = new_len; }
+    }
+
+    impl<T> Deref for Vec<T> {
+        type Target = [T];
+        fn deref(&self) -> &Self::Target { self.as_slice() }
     }
 }
