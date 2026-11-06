@@ -1,14 +1,16 @@
 #![allow(unused, dead_code)]
 
 pub mod vec {
-    use core::marker::PhantomData;
     use core::ptr::NonNull;
+    use core::{marker::PhantomData, slice};
 
     use core::cmp;
     use std::{
         alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
         env::current_exe,
-        mem, ptr,
+        mem,
+        ops::{Bound, RangeBounds},
+        ptr,
     };
 
     /// error for capacity overflow
@@ -371,6 +373,30 @@ pub mod vec {
                 }
             }
             self.len = write;
+        }
+
+        pub fn drain<R: RangeBounds<usize>>(&mut self, range: R) -> Drain<'_, T> {
+            let len = self.len;
+            let start = match range.start_bound() {
+                Bound::Included(&n) => n,
+                Bound::Excluded(&n) => n.checked_add(1).unwrap_or_else(|| capacity_overflow()),
+                Bound::Unbounded => 0,
+            };
+            let end = match range.end_bound() {
+                Bound::Included(&n) => n.checked_add(1).unwrap_or_else(|| capacity_overflow()),
+                Bound::Excluded(&n) => n,
+                Bound::Unbounded => len,
+            };
+            assert!(start <= end, "slice index starts at {start} but ends at {end}");
+            assert!(end <= len, "range end index {end} out of range for slice of length {len}");
+
+            unsafe {
+                // Leak amplification: if Drain is mem::forget'd,
+                // the tail is leaked, never double-dropped.
+                self.len = start;
+                let slice = slice::from_raw_parts(self.buf.ptr().add(start), end - start);
+                Drain { tail_start: end, tail_len: len - end, iter: slice.iter(), vec: NonNull::from(&mut *self) }
+            }
         }
     }
 }
