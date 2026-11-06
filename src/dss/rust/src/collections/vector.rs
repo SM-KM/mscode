@@ -224,5 +224,17 @@ pub mod vec {
                 value
             }
         }
+
+        pub fn swap_remove(&mut self, index: usize) -> T {
+            let len = self.len;
+            assert!(index < len, "swap_remove index (is {index}) should be < len (is {len})");
+            unsafe {
+                let base = self.buf.ptr();
+                let value = ptr::read(base.add(index));
+                ptr::copy(base.add(len - 1), base.add(index), 1);
+                self.len = len - 1;
+                value
+            }
+        }
     }
 }
