@@ -343,5 +343,34 @@ pub mod vec {
                 }
             }
         }
+
+        pub fn dedup(&mut self)
+        where
+            T: PartialEq,
+        {
+            let len = self.len;
+            if len <= 1 {
+                return;
+            }
+
+            // Leak amplification: if `==` or a destructor panics we leak
+            // instead of risking a double drop.
+            self.len = 0;
+            let p = self.buf.ptr();
+            let mut write = 1;
+            unsafe {
+                for read in 1..len {
+                    if &*p.add(read) == &*p.add(write - 1) {
+                        ptr::drop_in_place(p.add(read));
+                    } else {
+                        if read != write {
+                            ptr::copy_nonoverlapping(p.add(read), p.add(write), 1);
+                        }
+                        write += 1;
+                    }
+                }
+            }
+            self.len = write;
+        }
     }
 }
