@@ -5,7 +5,7 @@ pub mod vec {
     use core::{marker::PhantomData, slice};
 
     use core::cmp;
-    use std::ops::Deref;
+    use std::ops::{Deref, DerefMut};
     use std::{
         alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
         env::current_exe,
@@ -411,5 +411,18 @@ pub mod vec {
     impl<T> Deref for Vec<T> {
         type Target = [T];
         fn deref(&self) -> &Self::Target { self.as_slice() }
+    }
+
+    impl<T> DerefMut for Vec<T> {
+        fn deref_mut(&mut self) -> &mut Self::Target { self.as_mut_slice() }
+    }
+
+    impl<T> Drop for Vec<T> {
+        fn drop(&mut self) {
+            // Elements are dropped here; RawVec's Drop then frees the memory.
+            unsafe {
+                ptr::drop_in_place(ptr::slice_from_raw_parts_mut(self.buf.ptr(), self.len));
+            }
+        }
     }
 }
