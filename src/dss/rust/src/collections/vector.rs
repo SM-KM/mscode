@@ -7,6 +7,7 @@ pub mod vec {
     use core::cmp;
     use std::{
         alloc::{Layout, alloc, dealloc, handle_alloc_error, realloc},
+        env::current_exe,
         mem, ptr,
     };
 
@@ -293,6 +294,53 @@ pub mod vec {
             self.reserve(other.len());
             for x in other {
                 self.push(x.clone());
+            }
+        }
+
+        pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut f: F) {
+            let original_len = self.len;
+            if original_len == 0 {
+                return;
+            }
+
+            // If `f` or a destructor panics we must not expose
+            // moved-out/dropped slots.
+            self.len = 0;
+
+            struct Guard<'a, T> {
+                v: &'a mut Vec<T>,
+                processed: usize,
+                deleted: usize,
+                original_len: usize,
+            }
+            impl<T> Drop for Guard<'_, T> {
+                fn drop(&mut self) {
+                    unsafe {
+                        if self.deleted > 0 && self.processed < self.original_len {
+                            let p = self.v.buf.ptr();
+                            ptr::copy(p.add(self.processed), p.add(self.processed - self.deleted), self.original_len - self.processed);
+                        }
+                    }
+                    self.v.len = self.original_len - self.deleted;
+                }
+            }
+
+            let mut g = Guard { v: self, processed: 0, deleted: 0, original_len };
+            while g.processed < original_len {
+                unsafe {
+                    let current = g.v.buf.ptr().add(g.processed);
+                    if !f(&*current) {
+                        g.processed += 1;
+                        g.deleted += 1;
+                        ptr::drop_in_place(current);
+                    } else {
+                        if g.deleted > 0 {
+                            let hole = g.v.buf.ptr().add(g.processed - g.deleted);
+                            ptr::copy_nonoverlapping(current, hole, 1);
+                        }
+                        g.processed += 1;
+                    }
+                }
             }
         }
     }
