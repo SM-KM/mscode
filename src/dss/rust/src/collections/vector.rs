@@ -199,5 +199,19 @@ pub mod vec {
                 unsafe { Some(ptr::read(self.buf.ptr().add(self.len))) }
             }
         }
+
+        pub fn insert(&mut self, index: usize, element: T) {
+            let len = self.len;
+            assert!(index <= len, "insertion index (is {index}) should be <= len (is {len})");
+            if len == self.buf.capacity() {
+                self.buf.grow_one();
+            }
+            unsafe {
+                let p = self.buf.ptr().add(index);
+                ptr::copy(p, p.add(1), len - index);
+                ptr::write(p, element);
+            }
+            self.len = len + 1;
+        }
     }
 }
