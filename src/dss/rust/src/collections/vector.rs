@@ -512,4 +512,28 @@ pub mod vec {
             (len, Some(len))
         }
     }
+
+    impl<T> DoubleEndedIterator for IntoIter<T> {
+        fn next_back(&mut self) -> Option<T> {
+            if self.ptr == self.end {
+                return None;
+            }
+            unsafe {
+                if RawVec::<T>::IS_ZST {
+                    self.end = (self.end as *const u8).wrapping_sub(1) as *const T;
+                    Some(ptr::read(NonNull::<T>::dangling().as_ptr()))
+                } else {
+                    self.end = self.end.sub(1);
+                    Some(ptr::read(self.end))
+                }
+            }
+        }
+    }
+
+    impl<T> Drop for IntoIter<T> {
+        fn drop(&mut self) {
+            for _ in &mut *self {}
+            drop(RawVec { ptr: self.buf, cap: self.cap });
+        }
+    }
 }
