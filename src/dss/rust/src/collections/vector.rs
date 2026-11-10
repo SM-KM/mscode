@@ -536,4 +536,10 @@ pub mod vec {
             drop(RawVec { ptr: self.buf, cap: self.cap });
         }
     }
+
+    impl<'a, T> Iterator for Drain<'a, T> {
+        type Item = T;
+        fn next(&mut self) -> Option<T> { self.iter.next().map(|elt| unsafe { ptr::read(elt as *const T) }) }
+        fn size_hint(&self) -> (usize, Option<usize>) { self.iter.size_hint() }
+    }
 }
