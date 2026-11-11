@@ -160,4 +160,18 @@ concept Produces = requires (const F& f) {
     { f.template make<T>() } -> std::convertible_to<std::unique_ptr<T>>;
 };
 
-// clang-format on
+template<typename F, typename... Ts>
+concept ProducesAll = (Produces<F, Ts> && ...);
+
+template<typename List> class AbstractFactory;
+
+template<typename... Ts>
+class AbstractFactory<TypeList<Ts...>> {
+public:
+    template<typename F> requires ProducesAll<F, Ts...>
+	explicit AbstractFactory(F family) {}
+  // clang-format on
+
+private:
+  std::tuple<std::function<std::unique_ptr<Ts>()>...> creators_;
+};
