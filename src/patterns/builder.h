@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #include <version>
@@ -112,6 +113,8 @@ struct User {
   std::string email;
 };
 
+/// If any of the required fields are missing it cant be built,
+/// also cant rechain already set fields like UserBuilder{}.name().name()
 template <bool hasName = false, bool hasAge = false>
 class UserBuilder {
   User u_;
@@ -137,5 +140,9 @@ public:
 template <typename B>
 concept CanBuild = requires(B&& b) { std::move(b).build(); };
 
-/// Generic builder for any struct
+/// Generic builder for any aggregate via pointers to members
+
+template <typename T>
+concept Buildable = std::is_aggregate_v<T> || std::default_initializable<T>;
+
 /// Validated build using expected for c++23
