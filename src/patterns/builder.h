@@ -2,9 +2,11 @@
 // INFO: change the normal from the standard with the ones
 // implmented in the dss
 
+#include <chrono>
 #include <concepts>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 #include <version>
@@ -64,6 +66,7 @@ class Director {
 /// Fluent builder
 struct Http {
   std::string method = "GET";
+  std::string url;
   std::vector<std::pair<std::string, std::string>> headers;
   std::optional<std::string> body;
   int timeout_ms = 30'000;
@@ -78,7 +81,16 @@ class RequestBuilderBase {
   // clang-format off
  public:
   D& method(std::string m) { r_.method = std::move(m); return self(); }
+  D& url(std::string u)    { r_.url = std::move(u);    return self(); };
+  D& timeout(std::chrono::milliseconds ms) { r_.timeout_ms = static_cast<int>(ms.count()); return self(); };
+  template <std::convertible_to<std::string_view> K, std::convertible_to<std::string_view> V>
+  D& header(K&& k, V&& v) {
+      r_.headers.emplace_back(std::string(std::string_view(k)), std::string(std::string_view(v)));
+      return self();
+  }
   // clang-format on
+
+  Http build() const { return r_; }
 };
 
 /// Generic builder for any struct
