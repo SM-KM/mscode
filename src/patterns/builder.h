@@ -83,14 +83,24 @@ class RequestBuilderBase {
   D& method(std::string m) { r_.method = std::move(m); return self(); }
   D& url(std::string u)    { r_.url = std::move(u);    return self(); };
   D& timeout(std::chrono::milliseconds ms) { r_.timeout_ms = static_cast<int>(ms.count()); return self(); };
+
   template <std::convertible_to<std::string_view> K, std::convertible_to<std::string_view> V>
   D& header(K&& k, V&& v) {
-      r_.headers.emplace_back(std::string(std::string_view(k)), std::string(std::string_view(v)));
+      r_.headers.emplace_back(std::string{std::string_view{k}}, std::string{std::string_view{v}});
       return self();
   }
   // clang-format on
 
   Http build() const { return r_; }
+};
+
+class RequestBuilder : public RequestBuilderBase<RequestBuilder> {};
+class JsonRequestBuilder : public RequestBuilderBase<JsonRequestBuilder> {
+ public:
+  JsonRequestBuilder& json(std::string body) {
+    r_.body = std::move(body);
+    return header("Content-Type", "application/json");
+  }
 };
 
 /// Generic builder for any struct
