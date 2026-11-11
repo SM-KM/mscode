@@ -41,4 +41,16 @@ template <typename T, typename... Args> requires Creatable<T, Enemy, Args...>
 std::unique_ptr<Enemy> make(Args&&... args) {
   return std::make_unique<T>(std::forward<Args>(args)...);
 }
+
+// Simple implementation of the make, using the enum to pass the selected
+// option at runtime
+std::unique_ptr<Enemy> make(Kind k) {
+    switch (k) {
+	case Kind::Goblin: return make<Goblin>();
+	case Kind::Orc: return make<Orc>();
+	case Kind::Dragon: return make<Dragon>();
+    }
+    return nullptr;
+}
+
 // clang-format on
