@@ -1,10 +1,13 @@
 #pragma once
 
 #include <concepts>
+#include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 
 /// Factory pattern
@@ -82,8 +85,28 @@ public:
 /// Example usage of Spawner
 /// using the normal spawner and the spawner of derived -> std::unique_ptr<Spawner> s = std::make_unique<SpawnerOf<Orc>>();
 /// directly using spawner of -> SpawnerOf<Dragon, int> d{5};
-/// clang-format on
 
+/// Registry factory
+template<typename Base, typename... Args>
+class Factory {
+public:
+    using Creator = std::function<std::unique_ptr<Base>(Args...)>;
+    static Factory& instance() { static Factory f; return f; }
 
+    template<typename T> requires std::derived_from<T, Base> && std::constructible_from<T, Args...> 
+    bool add(std::string key) {
+	return map_.emplace(std::move(key), [](Args... a) -> std::unique_ptr<Base>{
+	    return std::make_unique<T>(std::forward<Args>(a)...);
+	}).second;	    
+    }
+  // clang-format on
 
+  std::unique_ptr<Base> create(std::string_view key, Args... args) const {
+    auto it = map_.find(std::string(key));
+    if (it == map_.end()) return nullptr;
+    return it->second(std::forward<Args>(args)...);
+  }
 
+private:
+  std::unordered_map<std::string, Creator> map_;
+};
