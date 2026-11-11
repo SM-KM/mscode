@@ -18,9 +18,9 @@
   - [x] Generic Abstract Factory (type list)
 
 ### Creational
-- [ ] Factory Method
-- [ ] Abstract Factory
-- [ ] Builder
+- [x] Factory Method
+- [x] Abstract Factory
+- [x] Builder
 - [ ] Prototype (`clone()`)
 - [ ] Singleton (Meyers)
 - [ ] Object Pool
