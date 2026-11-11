@@ -169,7 +169,11 @@ template<typename... Ts>
 class AbstractFactory<TypeList<Ts...>> {
 public:
     template<typename F> requires ProducesAll<F, Ts...>
-	explicit AbstractFactory(F family) {}
+    explicit AbstractFactory(F family) : creators_{std::make_tuple(std::function<std::unique_ptr<Ts>()>(
+		[family] { return family.template make<Ts>(); })...)} {}
+
+    template<typename T> requires one_of<T, Ts...>
+    std::unique_ptr<T> create() const { return std::get<std::function<std::unique_ptr<T>()>>(creators_)(); };
   // clang-format on
 
 private:
