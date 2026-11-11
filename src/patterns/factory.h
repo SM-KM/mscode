@@ -3,6 +3,7 @@
 #include <concepts>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -143,3 +144,8 @@ struct GuiFactoryOf final : GuiFactory {
 struct DarkButton : Button { std::string render() const override { return "[dark button]"; } };
 struct DarkCheckbox : Checkbox { std::string render() const override { return "[dark checkbox]"; } };
 // clang-format on
+
+std::unique_ptr<GuiFactory> select_theme(std::string_view name) {
+  if (name == "dark") return std::make_unique<GuiFactoryOf<DarkButton, DarkCheckbox>>();
+  throw std::invalid_argument("unkonwn theme");
+}
