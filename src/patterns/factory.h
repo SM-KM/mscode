@@ -54,3 +54,12 @@ std::unique_ptr<Enemy> make(Kind k) {
 }
 
 // clang-format on
+
+/// Spawner - Factory method, subclasses decide what to create
+class Spawner {
+public:
+  virtual ~Spawner() = default;
+  virtual std::unique_ptr<Enemy> create() const = 0;
+  /// Uses the product independant of its type
+  std::string wave(int n) const { return std::string{}; };
+};
