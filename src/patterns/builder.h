@@ -1,6 +1,6 @@
 #pragma once
-// INFO: change the normal from the standard with the ones
-// implmented in the dss
+// INFO: change the dss from the standard with the ones
+// implemented in dss
 
 #include <chrono>
 #include <concepts>
@@ -16,6 +16,7 @@
 #endif
 
 /// Builder patterns
+
 /// @brief a way of build/construct complex objects in a linear,
 /// simpler and scalable way
 /// Classic builder + Director pattern
@@ -34,18 +35,17 @@ concept ProductBuilder = requires(B b) {
 };
 
 template <typename B>
-concept ComputerBuilder =
-    ProductBuilder<B, Computer> && requires(B b, std::string s, int n) {
-      b.cpu(s);
-      b.gpu(s);
-      b.ram(n);
-      b.add_rank(s);
-    };
+concept ComputerBuilder = ProductBuilder<B, Computer> && requires(B b, std::string s, int n) {
+  b.cpu(s);
+  b.gpu(s);
+  b.ram(n);
+  b.add_rank(s);
+};
 
 class GamingBuilder {
   Computer c_;
 
- public:
+public:
   void reset() {};
   Computer build() { return std::exchange(c_, {}); };
 };
@@ -57,7 +57,7 @@ template <ComputerBuilder B>
 class Director {
   B& b_;
 
- public:
+public:
   explicit Director(B& b) : b_{b} {}
   Computer high_end() {};
   Computer budget() {};
@@ -72,9 +72,11 @@ struct Http {
   int timeout_ms = 30'000;
 };
 
+/// Base setter returns the one that is used later for example for the
+/// JsonRequestBuilder& -> D&
 template <typename D>
 class RequestBuilderBase {
- protected:
+protected:
   Http r_;
   D& self() { return static_cast<D&>(*this); };
 
@@ -96,11 +98,39 @@ class RequestBuilderBase {
 
 class RequestBuilder : public RequestBuilderBase<RequestBuilder> {};
 class JsonRequestBuilder : public RequestBuilderBase<JsonRequestBuilder> {
- public:
+public:
   JsonRequestBuilder& json(std::string body) {
     r_.body = std::move(body);
     return header("Content-Type", "application/json");
   }
+};
+
+/// Type state fluent builder -> only compiles when the required fields are set
+struct User {
+  std::string name;
+  int age{0};
+  std::string email;
+};
+
+template <bool hasName = false, bool hasAge = false>
+class UserBuilder {
+  User u_;
+  // clang-format off
+  template <bool, bool> friend class UserBuilder;
+  // clang-format on
+  UserBuilder(User u) : u_{std::move(u)} {}
+
+public:
+  // clang-format off
+  UserBuilder() = default;
+  auto name(std::string n) && requires(!hasName) { u_.name = std::move(n); 
+      return UserBuilder<true, hasAge>{std::move(u_)}; }
+  auto age(int a) && requires(!hasAge) { u_.age = a; return UserBuilder<hasName, true>{std::move(u_)}; }
+
+  // Optional field
+  UserBuilder&& email(std::string e) && { u_.email = std::move(e); return std::move(*this); };
+  User build() && requires(hasName && hasAge) { return std::move(u_);}
+  // clang-format on
 };
 
 /// Generic builder for any struct
