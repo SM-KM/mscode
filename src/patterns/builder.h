@@ -168,3 +168,30 @@ public:
 };
 
 /// Validated build using expected for c++23
+
+struct Server {
+  std::string host;
+  int port;
+};
+enum class Err { NoHost, BadPort };
+
+template <typename P>
+concept Validateable = requires(const P& p) {
+  { p.validate() } -> std::same_as<std::expected<void, Err>>;
+};
+
+class ServerBuilder {
+  Server s_{"", 0};
+
+public:
+  // clang-format off
+  ServerBuilder& host(std::string h) { s_.host = std::move(h); return *this; }
+  ServerBuilder& port(int p) 	     { s_.port = p; 	       return *this; }
+  // clang-format on
+
+  std::expected<Server, Err> build() const {
+    if (s_.host.empty()) return std::unexpected{Err::NoHost};
+    if (s_.port <= 0 || s_.port > 65535) return std::unexpected{Err::BadPort};
+    return s_;
+  }
+};
