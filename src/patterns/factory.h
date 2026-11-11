@@ -174,8 +174,20 @@ public:
 
     template<typename T> requires one_of<T, Ts...>
     std::unique_ptr<T> create() const { return std::get<std::function<std::unique_ptr<T>()>>(creators_)(); };
-  // clang-format on
 
 private:
   std::tuple<std::function<std::unique_ptr<Ts>()>...> creators_;
 };
+
+struct Item { virtual ~Item() = default; virtual std::string name() const = 0; };
+struct Sword : Item { std::string name() const override { return "Sword"; } };
+
+struct MediumFamily {
+    template<typename T> std::unique_ptr<T> make() const {
+	if constexpr (std::same_as<T, Enemy>) return std::make_unique<Orc>(); 
+	else if constexpr (std::same_as<T, Item>) return std::make_unique<Sword>();
+	else static_assert(!sizeof(T), "Unsupported product");
+    };
+};
+
+// clang-format on
