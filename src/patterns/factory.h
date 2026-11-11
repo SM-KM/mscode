@@ -106,7 +106,18 @@ public:
     if (it == map_.end()) return nullptr;
     return it->second(std::forward<Args>(args)...);
   }
+  bool contains(std::string_view k) const { return map_.contains(std::string(k)); }
 
 private:
   std::unordered_map<std::string, Creator> map_;
 };
+
+using EnemyFactory = Factory<Enemy>;
+
+// clang-format off
+template <typename T>
+struct Register { explicit Register(const char* key) { EnemyFactory::instance().add<T>(key); }; };
+
+inline const Register<Goblin> reg_goblin{"goblin"};
+inline const Register<Orc>    reg_orc{"orc"};
+// clang-format on
