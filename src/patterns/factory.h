@@ -3,6 +3,7 @@
 #include <concepts>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -62,4 +63,17 @@ public:
   virtual std::unique_ptr<Enemy> create() const = 0;
   /// Uses the product independant of its type
   std::string wave(int n) const { return std::string{}; };
+};
+
+// The benefic comes from not having to create N boilerplate subclasses, just one
+// generic concrete creator.
+template <std::derived_from<Enemy> E, typename... Args>
+class SpawnerOf final : public Spawner {
+  std::tuple<Args...> args_;
+
+public:
+  explicit SpawnerOf(Args... a) : args_{std::move(a)...} {}
+  std::unique_ptr<Enemy> create() const override {
+    return std::apply([](const auto&... a) { return std::make_unique<E>(a...); }, args_);
+  }
 };
