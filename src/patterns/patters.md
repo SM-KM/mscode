@@ -9,13 +9,13 @@
   - [x] Type state builder
   - [x] Generic builder for any struct
   - [x] Validated build [c++23]
-- [ ] Factory pattern
-  - [ ] Simple factory
-  - [ ] Factory Method
-  - [ ] Registry factory
-  - [ ] Abstract Factory (static)
-  - [ ] Abstract Factory (dynamic)
-  - [ ] Generic Abstract Factory (type list)
+- [x] Factory pattern
+  - [x] Simple factory
+  - [x] Factory Method
+  - [x] Registry factory
+  - [x] Abstract Factory (static)
+  - [x] Abstract Factory (dynamic)
+  - [x] Generic Abstract Factory (type list)
 
 ### Creational
 - [ ] Factory Method
