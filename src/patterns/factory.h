@@ -77,3 +77,13 @@ public:
     return std::apply([](const auto&... a) { return std::make_unique<E>(a...); }, args_);
   }
 };
+
+// clang-format off
+/// Example usage of Spawner
+/// using the normal spawner and the spawner of derived -> std::unique_ptr<Spawner> s = std::make_unique<SpawnerOf<Orc>>();
+/// directly using spawner of -> SpawnerOf<Dragon, int> d{5};
+/// clang-format on
+
+
+
+
