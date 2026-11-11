@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <concepts>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -140,9 +141,30 @@ public:
 template <typename B>
 concept CanBuild = requires(B&& b) { std::move(b).build(); };
 
-/// Generic builder for any aggregate via pointers to members
-
+/// Generic builder for any aggregate via pointers to members, directly
+/// initializable without user defined constructors
 template <typename T>
 concept Buildable = std::is_aggregate_v<T> || std::default_initializable<T>;
+
+template <Buildable T>
+class Builder {
+  T obj_{};
+
+public:
+  // clang-format off
+  // it declares that M* is inside the scope of C
+  template<typename C, typename M, typename V> requires std::same_as<C, T> && std::assignable_from<M&, V&&>
+  Builder& with(M C::* member, V&& v) {
+      obj_.*member = std::forward<V>(v);
+      return *this;
+  }
+
+  template<std::invocable<T&> F>
+  Builder& apply(F&& f) { std::invoke(std::forward<F>(f), obj_); }
+
+  T build() const& { return obj_; }
+  T build() && 	   { return std::move(obj_); }
+  // clang-format on
+};
 
 /// Validated build using expected for c++23
