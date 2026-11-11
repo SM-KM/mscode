@@ -143,9 +143,21 @@ struct GuiFactoryOf final : GuiFactory {
 
 struct DarkButton : Button { std::string render() const override { return "[dark button]"; } };
 struct DarkCheckbox : Checkbox { std::string render() const override { return "[dark checkbox]"; } };
-// clang-format on
 
 std::unique_ptr<GuiFactory> select_theme(std::string_view name) {
   if (name == "dark") return std::make_unique<GuiFactoryOf<DarkButton, DarkCheckbox>>();
   throw std::invalid_argument("unkonwn theme");
 }
+
+/// Generic abstract factory
+template <typename... Ts> struct TypeList {};
+
+template <typename T, typename... Ts>
+concept one_of = (std::same_as<T, Ts> || ...);
+
+template <typename F, typename T>
+concept Produces = requires (const F& f) {
+    { f.template make<T>() } -> std::convertible_to<std::unique_ptr<T>>;
+};
+
+// clang-format on
