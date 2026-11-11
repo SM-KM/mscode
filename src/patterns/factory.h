@@ -120,4 +120,26 @@ struct Register { explicit Register(const char* key) { EnemyFactory::instance().
 
 inline const Register<Goblin> reg_goblin{"goblin"};
 inline const Register<Orc>    reg_orc{"orc"};
+
+/// Abstract factory dynamic
+struct Button { virtual ~Button() = default; virtual std::string render() const = 0; };
+struct Checkbox { virtual ~Checkbox() = default; virtual std::string render() const = 0; };
+// clang-format on
+
+struct GuiFactory {
+  virtual ~GuiFactory() = default;
+  virtual std::unique_ptr<Button> button() const = 0;
+  virtual std::unique_ptr<Checkbox> checkbox() const = 0;
+};
+
+// clang-format off
+// One template that implements any concrete family from its products
+template <typename B, typename C> requires std::derived_from<B, Button> && std::derived_from<C, Checkbox>
+struct GuiFactoryOf final : GuiFactory {
+  std::unique_ptr<Button> button() const override { return std::make_unique<B>(); };
+  std::unique_ptr<Checkbox> checkbox() const override { return std::make_unique<C>(); };
+};
+
+struct DarkButton : Button { std::string render() const override { return "[dark button]"; } };
+struct DarkCheckbox : Checkbox { std::string render() const override { return "[dark checkbox]"; } };
 // clang-format on
