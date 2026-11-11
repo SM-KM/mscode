@@ -133,5 +133,9 @@ public:
   // clang-format on
 };
 
+// Detect finished builders
+template <typename B>
+concept CanBuild = requires(B&& b) { std::move(b).build(); };
+
 /// Generic builder for any struct
 /// Validated build using expected for c++23
