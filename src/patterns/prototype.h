@@ -3,6 +3,7 @@
 #include <concepts>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 /// Prototype pattern
@@ -88,4 +89,18 @@ private:
   std::string name_;
   int hp_;
   polymorphic_ptr<Weapon> weapon_;
+};
+
+// clang-format off
+struct Goblin : Cloneable<Monster, Goblin> { using Cloneable::Cloneable; };
+struct Archer : Cloneable<Monster, Archer> { using Cloneable::Cloneable; };
+// clang-format on
+static_assert(Prototype<Monster> && Prototype<Weapon>);
+static_assert(!Prototype<int>);
+
+template <Prototype Base>
+class PrototypeRegistry {
+  std::unordered_map<std::string, std::unique_ptr<Base>> protos_;
+
+public:
 };
