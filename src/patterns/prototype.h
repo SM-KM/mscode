@@ -61,3 +61,22 @@ private:
   std::string name_;
   int damage_;
 };
+
+// clang-format off
+struct Sword : Cloneable<Weapon, Sword> { using Cloneable::Cloneable; };
+struct Bow : Cloneable<Weapon, Bow> { using Cloneable::Cloneable; };
+// clang-format on
+
+class Monster {
+public:
+  Monster(std::string name, int hp, polymorphic_ptr<Weapon> w) {}
+
+protected:
+  Monster(const Monster&) = default;
+  Monster& operator=(const Monster&) = delete;
+
+private:
+  std::string name_;
+  int hp_;
+  polymorphic_ptr<Weapon> weapon_;
+};
