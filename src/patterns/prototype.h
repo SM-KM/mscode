@@ -103,4 +103,13 @@ class PrototypeRegistry {
   std::unordered_map<std::string, std::unique_ptr<Base>> protos_;
 
 public:
+  template <std::derived_from<Base> D>
+  void add(std::string key, std::unique_ptr<D> proto) {
+    protos_[std::move(key)] = std::move(proto);
+  }
+
+  std::unique_ptr<Base> spawn(const std::string& key) const {
+    auto it = protos_.find(key);
+    return it == protos_.end() ? nullptr : it->second->clone();
+  }
 };
