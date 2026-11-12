@@ -3,6 +3,7 @@
 #include <concepts>
 #include <memory>
 #include <string>
+#include <utility>
 
 /// Prototype pattern
 /// a type qualifies if clone() returns something convertible to
@@ -69,7 +70,15 @@ struct Bow : Cloneable<Weapon, Bow> { using Cloneable::Cloneable; };
 
 class Monster {
 public:
-  Monster(std::string name, int hp, polymorphic_ptr<Weapon> w) {}
+  Monster(std::string name, int hp, polymorphic_ptr<Weapon> w)
+      : name_{std::move(name)}, hp_{hp}, weapon_{std::move(w)} {}
+  virtual ~Monster() = default;
+  virtual std::unique_ptr<Monster> clone() const = 0;
+
+  void rename(std::string n) { name_ = std::move(n); }
+  void set_hp(int h) { hp_ = h; }
+  Weapon& weapon() { return *weapon_; }
+  std::string describe();
 
 protected:
   Monster(const Monster&) = default;
