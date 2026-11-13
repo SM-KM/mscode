@@ -41,7 +41,10 @@ public:
   }
 
   template<Service I, typename Null> requires NullServiceFor<Null, I>
-  void set_fallback();
+  void set_fallback() {
+      std::lock_guard lk{m_};
+      fallbacks_[typeid(I)] = std::static_pointer_cast<void>(std::make_shared<Null>());
+  }
 
   // services_[typeid(I)] = std::static_pointer_cast<void>(std::move(impl));
   // clang-format on
