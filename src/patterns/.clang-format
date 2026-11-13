@@ -1,7 +1,5 @@
 BasedOnStyle: Google
 ColumnLimit: 120
-
-# Comments and whitespace
 ReflowComments: true
 SpacesBeforeTrailingComments: 1
 BreakBeforeBraces: llvm
@@ -15,6 +13,7 @@ ReferenceAlignment: Left
 AlwaysBreakTemplateDeclarations: Multiline
 RequiresClausePosition: WithPreceding
 
+# Includes
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^"(src|include)/'

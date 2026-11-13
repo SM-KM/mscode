@@ -2,7 +2,14 @@
 
 // Object pools
 
+#include <array>
 #include <concepts>
+#include <condition_variable>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <mutex>
+#include <optional>
 #include <utility>
 
 template <typename P, typename T>
@@ -46,5 +53,35 @@ public:
 // clang-format off
 template <typename T, std::size_t N> requires(N > 0) && std::destructible<T>
 class SlotPool {
+  struct alignas(T) Slot { std::byte buf[sizeof(T)]; };
+
+  std::array<Slot, N> slots_;
+  std::array<std::uint32_t, N> free_{};
+  std::size_t free_n_ = N;
+  mutable std::mutex m_;
+  std::condition_variable cv_;
+
+  std::optional<std::uint32_t> take(bool block) {
+    std::lock_guard lk{m_};
+    if (block) { cv_.wait(lk, [this] { return free_n_ > 0; }); }
+    if (free_n_ == 0) return std::nullopt;
+    return free_[--free_n_];
+  }
+
+  void give(std::uint32_t idx) {
+    { std::lock_guard lk{m_}; free_[free_n_++] = idx; }
+    cv_.notify_one();
+  }
+
+  template <typename... A> PoolHandle<T, SlotPool> make(bool block, A &&...a) {
+    auto idx = take(block);
+    if (!idx) return {};
+    T *p;
+    try {
+      p = std::construct_at(reinterpret_cast<T *>(slots_[*idx].buf), std::forward<A>(a)...);
+    } catch (...) { give(*idx); throw; }
+  };
   // clang-format on
+
+public:
 };
