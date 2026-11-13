@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <typeindex>
 #include <unordered_map>
+#include <utility>
 
 // Service locator / type-keyed registry with concepts
 
@@ -76,5 +77,28 @@ public:
   template <Service I> bool has() const {
     std::lock_guard lk{m_};
     return services_.contains(typeid(I)) || factories_.contains(typeid(I));
+  };
+
+  class [[nodiscard]] Override {
+    ServiceLocator *loc_;
+    Key key_;
+    std::shared_ptr<void> previous_;
+
+  public:
+    Override(ServiceLocator *l, Key k, std::shared_ptr<void> prev)
+        : loc_{l}, key_{k}, previous_{std::move(prev)} {}
+    Override(const Override &) = delete;
+    Override &operator=(const Override &) = delete;
+    Override(Override &&o) noexcept
+        : loc_{std::exchange(o.loc_, nullptr)}, key_{o.key_},
+          previous_{std::move(o.previous_)} {}
+
+    // clang-format off
+    ~Override() {
+      if (!loc_) return;
+      std::lock_guard lk{loc_->m_};
+      if(previous_) loc_->services_[key_] = std::move(previous_);
+      else loc_->services_.erase(key_);
+    }
   };
 };
