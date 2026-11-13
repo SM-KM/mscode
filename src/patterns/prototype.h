@@ -113,3 +113,7 @@ public:
     return it == protos_.end() ? nullptr : it->second->clone();
   }
 };
+
+// clang-format off
+template<std::copy_constructible T>
+std::unique_ptr<T> clone_value(const T& v) { return std::make_unique<T>(v); }
