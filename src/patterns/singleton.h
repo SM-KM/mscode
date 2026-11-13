@@ -3,6 +3,7 @@
 // Singleton pattern
 // Mayers singleton simpliest version
 
+#include <concepts>
 #include <type_traits>
 class Clock {
 public:
@@ -39,3 +40,9 @@ public:
     return inst;
   }
 };
+
+// clang-format off
+template<typename T>
+concept SingletionType = std::derived_from<T, Singleton<T>> && !std::copy_constructible<T> && !std::move_constructible<T> &&
+!std::default_initializable<T> && requires { { T::instance() } -> std::same_as<T&>; };
+// clang-format on
