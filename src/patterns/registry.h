@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <concepts>
 #include <functional>
 #include <memory>
@@ -101,4 +102,16 @@ public:
       else loc_->services_.erase(key_);
     }
   };
+
+  template<Service I>
+  Override override_with(std::shared_ptr<I> replacement) {
+      std::lock_guard lk{m_};
+      std::shared_ptr<void> prev;
+      if(auto it = services_.find(typeid(I)); it != services_.end()) prev = it->second;
+      services_[typeid(I)] = std::static_pointer_cast<void>(std::move(replacement));
+      return Override{this, typeid(I), std::move(prev)};
+  }
 };
+
+
+
