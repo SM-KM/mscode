@@ -3,6 +3,7 @@
 // Object pools
 
 #include <array>
+#include <cassert>
 #include <concepts>
 #include <condition_variable>
 #include <cstddef>
@@ -81,7 +82,27 @@ class SlotPool {
       p = std::construct_at(reinterpret_cast<T *>(slots_[*idx].buf), std::forward<A>(a)...);
     } catch (...) { give(*idx); throw; }
   };
-  // clang-format on
 
 public:
+  using handle = PoolHandle<T, SlotPool>;
+  SlotPool() { for(std::uint32_t i = 0; i < N; ++i) free_[i] = i; };
+  SlotPool(const SlotPool&) = delete;
+  SlotPool& operator=(const SlotPool&) = delete;
+  ~SlotPool() { assert(available() == N && "Handles outlived the pool"); }
+
+  /// Non-blocking acquire, if the pool is empty is an empty handle
+  template<typename... A> requires std::constructible_from<T, A...>
+  handle try_acquire(A&&... a) { return make(false, std::forward<A>(a)...); }
+  /// Blocking acquire, wailts until a slot is free
+  template<typename... A> requires std::constructible_from<T, A...>
+  handle acquire(A&&... a) { return make(true, std::forward<A>(a)...); }
+
+  void release(T* p) {
+      std::destroy_at(p);
+      give(static_cast<std::uint32_t>(reinterpret_cast<Slot*>(p) - slots_.data()));
+  }
+
+  std::size_t available() const { std::lock_guard lk{m_}; return free_n_; };
+  static constexpr std::size_t capacity() { return N; }
+  // clang-format on
 };
