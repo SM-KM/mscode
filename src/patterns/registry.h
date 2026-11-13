@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -12,6 +13,11 @@
 /// A service is lookup by its interface abstract with virtual destructor
 template <typename T>
 concept Service = std::is_abstract_v<T> && std::has_virtual_destructor_v<T>;
+
+template <typename Null, typename I>
+concept NullServiceFor =
+    std::derived_from<Null, I> && std::default_initializable<Null> &&
+    !std::is_abstract_v<Null>;
 
 class ServiceLocator {
   // clang-format off
@@ -34,8 +40,9 @@ public:
     factories_[typeid(I)] = [make = std::move(make)] { return std::static_pointer_cast<void>(make()); };
   }
 
+  template<Service I, typename Null> requires NullServiceFor<Null, I>
+  void set_fallback();
 
   // services_[typeid(I)] = std::static_pointer_cast<void>(std::move(impl));
-
   // clang-format on
 };
