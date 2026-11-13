@@ -21,8 +21,8 @@
 - [x] Factory Method
 - [x] Abstract Factory
 - [x] Builder
-- [ ] Prototype (`clone()`)
-- [ ] Singleton (Meyers)
+- [x] Prototype (`clone()`)
+- [x] Singleton (Meyers)
 - [ ] Object Pool
 - [ ] Registry / Service Locator
 
