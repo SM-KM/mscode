@@ -2,7 +2,9 @@
 
 #include <atomic>
 #include <concepts>
+#include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 
@@ -83,3 +85,28 @@ public:
     return p;
   }
 };
+
+// Singleton with arguments on startup
+class Settings {
+public:
+  // Must be called once and before instance(), it can be called only once
+  static void init(std::string path) {}
+  static Settings &instance() {
+    // clang-format off
+    if (!inst_) throw std::logic_error("Settings::init() not called");
+    return *inst_;
+    //clang-format on
+  }
+
+  const std::string& path() const { return path_; }
+  Settings(const Settings&) = delete;
+  Settings& operator=(const Settings&) = delete;
+
+private:
+  explicit Settings(std::string p) : path_{std::move(p)} {}
+  std::string path_{};
+  static inline std::once_flag flag_;
+  static std::unique_ptr<Settings> inst_;
+};
+
+
