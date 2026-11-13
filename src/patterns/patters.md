@@ -23,8 +23,8 @@
 - [x] Builder
 - [x] Prototype (`clone()`)
 - [x] Singleton (Meyers)
-- [ ] Object Pool
-- [ ] Registry / Service Locator
+- [x] Object Pool
+- [x] Registry / Service Locator
 
 ### Structural
 - [ ] Adapter

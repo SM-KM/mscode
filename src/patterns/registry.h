@@ -27,8 +27,15 @@ public:
   ServiceLocator(const ServiceLocator &) = delete;
   ServiceLocator &operator=(const ServiceLocator &) = delete;
 
-  template <Service I> void provide(std::shared_ptr<I> impl) {
+  // clang-format off
+  template <Service I> void provide_lazy(std::function<std::shared_ptr<I>()> make) {
     std::lock_guard lk{m_};
-    services_[typeid(I)] = std::static_pointer_cast<void>(std::move(impl));
+    services_.erase(typeid(I));
+    factories_[typeid(I)] = [make = std::move(make)] { return std::static_pointer_cast<void>(make()); };
   }
+
+
+  // services_[typeid(I)] = std::static_pointer_cast<void>(std::move(impl));
+
+  // clang-format on
 };
