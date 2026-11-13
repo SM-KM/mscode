@@ -1,11 +1,33 @@
 BasedOnStyle: Google
-# IndentWidth: 4
-AlwaysBreakTemplateDeclarations: Yes
+ColumnLimit: 120
+
+# Comments and whitespace
+ReflowComments: true
 SpacesBeforeTrailingComments: 1
 BreakBeforeBraces: llvm
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Always
-# AllowShortSpecializationsOnASingleLine: true
-ColumnLimit: 120
+AllowShortSpecializationsOnASingleLine: true
 AccessModifierOffset: -2
 ReferenceAlignment: Left
+
+# Templates, requires
+AlwaysBreakTemplateDeclarations: Multiline
+RequiresClausePosition: WithPreceding
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"(src|include)/'
+    Priority: 1
+    # 2. Custom project headers
+  - Regex: '^<[a-z0-9_]+>'
+    Priority: 2
+    # 4. C Standard Library headers 
+  - Regex: '^<[a-z0-9_]+\.h>'
+    Priority: 3
+    # 5. Third-party library headers
+  - Regex: '^<.*>'
+    Priority: 4
+
+
+

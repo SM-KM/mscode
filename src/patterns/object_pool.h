@@ -2,6 +2,7 @@
 
 // Object pools
 
+#include <concepts>
 #include <utility>
 
 template <typename P, typename T>
@@ -38,4 +39,12 @@ public:
   T *operator->() const { return p_; }
   T &operator*() const { return *p_; }
   T get() const { return p_; }
+  explicit operator bool() const { return p_ != nullptr; }
+};
+
+// Slot pool: fixed N slots of raw storage, lifetime per use
+// clang-format off
+template <typename T, std::size_t N> requires(N > 0) && std::destructible<T>
+class SlotPool {
+  // clang-format on
 };
