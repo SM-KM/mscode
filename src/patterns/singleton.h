@@ -66,3 +66,20 @@ private:
   std::atomic<int> count_{0};
   std::string last_;
 };
+
+// Immortal singleton
+template <typename T> class ImmortalSingleton {
+protected:
+  // clang-format off
+  class Key { explicit Key() = default; friend class ImmortalSingleton; };
+  // clang-format on
+
+public:
+  ImmortalSingleton(const ImmortalSingleton &) = delete;
+  ImmortalSingleton &operator=(const ImmortalSingleton &) = delete;
+  static T &instance() {
+    alignas(T) static unsigned char storage[sizeof(T)];
+    static T *p = ::new (static_cast<void *>(storage)) T{Key{}};
+    return p;
+  }
+};
