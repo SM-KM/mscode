@@ -2,6 +2,7 @@
 
 // Adapter pattern
 
+#include <concepts>
 struct ITempSensor {
   virtual ~ITempSensor() = default;
   virtual double celsius() const = 0;
@@ -31,4 +32,15 @@ class PrivateAdaptor final : public ITempSensor, private LegacyThermometer {
 public:
   using LegacyThermometer::LegacyThermometer;
   double celsius() const override { return f_to_c(read_fahrenheit()); };
+};
+
+/// Static adapter with concepts
+template <typename S>
+concept CelciusSensor = requires(const S &s) {
+  { s.celsius() } -> std::convertible_to<double>;
+};
+
+template <typename S>
+concept FahrenheitSensor = !CelciusSensor<S> && requires(const S &s) {
+  { s.read_fahrenheit() } -> std::convertible_to<double>;
 };
