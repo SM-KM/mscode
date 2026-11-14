@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <concepts>
 #include <functional>
+#include <memory>
 #include <type_traits>
 #include <utility>
 struct ITempSensor {
@@ -81,4 +82,17 @@ struct NativeSensor { double celsius() const { return 21.5; } };
 // Works with any mix of sensors -> resolved at compile time, zero virtual calls
 double average_celsius(const CelsiusSensor auto &...sensors) {
   return (sensors.celsius() + ...) / static_cast<double>(sizeof...(sensors));
+}
+
+// Bridge from static to dynamic
+template <CelsiusSensor S> class AnySensor final : public ITempSensor {
+  S s_;
+
+public:
+  explicit AnySensor(S s) : s_{std::move(s)} {}
+  double celsius() const override { return s_.celsius(); }
+};
+
+template <CelsiusSensor S> std::unique_ptr<ITempSensor> erase(S s) {
+  return std::make_unique<AnySensor<S>>(std::move(s));
 }
