@@ -2,7 +2,9 @@
 
 // Adapter pattern
 
+#include <algorithm>
 #include <concepts>
+#include <utility>
 struct ITempSensor {
   virtual ~ITempSensor() = default;
   virtual double celsius() const = 0;
@@ -36,11 +38,32 @@ public:
 
 /// Static adapter with concepts
 template <typename S>
-concept CelciusSensor = requires(const S &s) {
+concept CelsiusSensor = requires(const S &s) {
   { s.celsius() } -> std::convertible_to<double>;
 };
 
 template <typename S>
-concept FahrenheitSensor = !CelciusSensor<S> && requires(const S &s) {
+concept FahrenheitSensor = !CelsiusSensor<S> && requires(const S &s) {
   { s.read_fahrenheit() } -> std::convertible_to<double>;
 };
+
+template <FahrenheitSensor S> class StaticFahrenheitSensor {
+  S s_;
+
+public:
+  explicit StaticFahrenheitSensor(S s) : s_{std::move(s)} {}
+  double celcius() const { return f_to_c(s_.read_fahrenheit()); };
+};
+
+// Adapt a sensor of any supported kind to the celcius concept
+// clang-format off
+template <typename S> requires CelsiusSensor<S> || FahrenheitSensor<S>
+auto as_celsius(S s) {
+    if constexpr (CelsiusSensor<S>) return s;
+    else return StaticFahrenheitSensor<S>{std::move(s)};
+}
+
+
+
+
+
