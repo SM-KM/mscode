@@ -27,7 +27,7 @@
 - [x] Registry / Service Locator
 
 ### Structural
-- [ ] Adapter
+- [x] Adapter
 - [ ] Bridge
 - [ ] Composite
 - [ ] Decorator

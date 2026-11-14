@@ -8,6 +8,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+
 struct ITempSensor {
   virtual ~ITempSensor() = default;
   virtual double celsius() const = 0;
