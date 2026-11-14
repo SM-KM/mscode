@@ -25,3 +25,10 @@ public:
   explicit FarenheitAdapter(LegacyThermometer l) : legacy_{l} {}
   double celsius() const override { return f_to_c(legacy_.read_fahrenheit()); };
 };
+
+/// Class adaptor
+class PrivateAdaptor final : public ITempSensor, private LegacyThermometer {
+public:
+  using LegacyThermometer::LegacyThermometer;
+  double celsius() const override { return f_to_c(read_fahrenheit()); };
+};
