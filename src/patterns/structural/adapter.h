@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <concepts>
+#include <functional>
+#include <type_traits>
 #include <utility>
 struct ITempSensor {
   virtual ~ITempSensor() = default;
@@ -63,7 +65,15 @@ auto as_celsius(S s) {
     else return StaticFahrenheitSensor<S>{std::move(s)};
 }
 
+// Adapter for plain callable
+template <std::invocable F> requires std::convertible_to<std::invoke_result<F>, double>
+class KelvinCallableAdapter {
+  F f_;
 
+public:
+  explicit KelvinCallableAdapter(F f) : f_{std::move(f)} {}
+  double celsius() const { return static_cast<double>(std::invoke(f_)) - 273.16; }
+};
 
-
-
+struct NativeSensor { double celsius() const { return 21.5; } };
+// clang-format on
