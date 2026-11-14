@@ -77,3 +77,8 @@ public:
 
 struct NativeSensor { double celsius() const { return 21.5; } };
 // clang-format on
+
+// Works with any mix of sensors -> resolved at compile time, zero virtual calls
+double average_celsius(const CelsiusSensor auto &...sensors) {
+  return (sensors.celsius() + ...) / static_cast<double>(sizeof...(sensors));
+}
