@@ -93,3 +93,7 @@ public:
   int damage() const { return inner_.damage() + 5; }
   std::string describe() const { return inner_.describe() + " +Fire"; }
 };
+
+static_assert(Weapon<PlainSword> && Weapon<SFire<PlainSword>>);
+// Decorator costs no memory
+static_assert(sizeof(SFire<PlainSword>) == sizeof(PlainSword));
