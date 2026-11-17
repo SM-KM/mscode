@@ -42,7 +42,6 @@ struct ThirdPartyBackend {
 
 /// Classic runtime bridge, virtual implementor interface, backend swappable at
 /// runtime
-
 class Drawable {
 protected:
   IGfxBackend *gfx_;
@@ -58,12 +57,22 @@ class Sprite : public Drawable {
   float x_, y_, w_, h_;
 
 public:
+  /// the backend impl that it wants
   Sprite(IGfxBackend &g, float x, float y, float w, float h)
       : Drawable{g}, x_{x}, y_{y}, w_{w}, h_{h} {}
   void draw() const override { gfx_->draw_quad(x_, y_, w_, h_); };
 };
 
 /// Static bridge, abstraction templated on a concept-checked backend
+template <GfxBackend B> class StaticSprite {
+  B &gfx_;
+  float x_, y_, w_, h_;
+
+public:
+  StaticSprite(B &g, float x, float y, float w, float h)
+      : gfx_{g}, x_{x}, y_{y}, w_{w}, h_{h} {}
+  void draw() const { gfx_.draw_quad(x_, y_, w_, h_); }
+};
 
 /// Non-intrusive bridge, BackendRef - type erased reference to ANY type that
 /// fits the concept, no common base class needed
