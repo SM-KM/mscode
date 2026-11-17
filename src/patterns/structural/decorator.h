@@ -1,10 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <concepts>
 #include <memory>
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 /// Decorator pattern
 /// A decorator wraps in object that has the same interface and adds Behavior
@@ -53,11 +55,18 @@ public:
     std::string describe() const override { return inner_->describe() + " +Poison(" + std::to_string(per_tick_) + ")"; }
 };
 
+// Pipe sintax -> w | with<Fire>() | with<Poison>(10)
 template <typename D, typename... Args> struct Adder { std::tuple<Args...> args; };
 template <typename D, typename... Args>
 requires std::derived_from<D, WeaponDecorator> && std::constructible_from<D, std::unique_ptr<IWeapon>, Args...>
 Adder<D, std::decay_t<Args>...> with(Args&&... a) {
     return std::tuple<std::decay_t<Args>...>(std::forward<Args>(a)...);
+}
+
+template<typename D, typename... Args>
+std::unique_ptr<IWeapon> operator|(std::unique_ptr<IWeapon> w, Adder<D, Args...> add) {
+    return std::apply([&](auto&&... a){ return std::make_unique<D>(std::move(w), a...); },
+	   std::move(add.args));
 }
 
 // clang-format on
