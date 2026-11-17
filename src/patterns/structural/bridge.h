@@ -30,7 +30,7 @@ struct VkBackend final : IGfxBackend {
 public:
   void draw_quad(float x, float y, float w, float h) override {}
   void draw_text(std::string_view text, float x, float y) override {}
-  std::string_view name() const override {}
+  std::string_view name() const override { return std::string_view{}; }
 };
 
 struct ThirdPartyBackend {
@@ -42,6 +42,19 @@ struct ThirdPartyBackend {
 
 /// Classic runtime bridge, virtual implementor interface, backend swappable at
 /// runtime
+
+class Drawable {
+protected:
+  IGfxBackend *gfx_;
+
+public:
+  explicit Drawable(IGfxBackend &g) : gfx_{&g} {}
+  virtual ~Drawable() = default;
+  virtual void draw() const = 0;
+  void set_backend(IGfxBackend &g) {}
+};
+
+class Sprite : public Drawable {};
 
 /// Static bridge, abstraction templated on a concept-checked backend
 
