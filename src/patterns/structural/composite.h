@@ -37,3 +37,13 @@ public:
   std::size_t triangles() const override { return 2; }
   void draw(std::ostream &os, Vec2 p, int d) const override {};
 };
+
+class Mesh final : public Node {
+  std::size_t tris_;
+
+public:
+  Mesh(std::string name, Vec2 local, std::size_t tris)
+      : Node{std::move(name), local}, tris_{tris} {};
+  std::size_t triangles() const override { return tris_; }
+  void draw(std::ostream &os, Vec2 p, int d) const override {};
+};
