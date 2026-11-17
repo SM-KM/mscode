@@ -79,3 +79,17 @@ concept Weapon = requires(const W &w) {
   { w.damage() } -> std::convertible_to<int>;
   { w.describe() } -> std::convertible_to<std::string>;
 };
+
+struct PlainSword {
+  int damage() const { return 10; }
+  std::string describe() const { return "Sword"; }
+};
+
+template <Weapon W> class SFire {
+  W inner_;
+
+public:
+  explicit SFire(W w) : inner_{std::move(w)} {}
+  int damage() const { return inner_.damage() + 5; }
+  std::string describe() const { return inner_.describe() + " +Fire"; }
+};
