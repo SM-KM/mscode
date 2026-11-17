@@ -97,3 +97,12 @@ public:
 static_assert(Weapon<PlainSword> && Weapon<SFire<PlainSword>>);
 // Decorator costs no memory
 static_assert(sizeof(SFire<PlainSword>) == sizeof(PlainSword));
+
+template <Weapon W> class DynWeapon final : public IWeapon {
+  W w_;
+
+public:
+  explicit DynWeapon(W w) : w_(std::move(w)) {}
+  int damage() const override { return w_.damage(); };
+  std::string describe() const override { return w_.describe(); }
+};
