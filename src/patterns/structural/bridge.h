@@ -98,3 +98,14 @@ public:
     std::string_view name() const { return name_(obj_); }
   // clang-format on
 };
+
+class Hud {
+  BackendRef gfx_;
+
+public:
+  explicit Hud(BackendRef g) : gfx_{g} {}
+  void rebind(BackendRef g) { gfx_ = g; }
+  // clang-format off
+  void draw() { gfx_.draw_quad(0, 0, 200, 20); gfx_.draw_text("", 4, 4); }
+  // clang-format on
+};
