@@ -54,7 +54,14 @@ public:
   void set_backend(IGfxBackend &g) {}
 };
 
-class Sprite : public Drawable {};
+class Sprite : public Drawable {
+  float x_, y_, w_, h_;
+
+public:
+  Sprite(IGfxBackend &g, float x, float y, float w, float h)
+      : Drawable{g}, x_{x}, y_{y}, w_{w}, h_{h} {}
+  void draw() const override { gfx_->draw_quad(x_, y_, w_, h_); };
+};
 
 /// Static bridge, abstraction templated on a concept-checked backend
 
