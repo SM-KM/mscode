@@ -1,9 +1,12 @@
 #pragma once
 
+#include <concepts>
 #include <memory>
 #include <ostream>
 #include <span>
 #include <string>
+#include <utility>
+#include <vector>
 
 /// Composite lets u treat a single object and a group of objects
 /// uniformely (tree).
@@ -46,4 +49,29 @@ public:
       : Node{std::move(name), local}, tris_{tris} {};
   std::size_t triangles() const override { return tris_; }
   void draw(std::ostream &os, Vec2 p, int d) const override {};
+};
+
+class Group final : public Node {
+  std::vector<std::unique_ptr<Node>> kids_;
+  // clang-format off
+
+public:
+  using Node::Node;
+  // Build children in place, returns a reference so the tree can be built freely
+  template <std::derived_from<Node> T, typename... Args> requires std::constructible_from<T, Args...>
+  T &add(Args &&...args) {
+    auto p = std::make_unique<T>(std::forward<Args>(args)...);
+    T &ref = *p;
+    kids_.push_back(std::move(p));
+    return ref;
+  };
+
+  std::size_t triangles() const override {
+      std::size_t t{0};
+      for(auto& k : kids_) t += k->triangles();
+      return t;
+  }
+  void draw(std::ostream &os, Vec2 p, int d) const override {};
+  std::span<const std::unique_ptr<Node>> children() const override { return kids_; }
+  // clang-format on
 };
