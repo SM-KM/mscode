@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <ostream>
+#include <span>
 #include <string>
 
 /// Composite lets u treat a single object and a group of objects
@@ -19,4 +22,13 @@ public:
   Node(const Node &) = delete;
   Node &operator=(const Node &) = delete;
   virtual ~Node() = default;
+
+  const std::string &name() const { return name_; }
+  Vec2 local() const { return local_; }
+
+  virtual std::size_t triangles() const = 0;
+  virtual void draw(std::ostream &os, Vec2 parent_world, int depth) const = 0;
+  virtual std::span<const std::unique_ptr<Node>> children() const { return {}; }
 };
+
+class Sprite final : public Node {};
