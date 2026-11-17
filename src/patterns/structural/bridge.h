@@ -1,7 +1,9 @@
 #pragma once
 
 #include <concepts>
+#include <memory>
 #include <string_view>
+#include <type_traits>
 
 // Bridge structural pattern
 
@@ -76,3 +78,23 @@ public:
 
 /// Non-intrusive bridge, BackendRef - type erased reference to ANY type that
 /// fits the concept, no common base class needed
+class BackendRef {
+  void *obj_;
+  void (*quad_)(void *, float, float, float, float);
+  void (*text_)(void *, std::string_view, float, float);
+  std::string_view (*name_)(void *);
+
+  // clang-format off
+public:
+  template <GfxBackend B> requires(!std::same_as<std::remove_cvref_t<B>, BackendRef>)
+  BackendRef(B &b)
+      : obj_{std::addressof(b)},
+        quad_([](void *o, float x, float y, float w, float h) { static_cast<B *>(o)->draw_quad(x, y, w, h); }),
+        text_([](void* o, std::string_view t, float x, float y) {static_cast<B*>(o)->draw_text(t, x, y);} ),
+	name_([](void* o) -> std::string_view { return static_cast<B*>(o)->name(); }) {}
+
+    void draw_quad(float x, float y, float w, float h) { quad_(obj_, x, y, w, h); }
+    void draw_text(std::string_view t, float x, float y) { text_(obj_, t, x, y); }
+    std::string_view name() const { return name_(obj_); }
+  // clang-format on
+};
