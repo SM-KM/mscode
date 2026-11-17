@@ -69,4 +69,7 @@ std::unique_ptr<IWeapon> operator|(std::unique_ptr<IWeapon> w, Adder<D, Args...>
 	   std::move(add.args));
 }
 
+template<std::derived_from<IWeapon> w, typename... Args>
+std::unique_ptr<IWeapon> make(Args&&... a) { return std::make_unique<w>(std::forward<Args>(a)...); }
+
 // clang-format on
