@@ -71,5 +71,11 @@ std::unique_ptr<IWeapon> operator|(std::unique_ptr<IWeapon> w, Adder<D, Args...>
 
 template<std::derived_from<IWeapon> w, typename... Args>
 std::unique_ptr<IWeapon> make(Args&&... a) { return std::make_unique<w>(std::forward<Args>(a)...); }
-
 // clang-format on
+
+/// Static decorator
+template <typename W>
+concept Weapon = requires(const W &w) {
+  { w.damage() } -> std::convertible_to<int>;
+  { w.describe() } -> std::convertible_to<std::string>;
+};
