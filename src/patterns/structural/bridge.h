@@ -19,6 +19,27 @@ struct IGfxBackend {
   virtual std::string_view name() const = 0;
 };
 
+struct GlBackend final : IGfxBackend {
+public:
+  void draw_quad(float x, float y, float w, float h) override {}
+  void draw_text(std::string_view text, float x, float y) override {}
+  std::string_view name() const override { return std::string_view{}; }
+};
+
+struct VkBackend final : IGfxBackend {
+public:
+  void draw_quad(float x, float y, float w, float h) override {}
+  void draw_text(std::string_view text, float x, float y) override {}
+  std::string_view name() const override {}
+};
+
+struct ThirdPartyBackend {
+  int calls{0};
+  void draw_quad(float, float, float, float) { ++calls; }
+  void draw_text(std::string_view, float, float) { ++calls; }
+  std::string_view name() const { return "somthing lol"; }
+};
+
 /// Classic runtime bridge, virtual implementor interface, backend swappable at
 /// runtime
 
