@@ -31,4 +31,9 @@ public:
   virtual std::span<const std::unique_ptr<Node>> children() const { return {}; }
 };
 
-class Sprite final : public Node {};
+class Sprite final : public Node {
+public:
+  using Node::Node;
+  std::size_t triangles() const override { return 2; }
+  void draw(std::ostream &os, Vec2 p, int d) const override {};
+};
