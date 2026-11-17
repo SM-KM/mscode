@@ -69,8 +69,8 @@ public:
   std::string wave(int n) const { return std::string{}; };
 };
 
-// The benefic comes from not having to create N boilerplate subclasses, just one
-// generic concrete creator.
+// The benefic comes from not having to create N boilerplate subclasses, just
+// one generic concrete creator.
 template <std::derived_from<Enemy> E, typename... Args>
 class SpawnerOf final : public Spawner {
   std::tuple<Args...> args_;
@@ -78,7 +78,8 @@ class SpawnerOf final : public Spawner {
 public:
   explicit SpawnerOf(Args... a) : args_{std::move(a)...} {}
   std::unique_ptr<Enemy> create() const override {
-    return std::apply([](const auto&... a) { return std::make_unique<E>(a...); }, args_);
+    return std::apply(
+        [](const auto &...a) { return std::make_unique<E>(a...); }, args_);
   }
 };
 
@@ -104,10 +105,13 @@ public:
 
   std::unique_ptr<Base> create(std::string_view key, Args... args) const {
     auto it = map_.find(std::string(key));
-    if (it == map_.end()) return nullptr;
+    if (it == map_.end())
+      return nullptr;
     return it->second(std::forward<Args>(args)...);
   }
-  bool contains(std::string_view k) const { return map_.contains(std::string(k)); }
+  bool contains(std::string_view k) const {
+    return map_.contains(std::string(k));
+  }
 
 private:
   std::unordered_map<std::string, Creator> map_;
