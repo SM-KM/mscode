@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <variant>
 #include <vector>
 
 /// Composite lets u treat a single object and a group of objects
@@ -101,6 +102,18 @@ template<typename T>
 concept LeafNode = requires (const T& t) {
     { t.name } -> std::convertible_to<const std::string&>; 
     requires std::same_as<T, Sprt> || std::same_as<T, Light>;
+};
+
+struct Grp {
+    std::string name;
+    std::vector<Node> kids;
+    template<LeafNode L> Grp& add(L leaf);
+    Grp& add(Grp g);
+};
+
+struct Nd : std::variant<Sprt, Light, Grp> {
+    using variant::variant;
+    const std::variant<Sprt, Light, Grp>& v() const { return *this; }
 };
 
 
