@@ -1,7 +1,9 @@
 #pragma once
 
 #include <algorithm>
+#include <stdexcept>
 #include <string_view>
+#include <sys/socket.h>
 
 // clang-format off
 /// A facade gives a small, task-oriented API over a set of complicated
@@ -54,4 +56,44 @@ public:
   ~ScopeExit() { if (active_) f_(); }
   // clang-format on
   void release() { active_ = false; }
+};
+
+template <AudioSystem A, RenderSystem R, PhysicsSystem P> class Engine {
+  A audio_;
+  R renderer_;
+  P physics_;
+  bool started_{false};
+
+public:
+  // clang-format off
+  Engine(A a, R r, P p)
+      : audio_{std::move(a)}, renderer_{std::move(r)}, physics_{std::move(p)} {}
+  Engine(const Engine &) = delete;
+  Engine &operator=(const Engine &) = delete;
+  ~Engine() { shutdown(); }
+
+  void start() {
+      if(started_) return;
+      audio_.init(); ScopeExit undo_audio{[&] { audio_.shutdown(); }};
+      renderer_.init(); ScopeExit undo_render{[&] { renderer_.shutdown(); }};
+      physics_.init(); undo_render.release(); undo_audio.release(); started_ = true;
+  }
+
+  void run(int frames, float dt = 1.0f / 60) {
+      require_started();
+      for (int i = 0; i < frames; ++i) { physics_.step(dt); renderer_.render_frame(); }
+  }
+
+  void load_level(std::string_view name) {
+      require_started(); audio_.load_bank(name); renderer_.load_scene(name);
+      physics_.build_world(name);
+  }
+
+  void shutdown() {
+    if (!started_) return; physics_.shutdown(); renderer_.shutdown(); audio_.shutdown();
+    started_ = false;
+  }
+
+private:
+  void require_started() const { if(!started_) throw std::logic_error("engine not started"); };
 };
