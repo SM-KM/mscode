@@ -120,4 +120,6 @@ struct Nd : std::variant<Sprt, Light, Grp> {
 // clang-format off
 template <LeafNode L> Grp &Grp::add(L leaf) { kids.emplace_back(std::move(leaf)); return *this; }
 inline Grp& Grp::add(Grp g) { kids.emplace_back(std::move(g)); return *this; }
+
+template <typename... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 // clang-format on
