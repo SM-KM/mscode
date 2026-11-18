@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <cstddef>
 #include <memory>
 #include <ostream>
 #include <span>
@@ -90,6 +91,17 @@ inline const Node* find(const Node& root, std::string_view name) {
     walk(root, [&](const Node& n, int){ if (!found && n.name() == name) found = &n; });
     return found;
 }
+
+
+/// Variant composite: a closed set of node types, no virtuals
+struct Sprt { std::string name; std::size_t tris = 2; };
+struct Light { std::string name; float intensity = 1; };
+
+template<typename T>
+concept LeafNode = requires (const T& t) {
+    { t.name } -> std::convertible_to<const std::string&>; 
+    requires std::same_as<T, Sprt> || std::same_as<T, Light>;
+};
 
 
 
