@@ -30,4 +30,13 @@ struct RealPhysics {
     void build_world(std::string_view level);
 };
 
+struct NullAudio { void init(); void shutdown(); void load_bank(std::string_view); };
+struct NullRenderer { void init(); void shutdown(); void load_scene(std::string_view);
+    void render_frame();
+};
+
+struct CountingPhysics {
+    int steps{0};
+    void init(); void shutdown(); void build_world(std::string_view);
+};
 // clang-format on
