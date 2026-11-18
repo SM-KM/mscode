@@ -75,3 +75,11 @@ public:
   std::span<const std::unique_ptr<Node>> children() const override { return kids_; }
   // clang-format on
 };
+
+// clang-format off
+/// Generic traversal -> works for every node with the children()
+template <typename F> requires std::invocable<F &, const Node &, int>
+void walk(const Node &n, F &&f, int depth = 0) {
+    f(n, depth);
+    for(const auto& c : n.children()) walk(*c, f, depth + 1);
+}
