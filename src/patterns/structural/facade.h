@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string_view>
 
 // clang-format off
@@ -40,3 +41,17 @@ struct CountingPhysics {
     void init(); void shutdown(); void build_world(std::string_view);
 };
 // clang-format on
+
+template <typename F> class ScopeExit {
+  F f_;
+  bool active_{true};
+
+public:
+  explicit ScopeExit(F f) : f_{std::move(f)} {}
+  ScopeExit(const ScopeExit &) = delete;
+  ScopeExit &operator=(const ScopeExit &) = delete;
+  // clang-format off
+  ~ScopeExit() { if (active_) f_(); }
+  // clang-format on
+  void release() { active_ = false; }
+};
