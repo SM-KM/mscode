@@ -123,3 +123,17 @@ inline Grp& Grp::add(Grp g) { kids.emplace_back(std::move(g)); return *this; }
 
 template <typename... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 // clang-format on
+
+std::size_t triangles(const Nd &n) {
+  return std::visit(overloaded{
+                        [](const Sprt &s) { return s.tris; },
+                        [](const Light &) { return std::size_t{0}; },
+                        [](const Grp &g) {
+                          std::size_t t = 0;
+                          for (auto &k : g.kids)
+                            t += triangles(k);
+                          return t;
+                        },
+                    },
+                    n.v());
+}
