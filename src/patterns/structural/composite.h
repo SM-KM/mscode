@@ -5,6 +5,7 @@
 #include <ostream>
 #include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -83,3 +84,20 @@ void walk(const Node &n, F &&f, int depth = 0) {
     f(n, depth);
     for(const auto& c : n.children()) walk(*c, f, depth + 1);
 }
+
+inline const Node* find(const Node& root, std::string_view name) {
+    const Node* found = nullptr;
+    walk(root, [&](const Node& n, int){ if (!found && n.name() == name) found = &n; });
+    return found;
+}
+
+
+
+
+
+
+
+
+
+
+
