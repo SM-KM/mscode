@@ -104,9 +104,10 @@ concept LeafNode = requires (const T& t) {
     requires std::same_as<T, Sprt> || std::same_as<T, Light>;
 };
 
+struct Nd;
 struct Grp {
     std::string name;
-    std::vector<Node> kids;
+    std::vector<Nd> kids;
     template<LeafNode L> Grp& add(L leaf);
     Grp& add(Grp g);
 };
@@ -116,13 +117,7 @@ struct Nd : std::variant<Sprt, Light, Grp> {
     const std::variant<Sprt, Light, Grp>& v() const { return *this; }
 };
 
-
-
-
-
-
-
-
-
-
-
+// clang-format off
+template <LeafNode L> Grp &Grp::add(L leaf) { kids.emplace_back(std::move(leaf)); return *this; }
+inline Grp& Grp::add(Grp g) { kids.emplace_back(std::move(g)); return *this; }
+// clang-format on
