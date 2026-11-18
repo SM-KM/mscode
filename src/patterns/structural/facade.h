@@ -14,5 +14,9 @@ template<typename R>
 concept RenderSystem = requires (R r, std::string_view s) {
     r.init(); r.shutdown(); r.load_scene(s); r.render_frame();
 };
+template<typename P>
+concept PhysicsSystem = requires (P p, std::string_view s, float dt) {
+    p.init(); p.shutdow(); p.build_world(s); p.step(dt);
+};
 
 // clang-format on
