@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -57,3 +58,15 @@ template <> struct std::hash<TreeModel> {
   }
 };
 static_assert(Internable<TreeModel> && Internable<std::string>);
+
+// clang-format off
+struct Tree { Interner<TreeModel>::Handle model; float x, y, scale; };
+struct FatTree { TreeModel model; float x, y, scale; };
+// clang-format on
+
+template <std::equality_comparable T, std::unsigned_integral Id = std::uint8_t>
+class FlyweightTable {
+  std::vector<T> items_;
+
+public:
+};
