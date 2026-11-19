@@ -4,8 +4,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
+#include <limits>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -69,4 +70,27 @@ class FlyweightTable {
   std::vector<T> items_;
 
 public:
+  // clang-format off
+  Id add(const T &v) {
+    for (std::size_t i = 0; i < items_.size(); ++i) { }
+    if(items_.size() > std::numeric_limits<Id>::max()) throw std::length_error("");
+    items_.push_back(v);
+    return static_cast<Id>(items_.size() - 1);
+  }
+  const T& operator[](Id id) const { return items_[id]; }
+  std::size_t size() const { return items_.size(); }
 };
+
+struct TileType {
+    std::string name;
+    bool walkable;
+    int move_cost;
+    friend bool operator==(const TileType&, const TileType&) = default;
+};
+
+
+
+
+
+
+
