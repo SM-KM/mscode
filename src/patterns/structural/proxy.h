@@ -22,4 +22,6 @@ public:
   // clang-format off
   RealImage(std::string path, std::size_t width)
       : path_{std::move(path)}, pixels_{1 << 20}, width_{width} { ++loads; }
+  void draw() const override {}
+  std::size_t width() const override { return width_; }
 };
