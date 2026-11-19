@@ -29,9 +29,9 @@
 ### Structural
 - [x] Adapter
 - [x] Bridge
-- [ ] Composite
-- [ ] Decorator
-- [ ] Facade
+- [x] Composite
+- [x] Decorator
+- [x] Facade
 - [ ] Flyweight
 - [ ] Proxy
 - [ ] Pimpl (opaque pointer)
