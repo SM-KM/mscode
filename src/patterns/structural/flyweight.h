@@ -104,6 +104,15 @@ public:
 	auto& slot = cache_[key];
 	if (auto sp = slot.lock()) return sp;
 	auto sp = std::make_shared<const V>(std::invoke(std::forward<L>(loader), key));
+	slot = sp;
+	return sp;
+    }
+
+    std::size_t live() const {
+	std::lock_guard lk{mu_};
+	std::size_t n{0};
+	for(auto& [k, w] : cache_) n += !w.expired();
+	return n;
     }
 };
 
