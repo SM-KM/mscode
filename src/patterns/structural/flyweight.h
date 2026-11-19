@@ -5,10 +5,14 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <map>
+#include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 // clang-format off
@@ -87,6 +91,27 @@ struct TileType {
     int move_cost;
     friend bool operator==(const TileType&, const TileType&) = default;
 };
+
+template<std::totally_ordered K, typename V>
+class WeakCache {
+    std::map<K, std::weak_ptr<const V>> cache_;
+    mutable std::mutex mu_;
+
+public:
+    template<std::invocable<const K&> L> requires std::constructible_from<V, std::invoke_result<L, const K&>>
+    std::shared_ptr<const V> get(const K& key, L&& loader) {
+	std::lock_guard lk{mu_};
+	auto& slot = cache_[key];
+	if (auto sp = slot.lock()) return sp;
+	auto sp = std::make_shared<const V>(std::invoke(std::forward<L>(loader), key));
+    }
+};
+
+
+
+
+
+
 
 
 
