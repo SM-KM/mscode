@@ -110,9 +110,13 @@ public:
 
     std::size_t live() const {
 	std::lock_guard lk{mu_};
-	std::size_t n{0};
-	for(auto& [k, w] : cache_) n += !w.expired();
+	std::size_t n{0}; for(auto& [k, w] : cache_) n += !w.expired();
 	return n;
+    }
+
+    void purge() {
+	std::lock_guard lk{mu_};
+	std::erase_if(cache_, [](auto& kv) { return kv.second.expired(); });
     }
 };
 
