@@ -2,7 +2,10 @@
 
 #include <atomic>
 #include <cstddef>
+#include <memory>
+#include <mutex>
 #include <string>
+#include <utility>
 #include <vector>
 
 /// Proxy a proxy stands in for another object and controls access to it
@@ -24,4 +27,20 @@ public:
       : path_{std::move(path)}, pixels_{1 << 20}, width_{width} { ++loads; }
   void draw() const override {}
   std::size_t width() const override { return width_; }
+};
+
+class LazyImage final : public IImage {
+    std::string path_;
+    std::size_t width_;
+    mutable std::unique_ptr<RealImage> real_;
+    mutable std::once_flag once_;
+    const RealImage& real() const {
+	std::call_once(once_, [this] { real_ = std::make_unique<RealImage>(path_, width_); });
+	return *real_;
+    };
+
+public:
+    LazyImage(std::string path, std::size_t width) : path_{std::move(path)} {}
+    void draw() const override { real().draw(); }
+    std::size_t width() const override { return width_; }
 };
