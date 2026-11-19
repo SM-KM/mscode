@@ -120,15 +120,6 @@ public:
     }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
+// clang-format off
+struct Texture { std::string name; std::vector<std::byte> pixels; };
+// clang-format on
