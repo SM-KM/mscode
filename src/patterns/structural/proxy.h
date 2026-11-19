@@ -1,10 +1,12 @@
 #pragma once
 
 #include <atomic>
+#include <concepts>
 #include <cstddef>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -35,8 +37,7 @@ class LazyImage final : public IImage {
     mutable std::unique_ptr<RealImage> real_;
     mutable std::once_flag once_;
     const RealImage& real() const {
-	std::call_once(once_, [this] { real_ = std::make_unique<RealImage>(path_, width_); });
-	return *real_;
+	std::call_once(once_, [this] { real_ = std::make_unique<RealImage>(path_, width_); }); return *real_;
     };
 
 public:
@@ -44,3 +45,12 @@ public:
     void draw() const override { real().draw(); }
     std::size_t width() const override { return width_; }
 };
+
+template<typename C>
+concept Console = requires (C& c, std::string_view cmd) {
+    { c.execute(cmd) } -> std::convertible_to<std::string>;
+};
+
+
+
+
