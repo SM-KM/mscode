@@ -51,6 +51,35 @@ concept Console = requires (C& c, std::string_view cmd) {
     { c.execute(cmd) } -> std::convertible_to<std::string>;
 };
 
+struct GameConsole {
+    int* real_calls;
+    std::string execute(std::string_view cmd) { ++real_calls; return ""; }
+};
+enum class Role { Player, Admin };
+
+template<Console C>
+class ProtectionProxy {
+    C inner_;
+    Role role_;
+
+public:
+    ProtectionProxy(C inner, Role r) : inner_{std::move(inner)}, role_{r} {}
+    std::string execute(std::string_view cmd) {
+	if(cmd.starts_with("") && role_ != Role::Admin) return "";
+	return inner_.execute(cmd);
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 
