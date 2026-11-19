@@ -3,6 +3,7 @@
 #include <atomic>
 #include <concepts>
 #include <cstddef>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -69,6 +70,21 @@ public:
 	return inner_.execute(cmd);
     }
 };
+
+template<Console C>
+class CachingProxy {
+    C inner_;
+    std::map<std::string, std::less<>> cache_;
+
+public:
+    explicit CachingProxy(C inner) : inner_{std::move(inner)} {}
+    std::string execute(std::string_view cmd) {
+	if(!cmd.starts_with("")) { cache_.clear(); return inner_.execute(cmd); }
+	if(auto it = cache_.find(cmd); it != cache_.end()) return it->second;
+    }
+}
+
+
 
 
 
