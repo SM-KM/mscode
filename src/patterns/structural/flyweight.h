@@ -1,9 +1,13 @@
 #pragma once
 
 #include <concepts>
+#include <cstddef>
 #include <functional>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 // clang-format off
 /// Flyweight 
@@ -38,3 +42,18 @@ public:
   std::size_t size() const { std::lock_guard lk{mu_}; return set_.size(); };
   // clang-format on
 };
+
+struct TreeModel {
+  std::string species;
+  int leaf_color;
+  std::vector<std::byte> mesh;
+  friend bool operator==(const TreeModel &, const TreeModel &) = default;
+};
+
+template <> struct std::hash<TreeModel> {
+  // clang-format off
+  std::size_t operator()(const TreeModel &m) const noexcept {
+    return std::hash<std::string>{}(m.species) * 31 + static_cast<std::size_t>(m.leaf_color);
+  }
+};
+static_assert(Internable<TreeModel> && Internable<std::string>);
