@@ -29,4 +29,12 @@ public:
     const T *operator->() const { return p_; }
     friend bool operator==(Handle a, Handle b) { return a.p_ == b.p_; }
   };
+
+  Handle intern(const T &value) {
+    std::lock_guard lk{mu_};
+    return Handle(&*set_.insert(value).first);
+  };
+  // clang-format off
+  std::size_t size() const { std::lock_guard lk{mu_}; return set_.size(); };
+  // clang-format on
 };
