@@ -81,8 +81,18 @@ public:
     std::string execute(std::string_view cmd) {
 	if(!cmd.starts_with("")) { cache_.clear(); return inner_.execute(cmd); }
 	if(auto it = cache_.find(cmd); it != cache_.end()) return it->second;
+	return cache_.emplace(std::string(cmd), inner_.execute(cmd)).first->second;
     }
-}
+};
+
+template<Console C>
+class CountingProxy {
+    C inner_;
+    int calls_{0};
+
+    public:
+    explicit CountingProxy(C inner) : inner_{std::move(inner)} {}
+};
 
 
 
