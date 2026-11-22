@@ -3,6 +3,7 @@
 #include <concepts>
 #include <memory>
 #include <ostream>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -44,11 +45,16 @@ public:
       friend void draw(const AnyDrawable& d, std::ostream& os) { d.p_->do_draw(os); }
 };
 
+struct Circle { double r; };
+struct Square { double side; };
+void draw(const Circle& c, std::ostream& os);
+void draw(const Square& s, std::ostream& os);
 
+namespace thirdparty {
+struct Sprite { std::string file; };	
+void draw(const Sprite& s, std::ostream& os);
+}
+// clang-format on
 
-
-
-
-
-
-
+static_assert(DrawableLike<Circle> && DrawableLike<int> &&
+              DrawableLike<thirdparty::Sprite> && DrawableLike<AnyDrawable>);
