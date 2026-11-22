@@ -36,4 +36,19 @@ public:
       requires (!std::same_as<std::remove_cvref<T>, AnyDrawable>) && DrawableLike<std::decay_t<T>> &&
       std::copy_constructible<std::decay_t<T>>
       AnyDrawable(T&& t) : p_{std::make_unique<Model<std::decay_t<T>>>(std::forward<T>(t))} {}
+
+      AnyDrawable(const AnyDrawable& o) : p_{o.p_->clone()} {}
+      AnyDrawable(AnyDrawable&&) noexcept = default;
+      AnyDrawable& operator=(AnyDrawable o) noexcept { p_ = std::move(o.p_); return *this; }
+
+      friend void draw(const AnyDrawable& d, std::ostream& os) { d.p_->do_draw(os); }
 };
+
+
+
+
+
+
+
+
+
