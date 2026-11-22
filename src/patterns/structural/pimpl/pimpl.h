@@ -42,6 +42,9 @@ public:
   T* operator->() const { return p_.get(); }
   T& operator*() const { return *p_; }
   explicit operator bool() const { return static_cast<bool>(p_); }
-
-
 };
+
+
+
+
+
