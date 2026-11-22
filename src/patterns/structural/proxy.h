@@ -92,6 +92,34 @@ class CountingProxy {
 
     public:
     explicit CountingProxy(C inner) : inner_{std::move(inner)} {}
+    std::string execute(std::string_view cmd) { ++calls_; return inner_.execute(cmd); };
+    int calls() const { return calls_; }
+};
+static_assert(!Console<int>);
+
+/// Smart reference proxy: lock for exactly one call
+template<typename T>
+class Syncronized {
+    T value_;
+    mutable std::mutex mu_;
+
+public:
+    template<typename... Args>
+    explicit Syncronized(Args... args) : value_{std::forward<Args>(args)...} {}
+
+    class Locked {
+	T* p_;
+	std::unique_lock<std::mutex> lk_;
+
+    public:
+	Locked(T* p, std::mutex& m) : p_{p}, lk_{m} {}
+	T* operator->() const { return p_; }
+    };
+
+    Locked operator->() { return Locked{&value_, mu_}; }
+    template<std::invocable<T&> F>
+    decltype(auto) with_lock(F&& f) { std::lock_guard lk{mu_}; return std::forward<F>(f)(value_); }
+
 };
 
 
