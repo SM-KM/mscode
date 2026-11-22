@@ -3,6 +3,7 @@
 #include <atomic>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -122,6 +123,19 @@ public:
 
 };
 
+/// Element proxy: BitVector
+class BitVector {
+    std::vector<std::uint64_t> words_;
+    std::size_t n_;
+
+public:
+    class Ref {
+	std::uint64_t* w_;
+	std::uint64_t mask_;
+	friend class BitVector;
+	Ref(std::uint64_t* w, std::uint64_t m) : w_{w}, mask_{m} {};
+    };
+};
 
 
 
