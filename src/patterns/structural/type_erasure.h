@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gtest/gtest.h"
 #include <concepts>
 #include <cstddef>
 #include <memory>
@@ -115,16 +116,31 @@ class AnyShape {
             [](Storage& s) noexcept { if constexpr (kInline) ptr(s)->~T(); else delete ptr(s); },
             kInline,
     };
+  };
 
     Storage s_;
     const VTable* vt_{nullptr};
     void reset() noexcept { if (vt_) { vt_->destroy(s_); vt_ = nullptr; } }
-  };
 
 public:
-    template<typename P>
-    requires (!std::same_as<std::remove_cvref_t<P>, AnyShape>) && ShapeLike<std::decay_t<T>>
-    AnyShape(T&& t) { }
+    template<typename T>
+    requires (!std::same_as<std::remove_cvref_t<T>, AnyShape>) && ShapeLike<std::decay_t<T>>
+    AnyShape(T&& t) { 
+	using D = std::decay_t<T>;
+	Ops<D>::create(s_, std::forward<T>(t));
+	vt_ = &Ops<D>::table;
+    }
+
+    AnyShape(const AnyShape& o) : vt_{o.vt_} { if (vt_) vt_->copy(o.s_, s_); }
+    AnyShape(AnyShape&& o) noexcept : vt_(o.vt_) { if (vt_) { vt_->move(o.s_, s_); o.vt_ = nullptr; } }
+    AnyShape& operator=(AnyShape o) noexcept { reset(); if (o.vt_) { 
+	o.vt_->move(o.s_, s_); vt_ = o.vt_; o.vt_ = nullptr; } return *this; }
+
+    ~AnyShape() { reset(); }
+    double area() const { return vt_->area(s_); }
+    std::string name() const { return vt_->name(s_); }
+    bool is_inline() const { return vt_->inline_storage; }
+    bool empty() const { return vt_ == nullptr; }
 };
 
 
