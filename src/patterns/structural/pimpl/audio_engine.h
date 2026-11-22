@@ -23,4 +23,13 @@ private:
 
 /// Move-only Pimpl: Impl holds a mutex, so copying is disabled
 /// at compile time
-class Telemetry {};
+class Telemetry {
+public:
+  Telemetry();
+  void record(const std::string &event);
+  std::size_t count() const;
+
+private:
+  struct Impl;
+  PImpl<Impl, false> impl_;
+};
