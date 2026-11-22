@@ -58,3 +58,11 @@ void draw(const Sprite& s, std::ostream& os);
 
 static_assert(DrawableLike<Circle> && DrawableLike<int> &&
               DrawableLike<thirdparty::Sprite> && DrawableLike<AnyDrawable>);
+static_assert(!DrawableLike<std::string>);
+
+/// Manual vtable + small-buffer optimization
+template <typename T>
+concept ShapeLike = std::copy_constructible<T> && requires(const T &t) {
+  { t.area() } -> std::convertible_to<double>;
+  { t.name() } -> std::convertible_to<std::string>;
+};
