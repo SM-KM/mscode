@@ -134,6 +134,12 @@ public:
 	std::uint64_t mask_;
 	friend class BitVector;
 	Ref(std::uint64_t* w, std::uint64_t m) : w_{w}, mask_{m} {};
+
+    public:
+	Ref& operator=(bool b) { if(b) *w_ |= mask_; else *w_ &= ~mask_; return *this; }	
+	Ref& operator=(const Ref& o) { return *this = static_cast<bool>(o); }
+        operator bool() const { return (*w_ & mask_) != 0; }
+	Ref& flip() { *w_ ^= mask_; return *this; }
     };
 };
 
