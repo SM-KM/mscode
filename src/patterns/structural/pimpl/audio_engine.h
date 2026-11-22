@@ -33,3 +33,15 @@ private:
   struct Impl;
   PImpl<Impl, false> impl_;
 };
+
+class Counter {
+public:
+  Counter();
+  ~Counter();
+  Counter(Counter &&) noexcept;
+  Counter &operator=(Counter &&) noexcept;
+  Counter(const Counter &);
+  Counter &operator=(const Counter &);
+  void bump();
+  int value() const;
+};
