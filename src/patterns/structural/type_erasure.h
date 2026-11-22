@@ -3,6 +3,7 @@
 #include <concepts>
 #include <cstddef>
 #include <memory>
+#include <new>
 #include <ostream>
 #include <string>
 #include <type_traits>
@@ -85,8 +86,47 @@ class AnyShape {
   };
 
   template <typename T> struct Ops {
-    static constexpr bool KInline = sizeof(T) <= kBuf &&
+    static constexpr bool kInline = sizeof(T) <= kBuf &&
                                     alignof(T) <= alignof(std::max_align_t) &&
                                     std::is_nothrow_move_constructible_v<T>;
+    static T *ptr(Storage &s) {
+      return kInline ? std::launder(reinterpret_cast<T *>(s.buf))
+                     : static_cast<const T *>(s.heap);
+    }
+    static const T *cptr(const Storage &s) {
+      return kInline ? std::launder(reinterpret_cast<const T *>(s.buf))
+                     : static_cast<const T *>(s.heap);
+    }
+
+    template <typename U> static void create(Storage &s, U &&v) {
+      // clang-format off
+      if constexpr (kInline) ::new (static_cast<void *>(s.buf)) T(std::forward<U>(v));
+      else s.heap = new T(std::forward<U>(v));
+    }
+
+    static inline const VTable table {
+	    [](const Storage& s) -> double { return cptr(s)->area(); },
+            [](const Storage& s) -> std::string { return cptr(s)->name(); },
+            [](const Storage& from, Storage& to) { create(to, *cptr(from)); },
+            [](Storage& from, Storage& to) noexcept {
+                if constexpr (kInline) { ::new (static_cast<void*>(to.buf)) T(std::move(*ptr(from))); ptr(from)->~T(); }
+                else { to.heap = from.heap; from.heap = nullptr; }
+            },
+            [](Storage& s) noexcept { if constexpr (kInline) ptr(s)->~T(); else delete ptr(s); },
+            kInline,
+    };
+
+    Storage s_;
+    const VTable* vt_{nullptr};
+    void reset() noexcept { if (vt_) { vt_->destroy(s_); vt_ = nullptr; } }
   };
+
+public:
+    template<typename P>
+    requires (!std::same_as<std::remove_cvref_t<P>, AnyShape>) && ShapeLike<std::decay_t<T>>
+    AnyShape(T&& t) { }
 };
+
+
+
+
