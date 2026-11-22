@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <cstddef>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -65,4 +66,27 @@ template <typename T>
 concept ShapeLike = std::copy_constructible<T> && requires(const T &t) {
   { t.area() } -> std::convertible_to<double>;
   { t.name() } -> std::convertible_to<std::string>;
+};
+
+class AnyShape {
+  static constexpr std::size_t kBuf{32};
+  struct Storage {
+    alignas(std::max_align_t) std::byte buf{kBuf};
+    void *heap{nullptr};
+  };
+
+  struct VTable {
+    double (*area)(const Storage &);
+    std::string (*name)(const Storage &);
+    void (*copy)(const Storage &from, Storage &to);
+    void (*move)(Storage &from, Storage &to) noexcept;
+    void (*destroy)(Storage &) noexcept;
+    bool inline_storage;
+  };
+
+  template <typename T> struct Ops {
+    static constexpr bool KInline = sizeof(T) <= kBuf &&
+                                    alignof(T) <= alignof(std::max_align_t) &&
+                                    std::is_nothrow_move_constructible_v<T>;
+  };
 };
