@@ -33,7 +33,7 @@
 - [x] Decorator
 - [x] Facade
 - [x] Flyweight
-- [ ] Proxy
+- [x] Proxy
 - [ ] Pimpl (opaque pointer)
 - [ ] Type Erasure (`std::function`, `std::any`)
 
