@@ -141,6 +141,12 @@ public:
         operator bool() const { return (*w_ & mask_) != 0; }
 	Ref& flip() { *w_ ^= mask_; return *this; }
     };
+
+    explicit BitVector(std::size_t n) : words_{(n + 63) / 64}, n_{n} {}
+    Ref operator[](std::size_t i) { return {&words_[i / 64], std::uint64_t{1} << (i % 64)}; }
+    bool operator[](std::size_t i) const { return (words_[i / 64] >> (i % 64)) & 1; }
+    std::size_t size() const { return n_; }
+    std::size_t bytes() const { return words_.size() * sizeof(std::uint64_t); }
 };
 
 
