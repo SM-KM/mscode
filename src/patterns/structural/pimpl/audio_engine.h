@@ -2,6 +2,7 @@
 
 #include "pimpl.h"
 #include <cstddef>
+#include <memory>
 #include <string>
 
 /// Rule of zero pimpl: copyable, with deep copy
@@ -44,4 +45,8 @@ public:
   Counter &operator=(const Counter &);
   void bump();
   int value() const;
+
+private:
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
