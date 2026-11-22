@@ -34,8 +34,8 @@
 - [x] Facade
 - [x] Flyweight
 - [x] Proxy
-- [ ] Pimpl (opaque pointer)
-- [ ] Type Erasure (`std::function`, `std::any`)
+- [x] Pimpl (opaque pointer)
+- [x] Type Erasure (`std::function`, `std::any`)
 
 ### Behavioral
 - [ ] Strategy
