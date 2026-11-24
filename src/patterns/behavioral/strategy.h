@@ -1,6 +1,7 @@
 // clang-format off
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <concepts>
 #include <memory>
@@ -66,6 +67,13 @@ template<typename F>
 concept DamageFormula = requires(const F& f, int attack, int defence) {
     { f(attack, defence) } -> std::convertible_to<int>;
 };
+
+// clang-format off
+struct FlatDamage { int operator()(int atk, int def) const { return std::max(1, atk - def); } };
+
+
+
+
 
 
 
