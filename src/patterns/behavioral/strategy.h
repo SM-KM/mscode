@@ -43,3 +43,19 @@ inline std::unique_ptr<MovementStrategy> make_strategy(Mode m) {
         default:          return std::make_unique<Chase>();
     }
 }
+
+class Enemy {                                                   // the context
+    Vec2 pos_{};
+    int hp_ = 100;
+    Mode mode_ = Mode::Patrol;
+    std::unique_ptr<MovementStrategy> mv_ = make_strategy(mode_);
+public:
+    void set_hp(int hp) { hp_ = hp; }
+    Vec2 pos() const { return pos_; }
+    std::string_view strategy() const { return mv_->name(); }
+    void update(Vec2 player) {
+        Mode want = hp_ < 30 ? Mode::Flee : dist(pos_, player) < 6 ? Mode::Chase : Mode::Patrol;
+        if (want != mode_) { mode_ = want; mv_ = make_strategy(want); }   // swap strategy at runtime
+        pos_ = mv_->next(pos_, player);
+    }
+};
