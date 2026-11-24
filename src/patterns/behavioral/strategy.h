@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cmath>
+#include <concepts>
 #include <memory>
 #include <string_view>
 
@@ -59,3 +60,13 @@ public:
         pos_ = mv_->next(pos_, player);
     }
 };
+
+/// Static [policy-based] strategy
+template<typename F>
+concept DamageFormula = requires(const F& f, int attack, int defence) {
+    { f(attack, defence) } -> std::convertible_to<int>;
+};
+
+
+
+
