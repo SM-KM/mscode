@@ -70,11 +70,10 @@ concept DamageFormula = requires(const F& f, int attack, int defence) {
 
 // clang-format off
 struct FlatDamage { int operator()(int atk, int def) const { return std::max(1, atk - def); } };
-
-
-
-
-
-
-
-
+// clang-format on
+struct PercentDamage {
+  int armor_scale = 100;
+  int operator()(int atk, int def) const {
+    return atk * armor_scale / (armor_scale + def);
+  }
+};
